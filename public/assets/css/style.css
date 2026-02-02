@@ -1,0 +1,200 @@
+:root {
+    --nav-dark-gray: #1e1e2d;
+    --content-bg: #151521;
+    --nav-border: rgba(255, 255, 255, 0.05);
+    --topbar-height: 65px;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: var(--nav-dark-gray);
+    height: 100vh;
+    width: 210px !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    border-right: 1px solid var(--nav-border);
+    transition: all 0.3s ease;
+    overflow-y: auto;
+}
+
+.sidebar .nav-link {
+    color: #a2a3b7;
+    margin: 2px 5px;
+    padding: 0.65rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+}
+
+.sidebar .nav-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar .nav-link.active {
+    color: #ffffff;
+    background-color: #3699ff;
+    /* Blue accent for active */
+    font-weight: 500;
+}
+
+.sidebar .nav-link i {
+    font-size: 1rem;
+    margin-right: 12px;
+}
+
+/* Topbar Styling */
+.topbar {
+    height: var(--topbar-height);
+    background-color: rgba(30, 30, 45, 0.7);
+    /* Transparent version of #1e1e2d */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--nav-border);
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    justify-content: flex-end;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    color: #ffffff;
+}
+
+/* Main Layout adjustments */
+.content-wrapper {
+    margin-left: 210px;
+    width: calc(100% - 210px);
+    background-color: var(--content-bg);
+    color: #b5b5c3;
+    min-height: 100vh;
+}
+
+.page-content {
+    padding: 2rem;
+    min-height: calc(100vh - var(--topbar-height));
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    border-color: var(--nav-border) !important;
+}
+
+.user-info {
+    text-align: right;
+    line-height: 1.2;
+}
+
+.user-info strong {
+    display: block;
+    color: #ffffff;
+}
+
+.user-info small {
+    color: #7e8299;
+}
+
+/* Card adjustments for dark background */
+.card {
+    background-color: #1e1e2d;
+    border: 1px solid var(--nav-border);
+    color: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    border-bottom: 1px solid var(--nav-border) !important;
+    font-weight: 600;
+}
+
+/* Vibrant Accents */
+.text-accent-primary {
+    color: #3699ff !important;
+}
+
+.text-accent-success {
+    color: #1bc5bd !important;
+}
+
+.text-accent-warning {
+    color: #ffa800 !important;
+}
+
+.text-accent-danger {
+    color: #f64e60 !important;
+}
+
+.bg-accent-primary {
+    background-color: rgba(54, 153, 255, 0.1) !important;
+}
+
+.bg-accent-success {
+    background-color: rgba(27, 197, 189, 0.1) !important;
+}
+
+.bg-accent-warning {
+    background-color: rgba(255, 168, 0, 0.1) !important;
+}
+
+.bg-accent-danger {
+    background-color: rgba(246, 78, 96, 0.1) !important;
+}
+
+/* Gradient Variations */
+.bg-grad-primary {
+    background: linear-gradient(135deg, #3699ff 0%, #0072ff 100%) !important;
+}
+
+.bg-grad-success {
+    background: linear-gradient(135deg, #1bc5bd 0%, #0bb7af 100%) !important;
+}
+
+.bg-grad-warning {
+    background: linear-gradient(135deg, #ffa800 0%, #ff9700 100%) !important;
+}
+
+.bg-grad-danger {
+    background: linear-gradient(135deg, #f64e60 0%, #e91e63 100%) !important;
+}
+
+.table {
+    color: #b5b5c3;
+    border-color: var(--nav-border) !important;
+}
+
+.table thead th {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    color: #ffffff;
+    border-bottom: 1px solid var(--nav-border) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    color: #ffffff;
+}
+
+/* List group in dark mode */
+.list-group-item {
+    background-color: transparent !important;
+    border-color: var(--nav-border) !important;
+    color: #b5b5c3;
+}
+
+.list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}

@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+/**
+ * SarprasModel
+ * 
+ * Manages 'sarpras' table (Sarana dan Prasarana).
+ * Handles inventory items and their variants.
+ */
+class SarprasModel extends Model
+{
+    protected $table            = 'sarpras';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = true;
+    protected $returnType       = 'array';
+    protected $useSoftDeletes   = true;
+    protected $allowedFields    = [
+        'kode', 
+        'nama', 
+        'kategori_id', 
+        'location_id', 
+        'stok', 
+        'kondisi_id'
+    ];
+
+    // Dates
+    protected $useTimestamps = true;
+    protected $dateFormat    = 'datetime';
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
+    protected $deletedField  = 'deleted_at';
+
+    // Validation
+    protected $validationRules = [
+        'nama'        => 'required|min_length[3]|max_length[150]',
+        'kode'        => 'required|max_length[50]',
+        'kategori_id' => 'required|numeric',
+        'location_id' => 'required|numeric',
+        'stok'        => 'required|numeric|greater_than_equal_to[0]',
+        'kondisi_id'  => 'required|numeric',
+    ];
+
+    protected $validationMessages = [
+        'nama' => [
+            'required' => 'Nama barang harus diisi.',
+            'min_length' => 'Nama barang minimal 3 karakter.'
+        ],
+        'stok' => [
+            'greater_than_equal_to' => 'Stok tidak boleh negatif.'
+        ]
+    ];
+
+    protected $skipValidation = false;
+}
