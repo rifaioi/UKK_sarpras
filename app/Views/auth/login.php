@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: 
+            #f3f7f7;
             height: 100vh;
             display: flex;
             align-items: center;
@@ -16,6 +17,7 @@
             margin: 0;
         }
         .login-card {
+            background-color: #717272;
             width: 100%;
             max-width: 400px;
             padding: 2rem;

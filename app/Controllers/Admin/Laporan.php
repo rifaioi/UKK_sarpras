@@ -32,8 +32,9 @@ class Laporan extends BaseController
     {
         $tgl_awal = $this->request->getGet('tgl_awal');
         $tgl_akhir = $this->request->getGet('tgl_akhir');
+        $is_print = $this->request->getGet('print');
 
-        $query = $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, status_peminjaman.nama_status')
+        $query = $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, sarpras.kode as kode_barang, status_peminjaman.nama_status')
                                         ->join('users', 'users.id = peminjaman.user_id')
                                         ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
                                         ->join('status_peminjaman', 'status_peminjaman.id = peminjaman.status_id');
@@ -43,13 +44,21 @@ class Laporan extends BaseController
                   ->where('peminjaman.tgl_pinjam <=', $tgl_akhir);
         }
 
+        $peminjaman = $query->orderBy('peminjaman.created_at', 'DESC')->findAll();
+
         $data = [
-            'peminjaman' => $query->orderBy('peminjaman.created_at', 'DESC')->findAll(),
+            'peminjaman' => $peminjaman,
             'filter' => [
                 'tgl_awal' => $tgl_awal,
                 'tgl_akhir' => $tgl_akhir
-            ]
+            ],
+            'is_print' => $is_print
         ];
+
+        if ($is_print) {
+            return view('admin/laporan/peminjaman_print', $data);
+        }
+
         return view('admin/laporan/peminjaman', $data);
     }
     
@@ -88,28 +97,52 @@ class Laporan extends BaseController
     {
         $db = \Config\Database::connect();
         
-        // Count returns by condition
+        // Count returns by condition (Summary)
         $conditions = $db->table('pengembalian')
                          ->select('kondisi_alat.nama_kondisi, COUNT(*) as jumlah')
                          ->join('kondisi_alat', 'kondisi_alat.id = pengembalian.kondisi_id')
                          ->groupBy('pengembalian.kondisi_id')
                          ->get()->getResultArray();
 
-        // Get list of currently damaged items (Condition != Baik)
-        // This is based on transactions (Pengembalian)
+        // 1. DAMAGED ITEMS LIST (Kondisi = Rusak, ID=2)
         $damaged_items = $db->table('pengembalian')
-                            ->select('sarpras.nama as nama_barang, users.nama_lengkap as peminjam, kondisi_alat.nama_kondisi, pengembalian.tgl_pengembalian, pengembalian.deskripsi')
+                            ->select('sarpras.nama as nama_barang, sarpras.kode, locations.nama_lokasi, users.nama_lengkap as peminjam, kondisi_alat.nama_kondisi, pengembalian.tgl_pengembalian, pengembalian.deskripsi')
                             ->join('peminjaman', 'peminjaman.id = pengembalian.peminjaman_id')
                             ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
+                            ->join('locations', 'locations.id = sarpras.location_id')
                             ->join('users', 'users.id = peminjaman.user_id')
                             ->join('kondisi_alat', 'kondisi_alat.id = pengembalian.kondisi_id')
-                            ->where('pengembalian.kondisi_id !=', 1) // Assuming 1 is Baik
+                            ->where('pengembalian.kondisi_id', 2) // Rusak
+                            ->where('pengembalian.is_restocked', 0) // Still damaged
                             ->orderBy('pengembalian.tgl_pengembalian', 'DESC')
                             ->get()->getResultArray();
 
+        // 2. MISSING ITEMS LIST (Kondisi = Hilang, ID=3)
+        $missing_items = $db->table('pengembalian')
+                            ->select('sarpras.nama as nama_barang, sarpras.kode, users.nama_lengkap as peminjam, pengembalian.tgl_pengembalian, pengembalian.deskripsi')
+                            ->join('peminjaman', 'peminjaman.id = pengembalian.peminjaman_id')
+                            ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
+                            ->join('users', 'users.id = peminjaman.user_id')
+                            ->where('pengembalian.kondisi_id', 3) // Hilang
+                            ->orderBy('pengembalian.tgl_pengembalian', 'DESC')
+                            ->get()->getResultArray();
+
+        // 3. TOP 10 FREQUENTLY DAMAGED
+        $top_damaged = $db->table('pengembalian')
+                          ->select('sarpras.nama as nama_barang, COUNT(*) as total_kerusakan')
+                          ->join('peminjaman', 'peminjaman.id = pengembalian.peminjaman_id')
+                          ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
+                          ->where('pengembalian.kondisi_id', 2) // Count only damage events
+                          ->groupBy('sarpras.nama')
+                          ->orderBy('total_kerusakan', 'DESC')
+                          ->limit(10)
+                          ->get()->getResultArray();
+
         $data = [
             'conditions' => $conditions,
-            'damaged_items' => $damaged_items
+            'damaged_items' => $damaged_items,
+            'missing_items' => $missing_items,
+            'top_damaged' => $top_damaged
         ];
         
         return view('admin/laporan/asset_health', $data);

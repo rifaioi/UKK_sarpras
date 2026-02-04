@@ -34,10 +34,12 @@ class Sarpras extends BaseController
      */
     public function index()
     {
-        $items = $this->sarprasModel->select('sarpras.*, kategori_sarpras.nama as nama_kategori, locations.nama_lokasi, kondisi_alat.nama_kondisi')
+        $items = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, kategori_sarpras.nama as nama_kategori, 
+                                             COUNT(*) as total_unit, 
+                                             SUM(CASE WHEN sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as tersedia,
+                                             MIN(sarpras.id) as id")
                                      ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id', 'left')
-                                     ->join('locations', 'locations.id = sarpras.location_id', 'left')
-                                     ->join('kondisi_alat', 'kondisi_alat.id = sarpras.kondisi_id', 'left')
+                                     ->groupBy('sarpras.nama, sarpras.kategori_id')
                                      ->orderBy('kategori_sarpras.nama', 'ASC')
                                      ->orderBy('sarpras.nama', 'ASC')
                                      ->findAll();
@@ -62,55 +64,99 @@ class Sarpras extends BaseController
     /**
      * Store a new asset
      */
+    /**
+     * Store a new asset
+     */
     public function store()
     {
         $nama = $this->request->getVar('nama');
-        
-        // Generate code based on the Category (kategori_id)
-        $alatId = $this->request->getVar('kategori_id');
-        $alat = $this->categoryModel->find($alatId);
-        $kode = $this->generateKode($alat['nama']);
+        $kategoriId = $this->request->getVar('kategori_id');
+        $locationId = $this->request->getVar('location_id');
+        $jumlah = (int)$this->request->getVar('stok'); 
+        $kondisiId = $this->request->getVar('kondisi_id');
 
-        $saveData = [
-            'kode' => $kode,
-            'nama' => $nama,
-            'kategori_id' => $this->request->getVar('kategori_id'),
-            'location_id' => $this->request->getVar('location_id'),
-            'stok' => $this->request->getVar('stok'),
-            'kondisi_id' => $this->request->getVar('kondisi_id'),
-        ];
-
-        if (!$this->sarprasModel->save($saveData)) {
-            return redirect()->back()->withInput()->with('errors', $this->sarprasModel->errors());
+        if ($jumlah < 1) {
+            return redirect()->back()->withInput()->with('error', 'Jumlah barang minimal 1.');
         }
-        
-        log_activity('Tambah Sarpras', "Menambahkan item: $nama ($kode)");
 
-        return redirect()->to('/admin/sarpras')->with('success', 'Data Sarpras berhasil ditambahkan');
+        $kategori = $this->categoryModel->find($kategoriId);
+        $location = $this->locationModel->find($locationId);
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        for ($i = 0; $i < $jumlah; $i++) {
+            $kode = $this->generateKode($kategori['nama'], $location['nama_lokasi'], $nama);
+
+            $status = 'tersedia';
+            if ($kondisiId == 4) {
+                $status = 'hilang';
+            } elseif ($kondisiId == 2 || $kondisiId == 3) {
+                $status = 'rusak';
+            }
+
+            $saveData = [
+                'kode' => $kode,
+                'nama' => $nama,
+                'kategori_id' => $kategoriId,
+                'location_id' => $locationId,
+                'stok' => 1, 
+                'kondisi_id' => $kondisiId,
+                'status' => $status,
+            ];
+
+            if (!$this->sarprasModel->insert($saveData)) {
+                $db->transRollback();
+                return redirect()->back()->withInput()->with('errors', $this->sarprasModel->errors());
+            }
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data sarpras.');
+        }
+
+        log_activity('Tambah Sarpras', "Menambahkan $jumlah unit item: $nama");
+
+        return redirect()->to('/admin/sarpras')->with('success', "$jumlah unit $nama berhasil ditambahkan");
     }
 
     /**
-     * Generate automatic inventory code based on category name
+     * Generate automatic inventory code
+     * Format: CAT-LOC-NAME5-SEQ
+     * e.g., ELE-LAB-KURSI-001
      */
-    private function generateKode($alatName)
+    private function generateKode($categoryName, $locationName, $itemName)
     {
-        // 3 Letters Prefix from Alat/Category
-        $prefix = strtoupper(substr(str_replace(' ', '', $alatName), 0, 3));
+        // Helper to clean and shorten strings
+        $clean = function($str, $len) {
+            return strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $str), 0, $len));
+        };
+
+        $p1 = $clean($categoryName, 3);
+        $p2 = $clean($locationName, 3);
+        $p3 = $clean($itemName, 5);
+        
+        $prefix = "$p1-$p2-$p3";
         
         // Find highest sequence for this prefix
-        $lastItem = $this->sarprasModel->where('kode LIKE', "$prefix%")
+        $lastItem = $this->sarprasModel->where('kode LIKE', "$prefix-%")
+                                       ->orderBy('id', 'DESC') // Order by ID is safer for insertion order usually, but let's check kode length/value
                                        ->orderBy('kode', 'DESC')
                                        ->first();
         
-        if (!$lastItem) {
-            return $prefix . '01';
+        $nextNum = 1;
+        if ($lastItem) {
+            // Extract number from end
+            $parts = explode('-', $lastItem['kode']);
+            $lastSeq = end($parts);
+            if (is_numeric($lastSeq)) {
+                $nextNum = (int)$lastSeq + 1;
+            }
         }
         
-        // Extract number suffix
-        $lastNumber = (int) substr($lastItem['kode'], 3);
-        $nextNumber = str_pad($lastNumber + 1, 2, '0', STR_PAD_LEFT);
-        
-        return $prefix . $nextNumber;
+        return $prefix . '-' . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -137,9 +183,22 @@ class Sarpras extends BaseController
             'nama' => $this->request->getVar('nama'),
             'kategori_id' => $this->request->getVar('kategori_id'),
             'location_id' => $this->request->getVar('location_id'),
-            'stok' => $this->request->getVar('stok'),
             'kondisi_id' => $this->request->getVar('kondisi_id'),
         ];
+
+        // Sync status based on condition (T1-PINJAM-010)
+        $existing = $this->sarprasModel->find($id);
+        if ($existing && $existing['status'] != 'dipinjam') {
+            $kondisiId = $updateData['kondisi_id'];
+            $status = 'tersedia';
+            if ($kondisiId == 4) {
+                $status = 'hilang';
+            } elseif ($kondisiId == 2 || $kondisiId == 3) {
+                $status = 'rusak';
+            }
+            $updateData['status'] = $status;
+            $updateData['stok'] = ($status == 'tersedia' ? 1 : 0);
+        }
 
         if (!$this->sarprasModel->save($updateData)) {
             return redirect()->back()->withInput()->with('errors', $this->sarprasModel->errors());
@@ -154,6 +213,68 @@ class Sarpras extends BaseController
     {
         $this->sarprasModel->delete($id);
         log_activity('Hapus Sarpras', "Hapus/Soft delete item id: $id");
-        return redirect()->to('/admin/sarpras')->with('success', 'Data Sarpras berhasil dihapus');
+        return redirect()->back()->with('success', 'Data Sarpras berhasil dihapus');
+    }
+
+    public function delete_group($kategoriId)
+    {
+        $nama = $this->request->getGet('nama');
+        if (!$nama) {
+            return redirect()->to('/admin/sarpras')->with('error', 'Gagal menghapus: Nama barang tidak ditemukan.');
+        }
+
+        $this->sarprasModel->where('nama', $nama)
+                           ->where('kategori_id', $kategoriId)
+                           ->delete();
+        
+        log_activity('Hapus Sarpras', "Hapus grup item: $nama");
+        return redirect()->to('/admin/sarpras')->with('success', "Semua unit $nama berhasil dihapus");
+    }
+
+    /**
+     * List all individual units of a product
+     */
+    public function units()
+    {
+        $nama = $this->request->getGet('nama');
+        $kategoriId = $this->request->getGet('kategori_id');
+
+        if (!$nama) {
+            return redirect()->to('/admin/sarpras');
+        }
+
+        $items = $this->sarprasModel->select('sarpras.*, kategori_sarpras.nama as nama_kategori, locations.nama_lokasi, kondisi_alat.nama_kondisi')
+                                     ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id', 'left')
+                                     ->join('locations', 'locations.id = sarpras.location_id', 'left')
+                                     ->join('kondisi_alat', 'kondisi_alat.id = sarpras.kondisi_id', 'left')
+                                     ->where('sarpras.nama', $nama)
+                                     ->where('sarpras.kategori_id', $kategoriId)
+                                     ->orderBy('kode', 'ASC')
+                                     ->findAll();
+
+        $data = [
+            'items' => $items,
+            'nama_barang' => $nama
+        ];
+        return view('admin/sarpras/units', $data);
+    }
+
+    /**
+     * Show detail of a single asset unit
+     */
+    public function show($id)
+    {
+        $item = $this->sarprasModel->select('sarpras.*, kategori_sarpras.nama as nama_kategori, locations.nama_lokasi, kondisi_alat.nama_kondisi')
+                                   ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id', 'left')
+                                   ->join('locations', 'locations.id = sarpras.location_id', 'left')
+                                   ->join('kondisi_alat', 'kondisi_alat.id = sarpras.kondisi_id', 'left')
+                                   ->find($id);
+
+        if (!$item) {
+            return redirect()->to('/admin/sarpras')->with('error', 'Data barang tidak ditemukan.');
+        }
+
+        $data = ['item' => $item];
+        return view('admin/sarpras/detail', $data);
     }
 }

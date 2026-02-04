@@ -3,9 +3,7 @@
 
 <?= $this->section('content') ?>
 
-<?php if(session()->getFlashdata('success')): ?>
-    <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
-<?php endif; ?>
+
 
 <div class="row">
     <div class="col-md-8 mx-auto">

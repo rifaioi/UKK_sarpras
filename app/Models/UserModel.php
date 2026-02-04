@@ -15,12 +15,13 @@ class UserModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = true;
+    protected $useSoftDeletes   = false;
     protected $allowedFields    = [
         'username', 
         'password_hash', 
         'nama_lengkap', 
-        'role_id'
+        'role_id',
+        'is_deleted'
     ];
 
     // Dates
@@ -28,7 +29,6 @@ class UserModel extends Model
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
 
     // Validation
     protected $validationRules = [

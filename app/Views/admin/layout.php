@@ -22,19 +22,23 @@
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </a>
                 </li>
-                 <li class="nav-item">
+                <li class="nav-item">
                     <a href="<?= base_url('admin/users') ?>" class="nav-link <?= strpos(uri_string(), 'admin/users') !== false ? 'active' : '' ?>">
                         <i class="bi bi-people me-2"></i> Manajemen User
                     </a>
                 </li>
+
+                <li class="nav-item border-top border-secondary mt-2 pt-2">
+                    <span class="text-secondary small text-uppercase fw-bold px-3">Master Data</span>
+                </li>
                 <li>
-                    <a href="<?= base_url('admin/locations') ?>" class="nav-link <?= strpos(uri_string(), 'admin/locations') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-geo-alt me-2"></i> Lokasi
+                    <a href="<?= base_url('admin/categories') ?>" class="nav-link <?= strpos(uri_string(), 'admin/categories') !== false ? 'active' : '' ?>">
+                        <i class="bi bi-tags me-2"></i> Data Kategori
                     </a>
                 </li>
-                 <li>
-                    <a href="<?= base_url('admin/categories') ?>" class="nav-link <?= strpos(uri_string(), 'admin/categories') !== false ? 'active' : '' ?>">
-                         <i class="bi bi-tags me-2"></i> Kategori
+                <li>
+                    <a href="<?= base_url('admin/locations') ?>" class="nav-link <?= strpos(uri_string(), 'admin/locations') !== false ? 'active' : '' ?>">
+                        <i class="bi bi-geo-alt me-2"></i> Data Lokasi
                     </a>
                 </li>
                 <li>
@@ -42,15 +46,33 @@
                         <i class="bi bi-box-seam me-2"></i> Data Sarpras
                     </a>
                 </li>
+
+                <li class="nav-item border-top border-secondary mt-2 pt-2">
+                    <span class="text-secondary small text-uppercase fw-bold px-3">Transaksi</span>
+                </li>
                 <li>
-                    <a href="<?= base_url('admin/pinjam') ?>" class="nav-link <?= strpos(uri_string(), 'admin/pinjam') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-arrow-left-right me-2"></i> Peminjaman
+                    <a href="<?= base_url('admin/peminjaman') ?>" class="nav-link <?= strpos(uri_string(), 'admin/peminjaman') !== false ? 'active' : '' ?>">
+                        <i class="bi bi-cart me-2"></i> Peminjaman
                     </a>
                 </li>
                 <li>
                     <a href="<?= base_url('admin/kembali') ?>" class="nav-link <?= strpos(uri_string(), 'admin/kembali') !== false ? 'active' : '' ?>">
                         <i class="bi bi-arrow-return-left me-2"></i> Pengembalian
                     </a>
+                </li>
+                <li>
+                    <a href="<?= base_url('admin/pengembalian/rusak') ?>" class="nav-link <?= strpos(uri_string(), 'admin/pengembalian/rusak') !== false ? 'active' : '' ?>">
+                        <i class="bi bi-tools me-2"></i> Sedang Perbaikan
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= base_url('admin/pengaduan') ?>" class="nav-link <?= strpos(uri_string(), 'admin/pengaduan') !== false ? 'active' : '' ?>">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Pengaduan
+                    </a>
+                </li>
+
+                <li class="nav-item border-top border-secondary mt-2 pt-2">
+                    <span class="text-secondary small text-uppercase fw-bold px-3">Laporan & Sistem</span>
                 </li>
                 <li>
                     <a href="#laporanMenu" class="nav-link d-flex align-items-center <?= strpos(uri_string(), 'reports/') !== false ? 'active' : '' ?>" data-bs-toggle="collapse" role="button" aria-expanded="<?= strpos(uri_string(), 'reports/') !== false ? 'true' : 'false' ?>">
@@ -75,9 +97,6 @@
                             </li>
                         </ul>
                     </div>
-                </li>
-                <li class="nav-item border-top border-secondary mt-2 pt-2">
-                    <span class="text-secondary small text-uppercase fw-bold px-3">Sistem</span>
                 </li>
                 <li>
                     <a href="<?= base_url('admin/log') ?>" class="nav-link <?= strpos(uri_string(), 'admin/log') !== false ? 'active' : '' ?>">

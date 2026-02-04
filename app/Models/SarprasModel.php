@@ -23,7 +23,8 @@ class SarprasModel extends Model
         'kategori_id', 
         'location_id', 
         'stok', 
-        'kondisi_id'
+        'kondisi_id',
+        'status'
     ];
 
     // Dates
@@ -41,6 +42,7 @@ class SarprasModel extends Model
         'location_id' => 'required|numeric',
         'stok'        => 'required|numeric|greater_than_equal_to[0]',
         'kondisi_id'  => 'required|numeric',
+        'status'      => 'required|in_list[tersedia,dipinjam,rusak,hilang]',
     ];
 
     protected $validationMessages = [

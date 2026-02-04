@@ -24,6 +24,12 @@
                         <small class="text-muted">Stok tersedia saat ini: <?= $item['stok'] ?></small>
                     </div>
 
+                    <div class="mb-3">
+                        <label><strong>Tujuan Peminjaman</strong></label>
+                        <textarea name="tujuan" class="form-control" rows="3" required placeholder="Jelaskan untuk apa barang ini akan digunakan..."></textarea>
+                        <small class="text-muted">Contoh: Untuk kegiatan praktikum, acara sekolah, dll.</small>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label>Tanggal Mulai Pinjam</label>

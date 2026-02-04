@@ -17,8 +17,8 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Kode Inventaris (Auto)</label>
-                            <input type="text" class="form-control bg-dark text-muted border-secondary opacity-50" value="<?= isset($item) ? $item['kode'] : '' ?>" placeholder="Akan digenerate otomatis" readonly>
-                            <small class="text-muted">Kode digenerate berdasarkan kategori.</small>
+                            <input type="text" class="form-control bg-dark text-muted border-secondary opacity-50" value="<?= isset($item) ? $item['kode'] : '' ?>" placeholder="Akan digenerate otomatis: KAT-LOK-NAMA-SEQ" readonly>
+                            <small class="text-muted">Kode digenerate dari Kategori, Lokasi, dan Nama Barang.</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-white">Nama Barang</label>
@@ -49,8 +49,13 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-4">
-                            <label class="form-label text-white">Stok</label>
-                            <input type="number" class="form-control bg-dark text-white border-secondary" name="stok" value="<?= isset($item) ? $item['stok'] : (old('stok') ?? 0) ?>" required min="0">
+                            <label class="form-label text-white"><?= isset($item) ? 'Stok' : 'Jumlah (Quantity)' ?></label>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" name="stok" value="<?= isset($item) ? $item['stok'] : (old('stok') ?? 1) ?>" required min="1" <?= isset($item) ? 'readonly disabled' : '' ?>>
+                            <?php if(!isset($item)): ?>
+                                <small class="text-muted">Input jumlah akan membuat data barang sejumlah tersebut (1 per data).</small>
+                            <?php else: ?>
+                                <small class="text-muted">Stok tidak dapat diubah di sini karena sistem menggunakan pelacakan individu. Silakan hapus jika barang tidak tersedia.</small>
+                            <?php endif; ?>
                         </div>
                         <div class="col-md-6 mb-4">
                             <label class="form-label text-white">Kondisi</label>

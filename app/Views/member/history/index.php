@@ -35,6 +35,7 @@
                         <thead>
                             <tr>
                                 <th>No</th>
+                                <th>Kode Pinjam</th>
                                 <th>Tanggal</th>
                                 <th>Barang</th>
                                 <th>Jumlah</th>
@@ -47,6 +48,7 @@
                             <?php foreach($my_borrowings as $i => $b): ?>
                             <tr>
                                 <td><?= $i+1 ?></td>
+                                <td><code class="text-primary"><?= esc($b['kode_peminjaman'] ?? '-') ?></code></td>
                                 <td><?= date('d/m/Y', strtotime($b['tgl_pinjam'])) ?></td>
                                 <td><?= esc($b['nama_barang']) ?></td>
                                 <td><?= $b['jumlah'] ?> Unit</td>
@@ -63,6 +65,11 @@
                                         elseif($b['nama_status'] == 'Dikembalikan') $badgeClass = 'bg-success';
                                     ?>
                                     <span class="badge <?= $badgeClass ?>"><?= $b['nama_status'] ?></span>
+                                    <?php if($b['nama_status'] == 'Ditolak' && !empty($b['rejection_reason'])): ?>
+                                        <div class="mt-1 small text-danger fw-bold">
+                                            Alasan: <span class="text-white-50 fw-normal"><?= esc($b['rejection_reason']) ?></span>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if($b['nama_status'] == 'Menunggu Persetujuan'): ?>
@@ -78,36 +85,54 @@
 
             <!-- Complaints Tab -->
             <div class="tab-pane fade" id="complaints" role="tabpanel">
-                <div class="list-group list-group-flush">
-                    <?php if(empty($my_complaints)): ?>
-                        <div class="text-center text-muted py-3">Belum ada riwayat pengaduan.</div>
-                    <?php else: ?>
-                        <?php foreach($my_complaints as $c): ?>
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1"><?= esc($c['judul']) ?></h5>
-                                <small class="text-muted"><?= date('d/m/Y H:i', strtotime($c['created_at'])) ?></small>
-                            </div>
-                            <p class="mb-1"><?= esc($c['deskripsi']) ?></p>
-                            <div class="mt-2">
-                                <?php 
-                                    $badgeClass = 'bg-secondary';
-                                    if($c['nama_status'] == 'Belum Ditindaklanjuti') $badgeClass = 'bg-danger';
-                                    elseif($c['nama_status'] == 'Sedang Diproses') $badgeClass = 'bg-warning text-dark';
-                                    elseif($c['nama_status'] == 'Selesai') $badgeClass = 'bg-success';
-                                ?>
-                                <span class="badge <?= $badgeClass ?>"><?= $c['nama_status'] ?></span>
-                                <small class="ms-2 text-muted"><i class="bi bi-geo-alt"></i> <?= esc($c['lokasi']) ?></small>
-                                
-                                <?php if($c['catatan']): ?>
-                                    <div class="alert alert-info py-1 px-2 mt-2 mb-0 d-inline-block">
-                                        <small><i class="bi bi-info-circle-fill"></i> <strong>Admin:</strong> <?= esc($c['catatan']) ?></small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm text-white">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Tanggal</th>
+                                <th>Judul Laporan</th>
+                                <th>Lokasi</th>
+                                <th>Status</th>
+                                <th>Catatan Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if(empty($my_complaints)): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-3">Belum ada riwayat pengaduan.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach($my_complaints as $i => $c): ?>
+                                <tr>
+                                    <td><?= $i+1 ?></td>
+                                    <td><?= date('d/m/Y', strtotime($c['created_at'])) ?></td>
+                                    <td>
+                                        <div class="fw-bold"><?= esc($c['judul']) ?></div>
+                                        <small class="text-white-50"><?= esc($c['deskripsi']) ?></small>
+                                    </td>
+                                    <td><?= esc($c['lokasi']) ?></td>
+                                    <td>
+                                        <?php 
+                                            $badgeClass = 'bg-secondary';
+                                            if($c['nama_status'] == 'Belum Ditindaklanjuti') $badgeClass = 'bg-danger';
+                                            elseif($c['nama_status'] == 'Sedang Diproses') $badgeClass = 'bg-warning text-dark';
+                                            elseif($c['nama_status'] == 'Selesai') $badgeClass = 'bg-success';
+                                        ?>
+                                        <span class="badge <?= $badgeClass ?>"><?= $c['nama_status'] ?></span>
+                                    </td>
+                                    <td>
+                                        <?php if($c['catatan']): ?>
+                                            <small class="text-info"><i class="bi bi-info-circle"></i> <?= esc($c['catatan']) ?></small>
+                                        <?php else: ?>
+                                            <small class="text-muted">-</small>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 

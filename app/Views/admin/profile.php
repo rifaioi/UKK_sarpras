@@ -30,23 +30,7 @@
                 <h3 class="card-title">Ubah Password</h3>
             </div>
             <div class="card-body">
-                <?php if (session()->getFlashdata('success')) : ?>
-                    <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
-                <?php endif; ?>
 
-                <?php if (session()->getFlashdata('error')) : ?>
-                    <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
-                <?php endif; ?>
-
-                <?php if (session()->getFlashdata('errors')) : ?>
-                    <div class="alert alert-danger">
-                        <ul>
-                            <?php foreach (session()->getFlashdata('errors') as $error) : ?>
-                                <li><?= $error ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
 
                 <form action="<?= base_url('admin/profile/update_password') ?>" method="post">
                     <?= csrf_field() ?>

@@ -24,6 +24,12 @@ class Pengaduan extends PetugasPengaduan
         return redirect()->to('/admin/pengaduan')->with('success', 'Status diubah');
     }
 
+    public function update_status()
+    {
+        parent::update_status();
+        return redirect()->to('/admin/pengaduan')->with('success', 'Pengaduan berhasil diupdate');
+    }
+
     public function complete($id)
     {
         parent::complete($id);

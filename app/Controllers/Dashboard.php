@@ -7,6 +7,7 @@ use App\Controllers\BaseController;
 use App\Models\SarprasModel;
 use App\Models\PeminjamanModel;
 use App\Models\PengaduanModel;
+use App\Models\PengembalianModel;
 use App\Models\ActivityLogModel;
 
 class Dashboard extends BaseController
@@ -20,6 +21,7 @@ class Dashboard extends BaseController
             $sarprasModel = new SarprasModel();
             $peminjamanModel = new PeminjamanModel();
             $pengaduanModel = new PengaduanModel();
+            $pengembalianModel = new PengembalianModel();
             
             // Chart Data: Borrows per month for current year
             $currentYear = date('Y');
@@ -41,7 +43,7 @@ class Dashboard extends BaseController
 
                 'total_sarpras' => $sarprasModel->where('is_deleted', 0)->countAllResults(),
                 'active_peminjaman' => $peminjamanModel->where('status_id', 2)->countAllResults(), // 2 = Disetujui/Dipinjam
-                'damaged_sarpras' => $sarprasModel->where('is_deleted', 0)->where('kondisi_id !=', 1)->countAllResults(), // Assuming 1 = Baik
+                'damaged_sarpras' => $pengembalianModel->where('kondisi_id !=', 1)->where('is_restocked', 0)->countAllResults(), // Items in repair (not Baik, not yet restocked)
                 'pengaduan_masuk' => $pengaduanModel->where('status_id', 1)->countAllResults(), // 1 = Belum Ditindaklanjuti
                 'chart_data' => json_encode($monthlyStats),
                 'recent_activities' => $recentActivities

@@ -17,12 +17,15 @@ class PeminjamanModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $allowedFields    = [
+        'kode_peminjaman',
         'user_id', 
         'sarpras_id', 
         'jumlah', 
         'tgl_pinjam', 
-        'tgl_kembali_rencana', 
-        'status_id', 
+        'tgl_kembali_rencana',
+        'tujuan',
+        'status_id',
+        'rejection_reason',
         'deleted_at'
     ];
 

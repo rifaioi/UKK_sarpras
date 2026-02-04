@@ -6,9 +6,7 @@
     <h1 class="h2">Manajemen Pengaduan</h1>
 </div>
 
-<?php if(session()->getFlashdata('success')): ?>
-    <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
-<?php endif; ?>
+
 
 <div class="table-responsive">
     <table class="table table-striped table-sm text-white">

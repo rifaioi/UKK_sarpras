@@ -38,6 +38,11 @@
                     </a>
                 </li>
                 <li>
+                    <a href="<?= base_url('petugas/pengembalian/rusak') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/pengembalian/rusak') !== false ? 'active' : '' ?>">
+                        <i class="bi bi-tools me-2"></i> Sedang Perbaikan
+                    </a>
+                </li>
+                <li>
                     <a href="<?= base_url('petugas/pengaduan') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/pengaduan') !== false ? 'active' : '' ?>">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i> Pengaduan
                     </a>

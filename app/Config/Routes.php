@@ -42,15 +42,20 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     $routes->post('sarpras/store', 'Admin\Sarpras::store');
     $routes->get('sarpras/edit/(:num)', 'Admin\Sarpras::edit/$1');
     $routes->post('sarpras/update/(:num)', 'Admin\Sarpras::update/$1');
+    $routes->get('sarpras/units', 'Admin\Sarpras::units');
+    $routes->get('sarpras/show/(:num)', 'Admin\Sarpras::show/$1');
     $routes->get('sarpras/delete/(:num)', 'Admin\Sarpras::delete/$1');
 
     // Admin Peminjaman
-    $routes->get('pinjam', 'Admin\Peminjaman::index');
-    $routes->get('pinjam/approve/(:num)', 'Admin\Peminjaman::approve/$1');
-    $routes->get('pinjam/reject/(:num)', 'Admin\Peminjaman::reject/$1');
-    $routes->get('pinjam/delete/(:num)', 'Admin\Peminjaman::delete/$1');
-    $routes->get('pinjam/archived', 'Admin\Peminjaman::archived');
-    $routes->get('pinjam/restore/(:num)', 'Admin\Peminjaman::restore/$1');
+    // Admin Peminjaman
+    $routes->get('sarpras/delete_group/(:num)', 'Admin\Sarpras::delete_group/$1');
+    $routes->get('peminjaman', 'Admin\Peminjaman::index');
+    $routes->get('peminjaman/approve/(:num)', 'Admin\Peminjaman::approve/$1');
+    $routes->post('peminjaman/reject/(:num)', 'Admin\Peminjaman::reject/$1');
+    $routes->get('peminjaman/print/(:num)', 'Admin\Peminjaman::print/$1');
+    $routes->get('peminjaman/delete/(:num)', 'Admin\Peminjaman::delete/$1');
+    $routes->get('peminjaman/archived', 'Admin\Peminjaman::archived');
+    $routes->get('peminjaman/restore/(:num)', 'Admin\Peminjaman::restore/$1');
 
     // Admin Pengembalian
     $routes->get('kembali', 'Admin\Pengembalian::index');
@@ -58,16 +63,22 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     $routes->post('kembali/store', 'Admin\Pengembalian::store');
     $routes->get('pengembalian', 'Admin\Pengembalian::index');
     $routes->get('pengembalian/riwayat', 'Admin\Pengembalian::riwayat');
+    
+    // Sedang Dalam Perbaikan Management
+    $routes->get('pengembalian/rusak', 'Admin\Pengembalian::rusak');
+    $routes->get('pengembalian/restock/(:num)', 'Admin\Pengembalian::restock/$1');
+    $routes->get('pengembalian/scrap/(:num)', 'Admin\Pengembalian::scrap/$1');
+    
     $routes->get('pengembalian/detail/(:num)', 'Admin\Pengembalian::detail/$1');
     $routes->get('pengembalian/process/(:num)', 'Admin\Pengembalian::form/$1');
     $routes->post('pengembalian/store', 'Admin\Pengembalian::store');
 
     // Admin Pengaduan
-    $routes->get('aduan', 'Admin\Pengaduan::index');
-    $routes->get('aduan/process/(:num)', 'Admin\Pengaduan::process/$1');
-    $routes->get('aduan/complete/(:num)', 'Admin\Pengaduan::complete/$1');
-    $routes->post('aduan/update_status', 'Admin\Pengaduan::update_status');
-    $routes->get('aduan/delete/(:num)', 'Admin\Pengaduan::delete/$1');
+    $routes->get('pengaduan', 'Admin\Pengaduan::index');
+    $routes->get('pengaduan/process/(:num)', 'Admin\Pengaduan::process/$1');
+    $routes->get('pengaduan/complete/(:num)', 'Admin\Pengaduan::complete/$1');
+    $routes->post('pengaduan/update_status', 'Admin\Pengaduan::update_status');
+    $routes->get('pengaduan/delete/(:num)', 'Admin\Pengaduan::delete/$1');
 
     // Activity Log
     $routes->get('log', 'Admin\ActivityLog::index');
@@ -105,6 +116,8 @@ $routes->group('petugas', ['filter' => 'petugas'], function($routes) {
     
     // Read Only Sarpras
     $routes->get('sarpras', 'Petugas\Sarpras::index');
+    $routes->get('sarpras/units', 'Petugas\Sarpras::units');
+    $routes->get('sarpras/show/(:num)', 'Petugas\Sarpras::show/$1');
     
     // Peminjaman
     $routes->get('peminjaman', 'Petugas\Peminjaman::index');
@@ -116,6 +129,8 @@ $routes->group('petugas', ['filter' => 'petugas'], function($routes) {
     $routes->get('pengembalian/process/(:num)', 'Petugas\Pengembalian::form/$1');
     $routes->post('pengembalian/store', 'Petugas\Pengembalian::store');
     $routes->get('pengembalian/riwayat', 'Petugas\Pengembalian::riwayat');
+    $routes->get('pengembalian/rusak', 'Petugas\Pengembalian::rusak');
+    $routes->get('pengembalian/scan', 'Petugas\Pengembalian::scan');
     $routes->get('pengembalian/detail/(:num)', 'Petugas\Pengembalian::detail/$1');
     
     // Pengaduan

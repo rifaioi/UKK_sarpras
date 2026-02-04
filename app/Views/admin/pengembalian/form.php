@@ -34,6 +34,7 @@
 
             <div class="mb-3">
                 <label class="form-label"><strong>Laporan Kerusakan / Deskripsi Detail</strong></label>
+                <textarea class="form-control" name="deskripsi" rows="4" placeholder="Deskripsikan kondisi barang secara detail jika ada kerusakan atau masalah..."></textarea>
                 <div class="form-text">Deskripsikan kondisi barang secara detail jika ada kerusakan atau masalah.</div>
             </div>
 

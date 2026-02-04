@@ -7,15 +7,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <?php if(session()->getFlashdata('errors')): ?>
-            <div class="alert alert-danger">
-                <ul>
-                <?php foreach(session()->getFlashdata('errors') as $error): ?>
-                    <li><?= $error ?></li>
-                <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
+
 
         <form action="<?= isset($user) ? base_url('admin/users/update/'.$user['id']) : base_url('admin/users/store') ?>" method="post">
             

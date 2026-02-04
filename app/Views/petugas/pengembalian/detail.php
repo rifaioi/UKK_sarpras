@@ -46,8 +46,9 @@
                             <?php 
                                 $badgeClass = 'bg-secondary';
                                 if($pengembalian['nama_kondisi'] == 'Baik') $badgeClass = 'bg-success';
-                                elseif($pengembalian['nama_kondisi'] == 'Rusak') $badgeClass = 'bg-danger';
-                                elseif($pengembalian['nama_kondisi'] == 'Hilang') $badgeClass = 'bg-danger';
+                                elseif($pengembalian['nama_kondisi'] == 'Rusak Ringan') $badgeClass = 'bg-warning text-dark';
+                                elseif($pengembalian['nama_kondisi'] == 'Rusak Berat') $badgeClass = 'bg-danger';
+                                elseif($pengembalian['nama_kondisi'] == 'Hilang') $badgeClass = 'bg-dark';
                             ?>
                             <span class="badge <?= $badgeClass ?>"><?= esc($pengembalian['nama_kondisi']) ?></span>
                         </td>

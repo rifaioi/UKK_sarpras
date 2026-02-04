@@ -10,28 +10,26 @@
         <thead>
             <tr>
                 <th>No</th>
-                <th>Kode</th>
-                <th>Nama</th>
+                <th>Nama Barang</th>
                 <th>Kategori</th>
-                <th>Lokasi</th>
-                <th>Stok</th>
-                <th>Kondisi</th>
+                <th>Total Unit</th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach($sarpras as $i => $item): ?>
+            <?php foreach($items as $i => $item): ?>
             <tr>
                 <td><?= $i+1 ?></td>
-                <td><?= esc($item['kode']) ?></td>
                 <td><?= esc($item['nama']) ?></td>
                 <td><?= esc($item['nama_kategori']) ?></td>
-                <td><?= esc($item['nama_lokasi']) ?></td>
-                <td><?= esc($item['stok']) ?></td>
                 <td>
-                    <?php
-                        $badge = $item['kondisi_id'] == 1 ? 'bg-success' : ($item['kondisi_id'] == 2 ? 'bg-warning text-dark' : 'bg-danger');
-                    ?>
-                    <span class="badge <?= $badge ?>"><?= esc($item['nama_kondisi']) ?></span>
+                    <span class="badge bg-success"><?= esc($item['tersedia']) ?> Tersedia</span>
+                    <span class="badge bg-secondary"><?= esc($item['total_unit']) ?> Total</span>
+                </td>
+                <td>
+                    <a href="<?= base_url('petugas/sarpras/units?nama='.urlencode($item['nama']).'&kategori_id='.$item['kategori_id']) ?>" class="btn btn-sm btn-info text-white" title="Lihat Unit">
+                        <i class="bi bi-list-ul"></i> Lihat Unit
+                    </a>
                 </td>
             </tr>
             <?php endforeach; ?>

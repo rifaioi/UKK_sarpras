@@ -10,7 +10,7 @@ class PengembalianModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $allowedFields    = ['peminjaman_id', 'tgl_pengembalian', 'kondisi_id', 'deskripsi', 'foto'];
+    protected $allowedFields    = ['peminjaman_id', 'tgl_pengembalian', 'kondisi_id', 'deskripsi', 'foto', 'is_restocked'];
 
     // Dates
     protected $useTimestamps = true;

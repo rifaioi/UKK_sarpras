@@ -1,4 +1,5 @@
 <?= $this->extend('member/layout') ?>
+<?= $this->Section('page_title'); ?>Dashboard<?= $this->endSection(); ?>
 
 <?= $this->section('content') ?>
 

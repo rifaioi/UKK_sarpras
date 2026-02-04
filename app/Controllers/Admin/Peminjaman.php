@@ -13,18 +13,6 @@ class Peminjaman extends PetugasPeminjaman
     /**
      * Admin: Approval dashboard
      */
-    public function index()
-    {
-        $data = [
-            'peminjaman' => $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, status_peminjaman.nama_status')
-                                                  ->join('users', 'users.id = peminjaman.user_id')
-                                                  ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
-                                                  ->join('status_peminjaman', 'status_peminjaman.id = peminjaman.status_id')
-                                                  ->orderBy('peminjaman.created_at', 'DESC')
-                                                  ->findAll()
-        ];
-        return view('admin/peminjaman/index', $data);
-    }
     
     /**
      * Approve a loan (wraps parent logic)
@@ -36,12 +24,54 @@ class Peminjaman extends PetugasPeminjaman
     }
 
     /**
-     * Reject a loan (wraps parent logic)
+     * Reject a loan with optional reason
      */
     public function reject($id)
     {
-        parent::reject($id);
+        $peminjaman = $this->peminjamanModel->find($id);
+        
+        if (!$peminjaman) {
+            return redirect()->to('/admin/peminjaman')->with('error', 'Data tidak ditemukan');
+        }
+
+        // Get rejection reason from POST (optional)
+        $rejectionReason = $this->request->getPost('rejection_reason');
+
+        // Update status to rejected (3) and save reason
+        $this->peminjamanModel->update($id, [
+            'status_id' => 3,
+            'rejection_reason' => $rejectionReason
+        ]);
+
+        log_activity('Tolak Peminjaman', "Menolak peminjaman id: $id" . ($rejectionReason ? " dengan alasan: $rejectionReason" : ""));
+        
         return redirect()->to('/admin/peminjaman')->with('success', 'Peminjaman ditolak');
+    }
+
+    /**
+     * Print loan receipt with QR code
+     */
+    public function print($id)
+    {
+        $peminjaman = $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, sarpras.kode, status_peminjaman.nama_status')
+                                            ->join('users', 'users.id = peminjaman.user_id')
+                                            ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
+                                            ->join('status_peminjaman', 'status_peminjaman.id = peminjaman.status_id')
+                                            ->find($id);
+        
+        if (!$peminjaman) {
+            return redirect()->to('/admin/peminjaman')->with('error', 'Data tidak ditemukan');
+        }
+
+        // Use the generated kode_peminjaman
+        $loanCode = $peminjaman['kode_peminjaman'] ?? ($peminjaman['kode'] . '-' . str_pad($id, 5, '0', STR_PAD_LEFT));
+
+        $data = [
+            'peminjaman' => $peminjaman,
+            'loan_code' => $loanCode
+        ];
+
+        return view('admin/peminjaman/print', $data);
     }
 
     /**
@@ -63,5 +93,41 @@ class Peminjaman extends PetugasPeminjaman
         $this->peminjamanModel->delete($id);
         log_activity('Hapus Peminjaman', "Menghapus data peminjaman id: $id");
         return redirect()->to('/admin/peminjaman')->with('success', 'Data peminjaman dihapus');
+    }
+
+    /**
+     * View soft-deleted loans
+     */
+    public function archived()
+    {
+        $data = [
+            'peminjaman' => $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, status_peminjaman.nama_status')
+                                                  ->join('users', 'users.id = peminjaman.user_id')
+                                                  ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
+                                                  ->join('status_peminjaman', 'status_peminjaman.id = peminjaman.status_id')
+                                                  ->onlyDeleted()
+                                                  ->orderBy('peminjaman.deleted_at', 'DESC')
+                                                  ->findAll()
+        ];
+        return view('admin/peminjaman/archived', $data);
+    }
+
+    /**
+     * Restore a soft-deleted loan
+     */
+    public function restore($id)
+    {
+        // First check if it's actually deleted
+        $peminjaman = $this->peminjamanModel->onlyDeleted()->find($id);
+        
+        if (!$peminjaman) {
+            return redirect()->to('/admin/peminjaman/archived')->with('error', 'Data tidak ditemukan di arsip.');
+        }
+
+        // Restore
+        $this->peminjamanModel->update($id, ['deleted_at' => null]);
+        
+        log_activity('Restore Peminjaman', "Mengembalikan data peminjaman id: $id dari arsip");
+        return redirect()->to('/admin/peminjaman/archived')->with('success', 'Data peminjaman berhasil dipulihkan.');
     }
 }

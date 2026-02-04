@@ -10,15 +10,14 @@
     </div>
 </div>
 
-<?php if(session()->getFlashdata('success')): ?>
-    <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
-<?php endif; ?>
+
 
 <div class="table-responsive">
     <table class="table table-striped table-sm text-white">
         <thead>
             <tr>
                 <th>No</th>
+                <th>Kode Pinjam</th>
                 <th>Peminjam</th>
                 <th>Barang</th>
                 <th>Jumlah</th>
@@ -33,6 +32,7 @@
             <?php foreach($peminjaman as $i => $p): ?>
             <tr>
                 <td><?= $i+1 ?></td>
+                <td><code class="text-primary"><?= esc($p['kode_peminjaman'] ?? '-') ?></code></td>
                 <td><?= esc($p['nama_lengkap']) ?></td>
                 <td><?= esc($p['nama_barang']) ?></td>
                 <td><?= esc($p['jumlah']) ?></td>

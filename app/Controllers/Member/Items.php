@@ -17,14 +17,16 @@ class Items extends BaseController
 
     public function index()
     {
-        // Get all items that have stock and are not deleted
-        $items = $this->sarprasModel->select('sarpras.*, locations.nama_lokasi, kategori_sarpras.nama as nama_kategori, kondisi_alat.nama_kondisi')
+        // Group items by name and category to show a summary for members
+        $items = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, MAX(sarpras.id) as id, kategori_sarpras.nama as nama_kategori, locations.nama_lokasi, 
+                                             COUNT(*) as total_unit, 
+                                             SUM(CASE WHEN sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as tersedia")
                                      ->join('locations', 'locations.id = sarpras.location_id')
                                      ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id')
-                                     ->join('kondisi_alat', 'kondisi_alat.id = sarpras.kondisi_id')
                                      ->where('sarpras.is_deleted', 0)
-                                     ->where('sarpras.stok >', 0)
-                                     ->where('sarpras.kondisi_id', 1) // Only Good condition items
+                                     ->where('sarpras.kondisi_id', 1) // Only Good condition base items usually
+                                     ->groupBy('sarpras.nama, sarpras.kategori_id, sarpras.location_id')
+                                     ->having('tersedia >', 0) // T1-PINJAM-001: Only show available
                                      ->findAll();
 
         $data = [

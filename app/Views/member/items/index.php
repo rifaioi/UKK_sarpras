@@ -24,7 +24,7 @@
                         <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill small">
                             <?= esc($item['nama_kategori']) ?>
                         </span>
-                        <span class="text-secondary small font-monospace">#<?= esc($item['kode']) ?></span>
+                        <span class="text-secondary small font-monospace">Tersedia</span>
                     </div>
                     
                     <h5 class="fw-bold text-white mb-2"><?= esc($item['nama']) ?></h5>
@@ -36,7 +36,7 @@
                         </div>
                         <div class="d-flex align-items-center text-secondary small">
                             <i class="bi bi-box-seam me-2"></i>
-                             Stok tersedia: <strong class="ms-1 text-info"><?= esc($item['stok']) ?></strong>
+                             Unit Tersedia: <strong class="ms-1 text-info"><?= esc($item['tersedia']) ?> / <?= esc($item['total_unit']) ?></strong>
                         </div>
                     </div>
                     

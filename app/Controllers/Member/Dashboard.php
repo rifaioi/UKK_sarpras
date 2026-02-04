@@ -72,8 +72,15 @@ class Dashboard extends BaseController
              return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $tglPinjam = $this->request->getVar('tgl_pinjam');
+        $tglKembali = $this->request->getVar('tgl_kembali_rencana');
+
+        if (strtotime($tglKembali) < strtotime($tglPinjam)) {
+            return redirect()->back()->withInput()->with('error', 'Tanggal kembali rencana tidak boleh lebih awal dari tanggal pinjam.');
+        }
+
         $sarprasId = $this->request->getVar('sarpras_id');
-        $jumlah = $this->request->getVar('jumlah');
+        $jumlah = (int) $this->request->getVar('jumlah');
         $tglPinjam = $this->request->getVar('tgl_pinjam');
         $tglKembali = $this->request->getVar('tgl_kembali_rencana');
         
@@ -82,87 +89,82 @@ class Dashboard extends BaseController
              return redirect()->back()->with('error', 'Barang tidak ditemukan.');
         }
 
-        // 2. Double Booking / Overlap Check
-        // Check if there are any active loans (Status 1 or 2) for this item that overlap with requested dates
-        // Overlap Formula: (StartA <= EndB) and (EndA >= StartB)
-        $db = \Config\Database::connect();
-        $overlapping = $db->table('peminjaman')
-                          ->selectSum('jumlah')
-                          ->where('sarpras_id', $sarprasId)
-                          ->whereIn('status_id', [1, 2]) // Menunggu or Disetujui
-                          ->groupStart()
-                                ->where('tgl_pinjam <=', $tglKembali)
-                                ->where('tgl_kembali_rencana >=', $tglPinjam)
-                          ->groupEnd()
-                          ->get()->getRow();
-        
-        $bookedQty = $overlapping ? $overlapping->jumlah : 0;
-        
-        // We assume 'stok' in Sarpras table is the TOTAL capacity if we are doing calendar-based booking.
-        // HOWEVER, in this system, 'stok' is decremented on approval.
-        // This hybrid approach is tricky. 
-        // IF we rely on 'stok' decrement, we only care about "Available NOW".
-        // IF we want "Future Booking", we must allow booking even if 'stok' (current) is 0, AS LONG AS it will be returned by then.
-        // But that requires robust inventory management (Total vs Available).
-        // 
-        // SIMPLIFIED LOGIC requested by User: "Prevent double booking".
-        // "Jika alat X sudah dipinjam... pengguna lain tidak bisa..."
-        // This implies we should check against the "Booked Qty" for that period.
-        // Let's assume 'stok' in DB is roughly "Total Asset Count" that limits concurrency.
-        // If (BookedQty + RequestQty > TotalStock), then REJECT.
-        
-        // To make this work safely without changing DB schema (adding total_qty), 
-        // let's assume the 'stok' value we read from DB *plus* any active loans *currently out* equals Total Capacity.
-        // OR, just assume 'stok' is the limit for *simultaneous* usage.
-        
-        // Let's use the standard "Capacity Check":
-        // We need to know the Total Capacity of the item.
-        // Since 'stok' decreases, we might ideally need a fixed 'initial_stock'. 
-        // Without it, we might block valid requests.
-        // 
-        // DECISION: For this task, we will check if the REQUESTED dates overlap with ANY existing loan.
-        // If there is ANY overlap that consumes the stock, we block.
-        // How to define "Consumes stock"?
-        // Detailed: Calculate max usage on any single day within the requested range.
-        
-        // Simple Version:
-        // If (BookedQty + $jumlah > $item['stok'] + $some_correction), Block.
-        // Since we don't have 'total_stock', let's rely on the current 'stok' being the "Available for new bookings".
-        // But 'stok' is current available. 
-        // If I book for next month, 'stok' (today) is high. 
-        // But maybe next month it's fully booked.
-        // So checking 'stok' (today) is insufficient. 
-        // And checking 'bookedQty' (next month) is correct.
-        // But what is the Max Capacity? 
-        // Let's assume: Real Capacity = (Current Stok + Sum of All Currently Active Loans).
-        // Active Loans = Status 2 (Dipinjam). Status 1 (Menunggu) hasn't reduced stock yet?
-        // Usually, stock is reduced when Status becomes 2.
-        
-        // Recovery of Total Capacity:
-        $activeNow = $db->table('peminjaman')
-                        ->selectSum('jumlah')
-                        ->where('sarpras_id', $sarprasId)
-                        ->where('status_id', 2) // Currently out
-                        ->get()->getRow();
-        $totalCapacity = $item['stok'] + ($activeNow ? $activeNow->jumlah : 0);
-        
-        if (($bookedQty + $jumlah) > $totalCapacity) {
-             return redirect()->back()->with('error', 'Barang tidak tersedia pada tanggal tersebut. Sudah dipesan: ' . $bookedQty . ' unit.');
+        // 2. Double Booking / Overlap Check (T1-PINJAM-008, 010)
+        // Find all potential units of this type
+        $allUnits = $this->sarprasModel->where('nama', $item['nama'])
+                                       ->where('kategori_id', $item['kategori_id'])
+                                       ->where('location_id', $item['location_id'])
+                                       ->where('kondisi_id', 1) // Only Baik
+                                       ->whereNotIn('status', ['rusak', 'hilang']) // Not broken or lost
+                                       ->findAll();
+
+        if (count($allUnits) < $jumlah) {
+            return redirect()->back()->withInput()->with('error', 'Maaf, total unit yang layak tidak mencukupi permintaan Anda.');
         }
 
-        // Create peminjaman (Status 1: Menunggu Persetujuan)
-        $this->peminjamanModel->save([
-            'user_id' => session()->get('id'),
-            'sarpras_id' => $sarprasId,
-            'jumlah' => $jumlah,
-            'tgl_pinjam' => $tglPinjam,
-            'tgl_kembali_rencana' => $tglKembali,
-            'status_id' => 1 
-        ]);
-        
-        log_activity('Request Peminjaman', 'Meminta pinjam barang: ' . $item['nama']);
+        // Check which units are available for the requested dates
+        $availableUnits = [];
+        $db = \Config\Database::connect();
 
-        return redirect()->to('/member/dashboard')->with('success', 'Permintaan peminjaman berhasil dikirim. Menunggu persetujuan.');
+        foreach ($allUnits as $unit) {
+            $isBooked = $db->table('peminjaman')
+                           ->where('sarpras_id', $unit['id'])
+                           ->whereIn('status_id', [1, 2]) // Menunggu or Disetujui
+                           ->groupStart()
+                                ->where('tgl_pinjam <=', $tglKembali)
+                                ->where('tgl_kembali_rencana >=', $tglPinjam)
+                           ->groupEnd()
+                           ->countAllResults();
+            
+            if ($isBooked == 0) {
+                $availableUnits[] = $unit;
+            }
+
+            if (count($availableUnits) >= $jumlah) {
+                break; // Found enough units
+            }
+        }
+
+        if (count($availableUnits) < $jumlah) {
+             return redirect()->back()->withInput()->with('error', 'Barang tidak tersedia pada tanggal tersebut. Silakan pilih tanggal lain atau kurangi jumlah barang.');
+        }
+
+        // Create peminjaman records (one per unit)
+        $pjCode = $this->generatePJCode();
+        foreach ($availableUnits as $index => $unit) {
+            $this->peminjamanModel->save([
+                'kode_peminjaman' => $jumlah > 1 ? $pjCode . '-' . ($index + 1) : $pjCode,
+                'user_id' => session()->get('id'),
+                'sarpras_id' => $unit['id'],
+                'jumlah' => 1, // Store as 1 unit per record for true individual tracking
+                'tgl_pinjam' => $tglPinjam,
+                'tgl_kembali_rencana' => $tglKembali,
+                'status_id' => 1 
+            ]);
+        }
+        
+        log_activity('Request Peminjaman', 'Meminta pinjam barang: ' . $item['nama'] . ' (' . $jumlah . ' unit)');
+
+        return redirect()->to('/member/dashboard')->with('success', 'Permintaan peminjaman (' . $jumlah . ' unit) berhasil dikirim. Menunggu persetujuan.');
+    }
+
+    private function generatePJCode()
+    {
+        $date = date('Ymd');
+        $prefix = "PJ-$date-";
+        
+        $lastPJ = $this->peminjamanModel->where('kode_peminjaman LIKE', "$prefix%")
+                                        ->orderBy('id', 'DESC')
+                                        ->first();
+        
+        $nextNum = 1;
+        if ($lastPJ) {
+            $parts = explode('-', $lastPJ['kode_peminjaman']);
+            $lastSeq = end($parts);
+            $nextNum = (int)$lastSeq + 1;
+        }
+        
+        return $prefix . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
     }
     public function cancel($id)
     {

@@ -3,9 +3,6 @@
 <?= $this->section('content') ?>
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Laporan Peminjaman</h1>
-    <div class="d-print-none">
-        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">Print / PDF</button>
-    </div>
 </div>
 
 <style>
@@ -31,9 +28,12 @@
                 <label class="form-label">Tanggal Akhir</label>
                 <input type="date" name="tgl_akhir" class="form-control" value="<?= $filter['tgl_akhir'] ?>">
             </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2">Filter</button>
-                <a href="<?= base_url('admin/reports/peminjaman') ?>" class="btn btn-secondary">Reset</a>
+            <div class="col-md-5 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2 fw-bold">Filter</button>
+                <a href="<?= base_url('admin/reports/peminjaman') ?>" class="btn btn-secondary me-2">Reset</a>
+                <a href="<?= base_url('admin/reports/peminjaman?print=1&tgl_awal='.$filter['tgl_awal'].'&tgl_akhir='.$filter['tgl_akhir']) ?>" target="_blank" class="btn btn-success fw-bold">
+                    <i class="bi bi-printer me-1"></i> Cetak PDF
+                </a>
             </div>
         </form>
     </div>

@@ -6,9 +6,7 @@
     <h1 class="h2">Riwayat Pengembalian & Kondisi Alat</h1>
 </div>
 
-<?php if(session()->getFlashdata('success')): ?>
-    <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
-<?php endif; ?>
+
 
 <div class="table-responsive">
     <table class="table table-striped table-sm text-white">
@@ -37,8 +35,9 @@
                     <?php 
                         $badgeClass = 'bg-secondary';
                         if($r['nama_kondisi'] == 'Baik') $badgeClass = 'bg-success';
-                        elseif($r['nama_kondisi'] == 'Rusak') $badgeClass = 'bg-danger';
-                        elseif($r['nama_kondisi'] == 'Hilang') $badgeClass = 'bg-danger';
+                        elseif($r['nama_kondisi'] == 'Rusak Ringan') $badgeClass = 'bg-warning text-dark';
+                        elseif($r['nama_kondisi'] == 'Rusak Berat') $badgeClass = 'bg-danger';
+                        elseif($r['nama_kondisi'] == 'Hilang') $badgeClass = 'bg-dark';
                     ?>
                     <span class="badge <?= $badgeClass ?>"><?= esc($r['nama_kondisi']) ?></span>
                 </td>

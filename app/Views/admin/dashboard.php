@@ -45,7 +45,7 @@
                         <i class="bi bi-exclamation-triangle-fill fs-3 text-accent-danger"></i>
                     </div>
                     <div>
-                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Barang Rusak</h6>
+                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Sedang Dalam Perbaikan</h6>
                         <h2 class="fw-bold mb-0 text-accent-danger"><?= $damaged_sarpras ?></h2>
                     </div>
                 </div>
