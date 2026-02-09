@@ -41,6 +41,7 @@ class Categories extends BaseController
 
         $this->categoryModel->save([
             'nama' => $this->request->getVar('nama'),
+            'expected_lifespan' => $this->request->getVar('expected_lifespan') ?? 5,
         ]);
 
         return redirect()->to('/admin/categories')->with('success', 'Kategori berhasil ditambahkan');
@@ -67,6 +68,7 @@ class Categories extends BaseController
         $this->categoryModel->save([
             'id' => $id,
             'nama' => $this->request->getVar('nama'),
+            'expected_lifespan' => $this->request->getVar('expected_lifespan'),
         ]);
 
         return redirect()->to('/admin/categories')->with('success', 'Kategori berhasil diupdate');

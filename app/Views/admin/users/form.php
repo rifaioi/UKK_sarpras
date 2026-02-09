@@ -37,16 +37,37 @@
             </div>
 
             <!-- PASSWORD -->
-            <div class="mb-3">
+            <div class="mb-3 position-relative">
                 <label class="form-label">Password <?= isset($user) ? '(Kosongkan jika tidak ubah)' : '' ?></label>
-                <input type="password" class="form-control" name="password"
-                       minlength="8" <?= isset($user) ? '' : 'required' ?>>
+                <div class="position-relative">
+                    <input type="password" class="form-control pe-5" name="password" id="user_password"
+                           minlength="8" <?= isset($user) ? '' : 'required' ?>>
+                    <button type="button" class="btn border-0 position-absolute top-50 end-0 translate-middle-y me-1 p-2 text-secondary" id="toggleUserPw">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
                 <small class="text-muted">Minimal 8 karakter</small>
             </div>
             
-            <button type="submit" class="btn btn-primary">Simpan</button>
-            <a href="<?= base_url('admin/users') ?>" class="btn btn-secondary">Batal</a>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">Simpan</button>
+                <a href="<?= base_url('admin/users') ?>" class="btn btn-action px-4 d-flex align-items-center">Batal</a>
+            </div>
         </form>
     </div>
 </div>
+
+<script>
+    const toggleUserPw = document.querySelector('#toggleUserPw');
+    const userPassword = document.querySelector('#user_password');
+
+    if (toggleUserPw) {
+        toggleUserPw.addEventListener('click', function() {
+            const type = userPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            userPassword.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('bi-eye');
+            this.querySelector('i').classList.toggle('bi-eye-slash');
+        });
+    }
+</script>
 <?= $this->endSection() ?>

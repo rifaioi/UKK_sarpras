@@ -9,8 +9,7 @@ use App\Models\SarprasModel;
 
 /**
  * Laporan Controller
- * 
- * Handles generation of various system reports for Admin.
+ * Generates various system reports for Admin.
  */
 class Laporan extends BaseController
 {
@@ -26,12 +25,14 @@ class Laporan extends BaseController
     }
 
     /**
-     * Peminjaman Report with date filter
+     * Peminjaman Report (with date filter)
      */
     public function peminjaman()
     {
         $tgl_awal = $this->request->getGet('tgl_awal');
         $tgl_akhir = $this->request->getGet('tgl_akhir');
+        $user_id = $this->request->getGet('user_id');
+        $category_id = $this->request->getGet('category_id');
         $is_print = $this->request->getGet('print');
 
         $query = $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, sarpras.kode as kode_barang, status_peminjaman.nama_status')
@@ -44,13 +45,26 @@ class Laporan extends BaseController
                   ->where('peminjaman.tgl_pinjam <=', $tgl_akhir);
         }
 
+        if ($user_id) {
+            $query->where('peminjaman.user_id', $user_id);
+        }
+
+        if ($category_id) {
+            $query->where('sarpras.kategori_id', $category_id);
+        }
+
         $peminjaman = $query->orderBy('peminjaman.created_at', 'DESC')->findAll();
 
+        $db = \Config\Database::connect();
         $data = [
             'peminjaman' => $peminjaman,
+            'users' => $db->table('users')->where('role_id', 3)->get()->getResultArray(), // Members/Users
+            'categories' => $db->table('kategori_sarpras')->where('is_deleted', 0)->get()->getResultArray(),
             'filter' => [
                 'tgl_awal' => $tgl_awal,
-                'tgl_akhir' => $tgl_akhir
+                'tgl_akhir' => $tgl_akhir,
+                'user_id' => $user_id,
+                'category_id' => $category_id
             ],
             'is_print' => $is_print
         ];
@@ -63,11 +77,14 @@ class Laporan extends BaseController
     }
     
     /**
-     * Pengaduan Report with status filter
+     * Pengaduan Report (with status filter)
      */
     public function pengaduan()
     {
         $status_id = $this->request->getGet('status_id');
+        $tgl_awal = $this->request->getGet('tgl_awal');
+        $tgl_akhir = $this->request->getGet('tgl_akhir');
+        $is_print = $this->request->getGet('print');
 
         $query = $this->pengaduanModel->select('pengaduan.*, users.nama_lengkap, status_pengaduan.nama_status')
                                       ->join('users', 'users.id = pengaduan.user_id')
@@ -78,26 +95,39 @@ class Laporan extends BaseController
             $query->where('pengaduan.status_id', $status_id);
         }
 
+        if ($tgl_awal && $tgl_akhir) {
+            $query->where('pengaduan.created_at >=', $tgl_awal . ' 00:00:00')
+                  ->where('pengaduan.created_at <=', $tgl_akhir . ' 23:59:59');
+        }
+
         $db = \Config\Database::connect();
         $statuses = $db->table('status_pengaduan')->get()->getResultArray();
 
         $data = [
             'pengaduan' => $query->orderBy('pengaduan.created_at', 'DESC')->findAll(),
             'statuses' => $statuses,
-            'filter_status' => $status_id
+            'filter' => [
+                'status_id' => $status_id,
+                'tgl_awal' => $tgl_awal,
+                'tgl_akhir' => $tgl_akhir
+            ],
+            'is_print' => $is_print
         ];
+
+        if ($is_print) {
+            return view('admin/laporan/pengaduan_print', $data);
+        }
+
         return view('admin/laporan/pengaduan', $data);
     }
 
     /**
      * Asset Health Report
-     * Visualizes the current condition of assets based on return history.
      */
     public function asset_health()
     {
         $db = \Config\Database::connect();
         
-        // Count returns by condition (Summary)
         $conditions = $db->table('pengembalian')
                          ->select('kondisi_alat.nama_kondisi, COUNT(*) as jumlah')
                          ->join('kondisi_alat', 'kondisi_alat.id = pengembalian.kondisi_id')

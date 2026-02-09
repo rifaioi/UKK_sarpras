@@ -46,6 +46,20 @@
                         </td>
                     </tr>
                     <tr>
+                        <th>Status Unit</th>
+                        <td>: 
+                            <?php
+                                $statusBadge = 'bg-secondary';
+                                $statusLabel = strtoupper($item['status']);
+                                if ($item['status'] == 'tersedia') $statusBadge = 'bg-success';
+                                elseif ($item['status'] == 'dipinjam') $statusBadge = 'bg-primary';
+                                elseif ($item['status'] == 'rusak') $statusBadge = 'bg-warning text-dark';
+                                elseif ($item['status'] == 'hilang') $statusBadge = 'bg-danger';
+                            ?>
+                            <span class="badge <?= $statusBadge ?>"><?= $statusLabel ?></span>
+                        </td>
+                    </tr>
+                    <tr>
                         <th>Terdaftar pada</th>
                         <td>: <?= date('d M Y, H:i', strtotime($item['created_at'])) ?></td>
                     </tr>
@@ -88,7 +102,7 @@
                         </div>
                         <div class="ps-3">
                             <h6 class="mb-1 text-white">Status Saat Ini</h6>
-                            <p class="mb-0 text-white-50 small">Unit tersedia untuk digunakan/dipinjam.</p>
+                            <p class="mb-0 text-white-50 small">Unit saat ini berstatus <strong><?= strtoupper($item['status']) ?></strong>.</p>
                         </div>
                     </div>
                 </div>

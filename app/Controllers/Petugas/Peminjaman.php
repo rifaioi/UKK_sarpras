@@ -18,14 +18,14 @@ class Peminjaman extends BaseController
         $this->sarprasModel = new SarprasModel();
     }
 
-    /**
-     * Display list of loan requests with filtering
-     */
     public function index()
     {
         $userId = $this->request->getGet('user_id');
         $sarprasId = $this->request->getGet('sarpras_id');
         $statusId = $this->request->getGet('status_id');
+        $dateFrom = $this->request->getGet('date_from');
+        $dateTo = $this->request->getGet('date_to');
+        $q = $this->request->getGet('q');
 
         $query = $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, status_peminjaman.nama_status')
                                        ->join('users', 'users.id = peminjaman.user_id')
@@ -36,7 +36,6 @@ class Peminjaman extends BaseController
             $query->where('peminjaman.user_id', $userId);
         }
         if ($sarprasId) {
-            // Find sarpras with same name to filter by 'alat' type
             $targetSarpras = $this->sarprasModel->find($sarprasId);
             if ($targetSarpras) {
                 $query->where('sarpras.nama', $targetSarpras['nama']);
@@ -44,6 +43,19 @@ class Peminjaman extends BaseController
         }
         if ($statusId) {
             $query->where('peminjaman.status_id', $statusId);
+        }
+        if ($dateFrom) {
+            $query->where('peminjaman.tgl_pinjam >=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->where('peminjaman.tgl_pinjam <=', $dateTo);
+        }
+        if ($q) {
+            $query->groupStart()
+                  ->like('peminjaman.kode_peminjaman', $q)
+                  ->orLike('users.nama_lengkap', $q)
+                  ->orLike('sarpras.nama', $q)
+                  ->groupEnd();
         }
 
         $peminjaman = $query->orderBy('peminjaman.created_at', 'DESC')->findAll();
@@ -56,7 +68,10 @@ class Peminjaman extends BaseController
             'sarpras_list' => $this->sarprasModel->select('nama, MIN(id) as id')->groupBy('nama')->findAll(),
             'filter_user' => $userId,
             'filter_sarpras' => $sarprasId,
-            'filter_status' => $statusId
+            'filter_status' => $statusId,
+            'filter_date_from' => $dateFrom,
+            'filter_date_to' => $dateTo,
+            'filter_q' => $q
         ];
 
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
@@ -72,31 +87,43 @@ class Peminjaman extends BaseController
         $item = $this->sarprasModel->find($peminjaman['sarpras_id']);
 
         if ($item['stok'] < $peminjaman['jumlah']) {
-            return redirect()->back()->with('error', 'Stok tidak mencukupi untuk menyetujui peminjaman ini.');
+            // T1-PINJAM-FIX: Try to find another unit of the same type that is available
+            $alternative = $this->sarprasModel->where('nama', $item['nama'])
+                                              ->where('kategori_id', $item['kategori_id'])
+                                              ->where('location_id', $item['location_id'])
+                                              ->where('kondisi_id', 1)
+                                              ->where('status', 'tersedia')
+                                              ->where('stok >', 0)
+                                              ->first();
+            
+            if ($alternative) {
+                // Swap the unit
+                $item = $alternative;
+                $this->peminjamanModel->update($id, ['sarpras_id' => $item['id']]);
+            } else {
+                return redirect()->back()->with('error', 'Stok tidak mencukupi untuk menyetujui peminjaman ini.');
+            }
         }
 
-        // Transactions are better for data integrity
         $db = \Config\Database::connect();
         $db->transStart();
         
-        // 1. Set specific unit status to 'dipinjam' (T1-PINJAM-010)
-        $this->sarprasModel->update($item['id'], [
+        // T1-PINJAM-010
+        $this->sarprasModel->skipValidation(true)->update($item['id'], [
             'stok' => 0,
-            'status' => 'dipinjam'
+            'status' => 'dipinjam' // Item reserved
         ]);
 
-        // 2. Update status to 2 (Disetujui/Dipinjam)
-        $this->peminjamanModel->update($id, ['status_id' => 2]);
-        
         $db->transComplete();
 
         if ($db->transStatus() === false) {
             return redirect()->back()->with('error', 'Gagal memproses peminjaman.');
         }
 
-        log_activity('Approve Peminjaman', "Menyetujui peminjaman id: $id");
+        log_activity('Setujui Peminjaman', "Menyetujui peminjaman id: $id");
 
-        return redirect()->to('/petugas/peminjaman')->with('success', 'Peminjaman disetujui');
+        // Redirect to Inspeksi Keluar
+        return redirect()->to('/petugas/inspections/create/' . $id . '?type=keluar')->with('success', 'Silakan lakukan inspeksi kondisi barang sebelum diserahkan.');
     }
 
     /**

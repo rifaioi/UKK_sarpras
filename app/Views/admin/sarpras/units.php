@@ -25,6 +25,7 @@
                 <th>Kode Inventaris</th>
                 <th>Lokasi</th>
                 <th>Kondisi</th>
+                <th>Status</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -41,10 +42,21 @@
                     <span class="badge <?= $badge ?>"><?= esc($item['nama_kondisi']) ?></span>
                 </td>
                 <td>
+                    <?php
+                        $statusBadge = 'bg-secondary';
+                        $statusLabel = strtoupper($item['status']);
+                        if ($item['status'] == 'tersedia') $statusBadge = 'bg-success';
+                        elseif ($item['status'] == 'dipinjam') $statusBadge = 'bg-primary';
+                        elseif ($item['status'] == 'rusak') $statusBadge = 'bg-warning text-dark';
+                        elseif ($item['status'] == 'hilang') $statusBadge = 'bg-danger';
+                    ?>
+                    <span class="badge <?= $statusBadge ?>"><?= $statusLabel ?></span>
+                </td>
+                <td>
                     <div class="btn-group">
                         <a href="<?= base_url('admin/sarpras/show/'.$item['id']) ?>" class="btn btn-sm btn-info text-white" title="Detail"><i class="bi bi-eye"></i></a>
                         <a href="<?= base_url('admin/sarpras/edit/'.$item['id']) ?>" class="btn btn-sm btn-warning" title="Edit"><i class="bi bi-pencil"></i></a>
-                        <a href="<?= base_url('admin/sarpras/delete/'.$item['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus unit ini?')" title="Hapus"><i class="bi bi-trash"></i></a>
+                        <a href="<?= base_url('admin/sarpras/delete/'.$item['id']) ?>" class="btn btn-sm btn-danger" title="Hapus"><i class="bi bi-trash"></i></a>
                     </div>
                 </td>
             </tr>

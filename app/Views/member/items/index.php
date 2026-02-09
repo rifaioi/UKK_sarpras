@@ -8,6 +8,18 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-6 mx-auto">
+        <form action="" method="get" class="d-flex">
+            <input type="text" name="q" class="form-control me-2 bg-dark text-white border-secondary" placeholder="Cari nama barang..." value="<?= esc($q ?? '') ?>">
+            <button type="submit" class="btn btn-primary">Cari</button>
+            <?php if ($q): ?>
+                <a href="<?= base_url('member/items') ?>" class="btn btn-outline-secondary ms-2 text-white">Reset</a>
+            <?php endif; ?>
+        </form>
+    </div>
+</div>
+
 <div class="row g-4">
     <?php if (empty($items)): ?>
         <div class="col-12 text-center py-5">

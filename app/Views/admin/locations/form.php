@@ -17,8 +17,10 @@
                 <textarea class="form-control" name="keterangan" rows="3"><?= isset($location) ? $location['keterangan'] : old('keterangan') ?></textarea>
             </div>
             
-            <button type="submit" class="btn btn-primary">Simpan</button>
-            <a href="<?= base_url('admin/locations') ?>" class="btn btn-secondary">Batal</a>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">Simpan</button>
+                <a href="<?= base_url('admin/locations') ?>" class="btn btn-action px-4 d-flex align-items-center">Batal</a>
+            </div>
         </form>
     </div>
 </div>

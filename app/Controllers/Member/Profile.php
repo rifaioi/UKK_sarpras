@@ -37,11 +37,10 @@ class Profile extends BaseController
         ];
 
         if ($this->userModel->update($id, $data)) {
-            // Update session
             session()->set('nama', $data['nama_lengkap']);
             session()->set('username', $data['username']);
             
-            log_activity('Ubah Profil', 'User memperbarui informasi profil');
+            log_activity('Ubah Profil', 'Peminjam memperbarui informasi profil');
             return redirect()->to('/member/profile')->with('success', 'Profil berhasil diperbarui.');
         }
 
@@ -71,7 +70,7 @@ class Profile extends BaseController
             'password_hash' => password_hash($this->request->getVar('password_baru'), PASSWORD_DEFAULT)
         ]);
         
-        log_activity('Ubah Password', 'User mengubah password sendiri');
+        log_activity('Ubah Password', 'Peminjam mengubah password sendiri');
 
         return redirect()->to('/member/profile')->with('success', 'Password berhasil diubah.');
     }

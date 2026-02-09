@@ -11,9 +11,9 @@
 <body>
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar d-flex flex-column px-2 py-3 text-white" style="width: 210px;">
+        <div class="sidebar d-flex flex-column px-2 py-3 text-white">
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none border-bottom border-secondary pb-3 w-100">
-                <span class="fs-4">Sarpras</span>
+                <span class="fs-5 fw-bold text-primary">Sarpras</span>
             </a>
             
             <ul class="nav nav-pills flex-column mb-auto mt-3">
@@ -22,33 +22,43 @@
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </a>
                 </li>
+
+                <!-- LAYANAN UTAMA -->
+                <li class="nav-item border-top border-secondary mt-2 pt-2">
+                    <span class="text-secondary small text-uppercase fw-bold px-3">Layanan Sarpras</span>
+                </li>
                 <li class="nav-item">
                     <a href="<?= base_url('member/items') ?>" class="nav-link <?= strpos(uri_string(), 'member/items') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-box-seam me-2"></i> Peminjaman Barang
+                        <i class="bi bi-plus-circle-dotted me-2"></i> Pinjam Barang
                     </a>
                 </li>
                 <li>
                     <a href="<?= base_url('member/pengaduan') ?>" class="nav-link <?= strpos(uri_string(), 'member/pengaduan') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Ajukan Pengaduan
+                        <i class="bi bi-exclamation-octagon me-2"></i> Ajukan Keluhan
                     </a>
+                </li>
+
+                <!-- TRACKING -->
+                <li class="nav-item border-top border-secondary mt-2 pt-2">
+                    <span class="text-secondary small text-uppercase fw-bold px-3">Monitoring</span>
                 </li>
                 <li class="nav-item">
                      <a href="<?= base_url('member/history') ?>" class="nav-link <?= strpos(uri_string(), 'member/history') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-clock-history me-2"></i> Riwayat Saya
+                        <i class="bi bi-clock-history me-2"></i> Riwayat & Status
                     </a>
                 </li>
             </ul>
         </div>
 
         <!-- Main Content Wrapper -->
-        <div class="content-wrapper d-flex flex-column" style="width: 100%;">
+        <div class="content-wrapper d-flex flex-column">
             
             <!-- Topbar -->
             <div class="topbar">
                 <div class="user-menu border-start ps-3">
-                    <div class="user-info d-none d-md-block">
-                        <strong><?= session()->get('nama') ?></strong>
-                        <small>Member</small>
+                    <div class="user-info d-none d-md-block me-2 text-end">
+                        <div class="fw-bold small lh-1 mb-1"><?= session()->get('nama') ?></div>
+                        <span class="role-badge">Peminjam</span>
                     </div>
                     <div class="dropdown">
                         <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -95,5 +105,34 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar Scroll Persistence
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const scrollPos = sessionStorage.getItem('sidebar_scroll_member');
+            if (scrollPos) {
+                sidebar.scrollTop = scrollPos;
+            }
+
+            const saveScroll = () => {
+                sessionStorage.setItem('sidebar_scroll_member', sidebar.scrollTop);
+            };
+
+            sidebar.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', saveScroll);
+            });
+            window.addEventListener('beforeunload', saveScroll);
+        });
+
+        // Global delete confirmation
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('confirm-delete')) {
+                e.preventDefault();
+                if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                    window.location.href = e.target.href;
+                }
+            }
+        });
+    </script>
 </body>
 </html>

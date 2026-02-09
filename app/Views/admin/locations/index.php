@@ -4,8 +4,8 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Manajemen Lokasi</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="<?= base_url('admin/locations/create') ?>" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-plus-lg"></i> Tambah Lokasi
+        <a href="<?= base_url('admin/locations/create') ?>" class="btn btn-tambah btn-sm-tambah">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Lokasi
         </a>
     </div>
 </div>
@@ -29,8 +29,14 @@
                 <td><?= esc($loc['nama_lokasi']) ?></td>
                 <td><?= esc($loc['keterangan']) ?></td>
                 <td>
-                    <a href="<?= base_url('admin/locations/edit/'.$loc['id']) ?>" class="btn btn-sm btn-warning">Edit</a>
-                    <a href="<?= base_url('admin/locations/delete/'.$loc['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus lokasi ini?')">Delete</a>
+                    <div class="d-flex gap-1">
+                        <a href="<?= base_url('admin/locations/edit/'.$loc['id']) ?>" class="btn btn-action text-warning" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="<?= base_url('admin/locations/delete/'.$loc['id']) ?>" class="btn btn-action text-danger" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>

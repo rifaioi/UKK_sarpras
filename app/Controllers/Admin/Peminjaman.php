@@ -6,21 +6,36 @@ use App\Controllers\Petugas\Peminjaman as PetugasPeminjaman;
 
 class Peminjaman extends PetugasPeminjaman
 {
-    // Inherit everything. If we need to override views, we can do it here.
-    // For now, let's reuse the logic but point to admin views if we want, 
-    // or just use the petugas views but layout needs to be admin.
     
-    /**
-     * Admin: Approval dashboard
-     */
     
     /**
      * Approve a loan (wraps parent logic)
      */
     public function approve($id)
     {
-        parent::approve($id);
-        return redirect()->to('/admin/peminjaman')->with('success', 'Peminjaman disetujui');
+        // Call parent approval logic (reserves stock)
+        // Note: We don't use the return value because we want to handle the redirect for Admin specifically
+        // or actually, the parent logic does the heavy lifting.
+        // But since parent returns a RedirectResponse, we should just replicate the redirect destination
+        // OR better yet, let's just copy the logic or return the parent's response directly if we trust it, 
+        // BUT the parent redirects to /petugas/... which we might want to change.
+        
+        // Let's just execute the parent logic (which is NOT just return parent::approve). 
+        // Calling parent::approve($id) executes it.
+        // But wait, parent::approve() returns a RedirectResponse. It doesn't just "do logic".
+        // If we call it and ignore the return, the logic (DB updates) still happens.
+        $response = parent::approve($id);
+        
+        // If the parent found an error (e.g. stock), it returned a redirect back. 
+        // We should check flash data or something? 
+        if (session()->getFlashdata('error')) {
+            return $response;
+        }
+        
+        // Simplest fix: Just return the redirect to the inspection page, pointing to the Petugas controller (since we share it)
+        // or creating an Admin route for inspection.
+        // Redirect to the Admin route for inspection
+        return redirect()->to('/admin/inspections/create/' . $id)->with('success', 'Silakan lakukan inspeksi kondisi barang.');
     }
 
     /**
@@ -34,10 +49,8 @@ class Peminjaman extends PetugasPeminjaman
             return redirect()->to('/admin/peminjaman')->with('error', 'Data tidak ditemukan');
         }
 
-        // Get rejection reason from POST (optional)
         $rejectionReason = $this->request->getPost('rejection_reason');
 
-        // Update status to rejected (3) and save reason
         $this->peminjamanModel->update($id, [
             'status_id' => 3,
             'rejection_reason' => $rejectionReason
@@ -63,7 +76,6 @@ class Peminjaman extends PetugasPeminjaman
             return redirect()->to('/admin/peminjaman')->with('error', 'Data tidak ditemukan');
         }
 
-        // Use the generated kode_peminjaman
         $loanCode = $peminjaman['kode_peminjaman'] ?? ($peminjaman['kode'] . '-' . str_pad($id, 5, '0', STR_PAD_LEFT));
 
         $data = [
@@ -112,9 +124,6 @@ class Peminjaman extends PetugasPeminjaman
         return view('admin/peminjaman/archived', $data);
     }
 
-    /**
-     * Restore a soft-deleted loan
-     */
     public function restore($id)
     {
         // First check if it's actually deleted

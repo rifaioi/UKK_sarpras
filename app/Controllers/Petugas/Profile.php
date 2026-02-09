@@ -37,7 +37,6 @@ class Profile extends BaseController
         ];
 
         if ($this->userModel->update($id, $data)) {
-            // Update session
             session()->set('nama', $data['nama_lengkap']);
             session()->set('username', $data['username']);
             

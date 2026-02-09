@@ -26,7 +26,6 @@ class Pengembalian extends BaseController
     public function index()
     {
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
-        // Show active borrwings (Status 2: Disetujui/Dipinjam)
         $data = [
             'active_peminjaman' => $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang')
                                                          ->join('users', 'users.id = peminjaman.user_id')
@@ -39,15 +38,8 @@ class Pengembalian extends BaseController
 
     public function form($peminjaman_id)
     {
-        $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
-        $data = [
-            'peminjaman' => $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, sarpras.stok as current_stock')
-                                                  ->join('users', 'users.id = peminjaman.user_id')
-                                                  ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
-                                                  ->find($peminjaman_id),
-            'conditions' => $this->kondisiModel->findAll()
-        ];
-        return view($role . '/pengembalian/form', $data);
+        // T2-INSPECTION: Redirect to Inspeksi Kembali
+        return redirect()->to("/petugas/inspections/create/$peminjaman_id?type=kembali");
     }
 
     public function store()
@@ -61,17 +53,15 @@ class Pengembalian extends BaseController
             return redirect()->back()->withInput()->with('error', 'Deskripsi kerusakan/masalah wajib diisi jika kondisi tidak Baik.');
         }
 
-        // Handle file upload (T1-KEMBALI-004)
         $foto = null;
         $fotoFile = $this->request->getFile('foto');
         
         if ($fotoFile && $fotoFile->isValid() && !$fotoFile->hasMoved()) {
             $namaFoto = $fotoFile->getRandomName();
-            $fotoFile->move('uploads/pengembalian', $namaFoto);
-            $foto = $namaFoto;
+            $fotoFile->move(FCPATH . 'uploads/pengembalian', $namaFoto);
+            $foto = 'uploads/pengembalian/' . $namaFoto;
         }
         
-        // 1. Save to pengembalian table
         $this->pengembalianModel->save([
             'peminjaman_id' => $peminjamanId,
             'tgl_pengembalian' => date('Y-m-d'),
@@ -80,10 +70,9 @@ class Pengembalian extends BaseController
             'foto' => $foto
         ]);
 
-        // 2. Update peminjaman status to 4 (Dikembalikan)
-        $this->peminjamanModel->update($peminjamanId, ['status_id' => 4]);
+        $this->peminjamanModel->skipValidation(true)->update($peminjamanId, ['status_id' => 4]);
 
-        // 3. Update unit status and stock (T1-PINJAM-010, T1-KEMBALI-006, 007)
+        // T1-PINJAM-010, T1-KEMBALI-006, 007
         $peminjaman = $this->peminjamanModel->find($peminjamanId);
         if ($peminjaman) {
             $status = 'tersedia';
@@ -98,7 +87,7 @@ class Pengembalian extends BaseController
                 'stok' => ($kondisiId == 1 ? 1 : 0),
                 'status' => $status
             ];
-            $this->sarprasModel->update($peminjaman['sarpras_id'], $updateData);
+            $this->sarprasModel->skipValidation(true)->update($peminjaman['sarpras_id'], $updateData);
         }
 
         $rolePath = session()->get('role_id') == 1 ? 'admin' : 'petugas';
@@ -123,7 +112,7 @@ class Pengembalian extends BaseController
                                                                ->join('users', 'users.id = peminjaman.user_id')
                                                                ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
                                                                ->join('kondisi_alat', 'kondisi_alat.id = pengembalian.kondisi_id')
-                                                               ->orderBy('pengembalian.tgl_pengembalian', 'DESC')
+                                                               ->orderBy('pengembalian.id', 'DESC')
                                                                ->findAll()
         ];
         return view($role . '/pengembalian/riwayat', $data);
@@ -132,8 +121,8 @@ class Pengembalian extends BaseController
     public function detail($pengembalian_id)
     {
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
-        // Show detailed return record with damage report and photo
-        $pengembalian = $this->pengembalianModel->select('pengembalian.*, peminjaman.jumlah, peminjaman.tgl_pinjam, users.nama_lengkap, sarpras.nama as nama_barang, kondisi_alat.nama_kondisi')
+        
+        $pengembalian = $this->pengembalianModel->select('pengembalian.*, peminjaman.id as peminjaman_id, peminjaman.jumlah, peminjaman.tgl_pinjam, users.nama_lengkap, sarpras.nama as nama_barang, sarpras.kategori_id, kondisi_alat.nama_kondisi')
                                                 ->join('peminjaman', 'peminjaman.id = pengembalian.peminjaman_id')
                                                 ->join('users', 'users.id = peminjaman.user_id')
                                                 ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
@@ -144,7 +133,38 @@ class Pengembalian extends BaseController
             return redirect()->to("/$role/pengembalian/riwayat")->with('error', 'Data pengembalian tidak ditemukan');
         }
 
-        $data = ['pengembalian' => $pengembalian];
+        $peminjamanId = $pengembalian['peminjaman_id'];
+        
+        // Fetch Inspections
+        $inspeksiModel = new \App\Models\InspectionModel();
+        $inspeksiChecklistModel = new \App\Models\InspectionResultModel();
+        $templateModel = new \App\Models\InspectionChecklistItemModel();
+
+        $inspeksiKeluar = $inspeksiModel->where('peminjaman_id', $peminjamanId)->where('type', 'keluar')->first();
+        $inspeksiKembali = $inspeksiModel->where('peminjaman_id', $peminjamanId)->where('type', 'kembali')->first();
+
+        $resultsKeluar = [];
+        if ($inspeksiKeluar) {
+            $raw = $inspeksiChecklistModel->where('inspection_id', $inspeksiKeluar['id'])->findAll();
+            foreach ($raw as $r) $resultsKeluar[$r['checklist_item_id']] = $r;
+        }
+
+        $resultsKembali = [];
+        if ($inspeksiKembali) {
+            $raw = $inspeksiChecklistModel->where('inspection_id', $inspeksiKembali['id'])->findAll();
+            foreach ($raw as $r) $resultsKembali[$r['checklist_item_id']] = $r;
+        }
+
+        $checklistTemplates = $templateModel->where('kategori_id', $pengembalian['kategori_id'])->findAll();
+
+        $data = [
+            'pengembalian' => $pengembalian,
+            'inspeksiKeluar' => $inspeksiKeluar,
+            'inspeksiKembali' => $inspeksiKembali,
+            'resultsKeluar' => $resultsKeluar,
+            'resultsKembali' => $resultsKembali,
+            'checklistTemplates' => $checklistTemplates
+        ];
         return view($role . '/pengembalian/detail', $data);
     }
 
@@ -154,52 +174,69 @@ class Pengembalian extends BaseController
     public function rusak()
     {
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
+        
+        // T1-KEMBALI-SYNC: Base the repair list on the actual condition of units in sarpras table.
+        // We join with the latest 'pengembalian' if it exists to show who returned it last, 
+        // but the item stays in the list as long as sarpras.kondisi_id is 2 or 3.
         $data = [
-            'barang_rusak' => $this->pengembalianModel->select('pengembalian.*, peminjaman.jumlah, users.nama_lengkap, sarpras.nama as nama_barang, kondisi_alat.nama_kondisi')
-                                                      ->join('peminjaman', 'peminjaman.id = pengembalian.peminjaman_id')
-                                                      ->join('users', 'users.id = peminjaman.user_id')
-                                                      ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
-                                                      ->join('kondisi_alat', 'kondisi_alat.id = pengembalian.kondisi_id')
-                                                      ->where('pengembalian.kondisi_id', 2) // Specifically 'Rusak'
-                                                      ->where('pengembalian.is_restocked', 0) // Not yet repaired
-                                                      ->orderBy('pengembalian.tgl_pengembalian', 'DESC')
-                                                      ->findAll()
+            'barang_rusak' => $this->sarprasModel->select('sarpras.*, locations.nama_lokasi, kondisi_alat.nama_kondisi, 
+                                                         latest_return.nama_lengkap as peminjam_terakhir, 
+                                                         latest_return.tgl_pengembalian,
+                                                         latest_return.id as pengembalian_id')
+                                                 ->join('locations', 'locations.id = sarpras.location_id', 'left')
+                                                 ->join('kondisi_alat', 'kondisi_alat.id = sarpras.kondisi_id', 'left')
+                                                 // Join with a subquery of the latest returns per SARPRAS_ID to avoid duplicates
+                                                 ->join('(SELECT p1.*, u.nama_lengkap, pj.sarpras_id 
+                                                          FROM pengembalian p1 
+                                                          JOIN peminjaman pj ON pj.id = p1.peminjaman_id
+                                                          JOIN users u ON u.id = pj.user_id
+                                                          WHERE p1.id IN (
+                                                              SELECT MAX(p2.id) 
+                                                              FROM pengembalian p2 
+                                                              JOIN peminjaman pj2 ON pj2.id = p2.peminjaman_id 
+                                                              GROUP BY pj2.sarpras_id
+                                                          )) as latest_return', 
+                                                         'latest_return.sarpras_id = sarpras.id', 'left')
+                                                 ->whereIn('sarpras.kondisi_id', [2, 3]) // Rusak Ringan, Rusak Berat
+                                                 ->orderBy('sarpras.updated_at', 'DESC')
+                                                 ->findAll()
         ];
         return view($role . '/pengembalian/rusak', $data);
     }
 
     /**
      * Action to Restock a repaired item
+     * ID passed is now SARPRAS_ID for better consistency
      */
     public function restock($id)
     {
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
-        $pengembalian = $this->pengembalianModel->find($id);
+        $unit = $this->sarprasModel->find($id);
 
-        if (!$pengembalian || $pengembalian['is_restocked'] == 1) {
-            return redirect()->back()->with('error', 'Data tidak valid atau sudah direstock.');
+        if (!$unit) {
+            return redirect()->back()->with('error', 'Unit tidak ditemukan.');
         }
 
-        $peminjaman = $this->peminjamanModel->find($pengembalian['peminjaman_id']);
-        if ($peminjaman) {
-            // Update unit to Baik (1) and Stok 1
-            $this->sarprasModel->update($peminjaman['sarpras_id'], [
-                'kondisi_id' => 1,
-                'stok' => 1
-            ]);
-            
-            // Mark as restocked
-            $this->pengembalianModel->update($id, ['is_restocked' => 1]);
-            
-            log_activity('Restock Barang Rusak', "Restock unit id: {$peminjaman['sarpras_id']} dari perbaikan.");
-        }
+        // 1. Update Sarpras Unit to Baik
+        $this->sarprasModel->skipValidation(true)->update($id, [
+            'kondisi_id' => 1,
+            'stok' => 1,
+            'status' => 'tersedia'
+        ]);
 
-        return redirect()->to("/$role/pengembalian/rusak")->with('success', 'Barang berhasil diperbaiki dan stok tersedia kembali.');
+        // 2. Sync Pengembalian record if this was a return-based repair
+        // Mark all 'un-restocked' returns for this sarpras as restocked
+        $db = \Config\Database::connect();
+        $db->query("UPDATE pengembalian p 
+                    JOIN peminjaman pj ON pj.id = p.peminjaman_id 
+                    SET p.is_restocked = 1 
+                    WHERE pj.sarpras_id = ? AND p.is_restocked = 0", [$id]);
+
+        log_activity('Restock Barang', "Unit {$unit['kode']} telah diperbaiki dan masuk stok kembali.");
+
+        return redirect()->to("/$role/pengembalian/rusak")->with('success', "Unit {$unit['kode']} berhasil direstock ke kondisi Baik.");
     }
 
-    /**
-     * Display QR Scanner for return
-     */
     public function scan()
     {
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
@@ -208,11 +245,33 @@ class Pengembalian extends BaseController
 
     /**
      * Action to Scrap a damaged item
+     * ID passed is SARPRAS_ID
      */
     public function scrap($id)
     {
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
-        $this->pengembalianModel->update($id, ['is_restocked' => 2]);
-        return redirect()->to("/$role/pengembalian/rusak")->with('success', 'Data barang rusak telah dihapus (Barang dimusnahkan).');
+        $unit = $this->sarprasModel->find($id);
+
+        if (!$unit) {
+            return redirect()->back()->with('error', 'Unit tidak ditemukan.');
+        }
+
+        // Mark as Lost/Scrapped in Sarpras
+        $this->sarprasModel->skipValidation(true)->update($id, [
+            'kondisi_id' => 4, // Hilang/Musnah
+            'stok' => 0,
+            'status' => 'hilang'
+        ]);
+
+        // Mark pengembalian records as scrapped (2)
+        $db = \Config\Database::connect();
+        $db->query("UPDATE pengembalian p 
+                    JOIN peminjaman pj ON pj.id = p.peminjaman_id 
+                    SET p.is_restocked = 2 
+                    WHERE pj.sarpras_id = ? AND p.is_restocked = 0", [$id]);
+
+        log_activity('Musnahkan Barang', "Unit {$unit['kode']} ditandai hilang/dimusnahkan dari daftar perbaikan.");
+
+        return redirect()->to("/$role/pengembalian/rusak")->with('success', "Unit {$unit['kode']} telah dihapus dari daftar perbaikan.");
     }
 }

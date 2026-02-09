@@ -20,14 +20,10 @@ class Dashboard extends BaseController
 
     public function index()
     {
-        // Status 1: Menunggu Persetujuan
         $pendingPeminjaman = $this->peminjamanModel->where('status_id', 1)->countAllResults();
         
-        // Status 2: Disetujui (Sedang dipinjam)
         $activePeminjaman = $this->peminjamanModel->where('status_id', 2)->countAllResults();
 
-        // Status 1 or 2: Pending/Process Pengaduan
-        // Assuming 1=Belum, 2=Proses
         $activePengaduan = $this->pengaduanModel->whereIn('status_id', [1, 2])->countAllResults();
 
         $activityModel = new ActivityLogModel();
@@ -37,11 +33,24 @@ class Dashboard extends BaseController
                                           ->limit(5)
                                           ->findAll();
 
+        // Maintenance Reminders - read from sarpras.next_maintenance_date directly
+        $sarprasModel = new \App\Models\SarprasModel();
+        $today = date('Y-m-d');
+        $reminderDate = date('Y-m-d', strtotime('+7 days'));
+        
+        $maintenanceReminders = $sarprasModel->select('sarpras.id, sarpras.nama, sarpras.kode, sarpras.next_maintenance_date,
+                                                        DATEDIFF(sarpras.next_maintenance_date, CURDATE()) as days_until')
+                                              ->where('sarpras.next_maintenance_date IS NOT NULL')
+                                              ->where('sarpras.next_maintenance_date <=', $reminderDate)
+                                              ->orderBy('sarpras.next_maintenance_date', 'ASC')
+                                              ->findAll();
+
         $data = [
             'pending_peminjaman' => $pendingPeminjaman,
             'active_peminjaman' => $activePeminjaman,
             'active_pengaduan' => $activePengaduan,
-            'recent_activities' => $recentActivities
+            'recent_activities' => $recentActivities,
+            'maintenance_reminders' => $maintenanceReminders,
         ];
 
         return view('petugas/dashboard', $data);

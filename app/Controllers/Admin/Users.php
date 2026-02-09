@@ -38,24 +38,30 @@ class Users extends BaseController
     public function store()
     {
         $rules = [
-            'username' => 'required',
-            'password' => 'required|min_length[8]',
-            'nama_lengkap' => 'required',
-            'role_id' => 'required'
+            'username'     => 'required|min_length[4]|max_length[100]|is_unique[users.username]',
+            'password'     => 'required|min_length[8]',
+            'nama_lengkap' => 'required|min_length[3]|max_length[150]',
+            'role_id'      => 'required|numeric'
         ];
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $this->userModel->save([
-            'username' => $this->request->getVar('username'),
+        $saveData = [
+            'username'      => $this->request->getVar('username'),
             'password_hash' => password_hash($this->request->getVar('password'), PASSWORD_BCRYPT),
-            'nama_lengkap' => $this->request->getVar('nama_lengkap'),
-            'role_id' => $this->request->getVar('role_id'),
-        ]);
+            'nama_lengkap'  => $this->request->getVar('nama_lengkap'),
+            'role_id'       => $this->request->getVar('role_id'),
+        ];
 
-        return redirect()->to('/admin/users')->with('success', 'User created successfully');
+        if ($this->userModel->save($saveData)) {
+            $newId = $this->userModel->getInsertID();
+            log_activity('Tambah User', "Menambah user baru: " . $saveData['username'] . " (ID: $newId)");
+            return redirect()->to('/admin/users')->with('success', 'User berhasil ditambahkan');
+        } else {
+            return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+        }
     }
 
     public function edit($id)
@@ -70,9 +76,9 @@ class Users extends BaseController
     public function update($id)
     {
         $rules = [
-            'username' => "required",
-            'nama_lengkap' => 'required',
-            'role_id' => 'required'
+            'username'     => "required|min_length[4]|max_length[100]|is_unique[users.username,id,$id]",
+            'nama_lengkap' => 'required|min_length[3]|max_length[150]',
+            'role_id'      => 'required|numeric'
         ];
 
         if (!$this->validate($rules)) {
@@ -80,22 +86,22 @@ class Users extends BaseController
         }
 
         $data = [
-            'id' => $id,
-            'username' => $this->request->getVar('username'),
+            'id'           => $id,
+            'username'     => $this->request->getVar('username'),
             'nama_lengkap' => $this->request->getVar('nama_lengkap'),
-            'role_id' => $this->request->getVar('role_id'),
+            'role_id'      => $this->request->getVar('role_id'),
         ];
 
         if ($this->request->getVar('password')) {
-            if (strlen($this->request->getVar('password')) < 8) {
-                return redirect()->back()->withInput()->with('errors', ['password' => 'Password minimal 8 karakter']);
-            }
             $data['password_hash'] = password_hash($this->request->getVar('password'), PASSWORD_BCRYPT);
         }
 
-        $this->userModel->save($data);
-
-        return redirect()->to('/admin/users')->with('success', 'User updated successfully');
+        if ($this->userModel->save($data)) {
+            log_activity('Update User', "Memperbarui profil user ID: $id (" . $data['username'] . ")");
+            return redirect()->to('/admin/users')->with('success', 'User berhasil diperbarui');
+        } else {
+            return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+        }
     }
 
     public function delete($id)

@@ -25,7 +25,7 @@
         <tbody>
             <?php foreach($riwayat_pengembalian as $i => $r): ?>
             <tr>
-                <td><?= $i+1 ?></td>
+                <td><?= count($riwayat_pengembalian) - $i ?></td>
                 <td><?= esc($r['nama_lengkap']) ?></td>
                 <td><?= esc($r['nama_barang']) ?></td>
                 <td><?= esc($r['jumlah']) ?></td>

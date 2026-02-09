@@ -2,56 +2,84 @@
 
 <?= $this->section('content') ?>
 <h2>Dashboard Petugas</h2>
-<div class="row g-4 mb-5">
+<div class="row g-5 mb-5">
     <div class="col-md-4">
-        <div class="card border-0 h-100">
+        <div class="card border-0 h-100 card-gradient-warning">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
                     <div class="bg-accent-warning p-3 rounded-3 me-3">
-                        <i class="bi bi-hourglass-split fs-3 text-accent-warning"></i>
+                        <i class="bi bi-hourglass-split fs-3 text-warning"></i>
                     </div>
                     <div>
-                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Menunggu Persetujuan</h6>
-                        <h2 class="fw-bold mb-0 text-accent-warning"><?= $pending_peminjaman ?></h2>
+                        <h6 class="text-warning small fw-bold text-uppercase mb-1">Menunggu Persetujuan</h6>
+                        <h2 class="fw-bold mb-0 text-warning"><?= $pending_peminjaman ?></h2>
                     </div>
                 </div>
-                <a href="<?= base_url('petugas/peminjaman') ?>" class="btn btn-outline-warning btn-sm w-100 rounded-pill">Lihat Permintaan</a>
+                <a href="<?= base_url('petugas/peminjaman') ?>" class="btn btn-warning text-dark btn-sm w-100 rounded-pill fw-bold">Lihat Permintaan</a>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 h-100">
+        <div class="card border-0 h-100 card-gradient-success">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
                     <div class="bg-accent-success p-3 rounded-3 me-3">
-                        <i class="bi bi-box-seam-fill fs-3 text-accent-success"></i>
+                        <i class="bi bi-box-seam-fill fs-3 text-success"></i>
                     </div>
                     <div>
-                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Sedang Dipinjam</h6>
-                        <h2 class="fw-bold mb-0 text-accent-success"><?= $active_peminjaman ?></h2>
+                        <h6 class="text-success small fw-bold text-uppercase mb-1">Sedang Dipinjam</h6>
+                        <h2 class="fw-bold mb-0 text-success"><?= $active_peminjaman ?></h2>
                     </div>
                 </div>
-                <a href="<?= base_url('petugas/pengembalian') ?>" class="btn btn-outline-success btn-sm w-100 rounded-pill">Kelola Pengembalian</a>
+                <a href="<?= base_url('petugas/pengembalian') ?>" class="btn btn-success text-white btn-sm w-100 rounded-pill fw-bold">Kelola Pengembalian</a>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card border-0 h-100">
+        <div class="card border-0 h-100 card-gradient-danger">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
                     <div class="bg-accent-danger p-3 rounded-3 me-3">
-                        <i class="bi bi-exclamation-triangle-fill fs-3 text-accent-danger"></i>
+                        <i class="bi bi-exclamation-triangle-fill fs-3 text-danger"></i>
                     </div>
                     <div>
-                        <h6 class="text-secondary small fw-bold text-uppercase mb-1">Pengaduan Aktif</h6>
-                        <h2 class="fw-bold mb-0 text-accent-danger"><?= $active_pengaduan ?></h2>
+                        <h6 class="text-danger small fw-bold text-uppercase mb-1">Pengaduan Aktif</h6>
+                        <h2 class="fw-bold mb-0 text-danger"><?= $active_pengaduan ?></h2>
                     </div>
                 </div>
-                 <a href="<?= base_url('petugas/pengaduan') ?>" class="btn btn-outline-danger btn-sm w-100 rounded-pill">Tinjau Laporan</a>
+                 <a href="<?= base_url('petugas/pengaduan') ?>" class="btn btn-danger text-white btn-sm w-100 rounded-pill fw-bold">Tinjau Laporan</a>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Maintenance Reminders -->
+<?php if(!empty($maintenance_reminders)): ?>
+<div class="alert alert-warning border-0 mb-4">
+    <div class="d-flex align-items-center mb-2">
+        <i class="bi bi-bell-fill fs-5 me-2"></i>
+        <h6 class="mb-0 fw-bold">Maintenance Reminders (<?= count($maintenance_reminders) ?>)</h6>
+    </div>
+    <ul class="mb-2">
+        <?php foreach($maintenance_reminders as $r): ?>
+        <li class="mb-1">
+            <strong><?= esc($r['nama']) ?></strong> (<?= esc($r['kode']) ?>)
+            - Due: <?= date('d/m/Y', strtotime($r['next_maintenance_date'])) ?>
+            <?php 
+            $days = (int)$r['days_until'];
+            if($days < 0): ?>
+                <span class="badge bg-danger">Terlambat <?= abs($days) ?> hari</span>
+            <?php elseif($days == 0): ?>
+                <span class="badge bg-danger">HARI INI</span>
+            <?php else: ?>
+                <span class="badge bg-warning"><?= $days ?> hari lagi</span>
+            <?php endif; ?>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+    <a href="<?= base_url('petugas/maintenance/upcoming') ?>" class="btn btn-sm btn-warning">Lihat Semua</a>
+</div>
+<?php endif; ?>
 
 <div class="row">
     <div class="col-md-12">

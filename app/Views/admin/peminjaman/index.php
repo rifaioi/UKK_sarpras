@@ -5,38 +5,32 @@
     <h1 class="h2">Admin: Approval Peminjaman</h1>
 </div><div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
-        <form action="<?= base_url('admin/peminjaman') ?>" method="get" class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label small text-white-50">Filter Peminjam</label>
-                <select name="user_id" class="form-select form-select-sm bg-dark text-white border-secondary">
-                    <option value="">Semua Peminjam</option>
-                    <?php foreach($users as $u): ?>
-                        <option value="<?= $u['id'] ?>" <?= $filter_user == $u['id'] ? 'selected' : '' ?>><?= esc($u['nama_lengkap']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+        <form action="<?= base_url(session()->get('role_id') == 1 ? 'admin/peminjaman' : 'petugas/peminjaman') ?>" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label small text-white-50">Cari (Kode/Nama/Alat)</label>
+                <input type="text" name="q" class="form-control form-control-sm bg-dark text-white border-secondary" value="<?= esc($filter_q ?? '') ?>" placeholder="Search...">
             </div>
-            <div class="col-md-3">
-                <label class="form-label small text-white-50">Filter Barang (Alat)</label>
-                <select name="sarpras_id" class="form-select form-select-sm bg-dark text-white border-secondary">
-                    <option value="">Semua Barang</option>
-                    <?php foreach($sarpras_list as $s): ?>
-                        <option value="<?= $s['id'] ?>" <?= $filter_sarpras == $s['id'] ? 'selected' : '' ?>><?= esc($s['nama']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="col-md-2">
+                <label class="form-label small text-white-50">Dari Tanggal</label>
+                <input type="date" name="date_from" class="form-control form-control-sm bg-dark text-white border-secondary" value="<?= esc($filter_date_from ?? '') ?>">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label small text-white-50">Sampai Tanggal</label>
+                <input type="date" name="date_to" class="form-control form-control-sm bg-dark text-white border-secondary" value="<?= esc($filter_date_to ?? '') ?>">
+            </div>
+            <div class="col-md-2">
                 <label class="form-label small text-white-50">Status</label>
                 <select name="status_id" class="form-select form-select-sm bg-dark text-white border-secondary">
                     <option value="">Semua Status</option>
-                    <option value="1" <?= $filter_status == '1' ? 'selected' : '' ?>>Menunggu Persetujuan</option>
-                    <option value="2" <?= $filter_status == '2' ? 'selected' : '' ?>>Disetujui/Dipinjam (Aktif)</option>
+                    <option value="1" <?= $filter_status == '1' ? 'selected' : '' ?>>Menunggu Approval</option>
+                    <option value="2" <?= $filter_status == '2' ? 'selected' : '' ?>>Disetujui</option>
                     <option value="3" <?= $filter_status == '3' ? 'selected' : '' ?>>Ditolak</option>
                     <option value="4" <?= $filter_status == '4' ? 'selected' : '' ?>>Dikembalikan</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-sm btn-primary w-100">
-                    <i class="bi bi-filter"></i> Filter
+                    <i class="bi bi-search"></i> Cari
                 </button>
             </div>
         </form>
@@ -78,16 +72,24 @@
                     <span class="badge <?= $badgeClass ?>"><?= esc($p['nama_status']) ?></span>
                 </td>
                 <td>
-                    <?php if($p['nama_status'] == 'Menunggu Persetujuan'): ?>
-                        <a href="<?= base_url('admin/peminjaman/approve/'.$p['id']) ?>" class="btn btn-sm btn-success" onclick="return confirm('Setujui peminjaman?')">Approve</a>
-                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal<?= $p['id'] ?>">Reject</button>
-                    <?php endif; ?>
-                    <?php if($p['nama_status'] == 'Disetujui'): ?>
-                        <a href="<?= base_url('admin/peminjaman/print/'.$p['id']) ?>" class="btn btn-sm btn-primary" target="_blank">
-                            <i class="bi bi-printer"></i> Cetak
+                    <div class="d-flex gap-1 justify-content-center">
+                        <?php if($p['nama_status'] == 'Menunggu Persetujuan'): ?>
+                            <a href="<?= base_url('admin/peminjaman/approve/'.$p['id']) ?>" class="btn btn-action text-success" title="Approve" onclick="return confirm('Setujui peminjaman?')">
+                                <i class="bi bi-check-lg"></i>
+                            </a>
+                            <button type="button" class="btn btn-action text-danger" title="Reject" data-bs-toggle="modal" data-bs-target="#rejectModal<?= $p['id'] ?>">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        <?php endif; ?>
+                        <?php if($p['nama_status'] == 'Disetujui'): ?>
+                            <a href="<?= base_url('admin/peminjaman/print/'.$p['id']) ?>" class="btn btn-action text-info" title="Cetak" target="_blank">
+                                <i class="bi bi-printer"></i>
+                            </a>
+                        <?php endif; ?>
+                        <a href="<?= base_url('admin/peminjaman/delete/'.$p['id']) ?>" class="btn btn-action text-muted" title="Hapus" onclick="return confirm('Hapus data peminjaman?')">
+                            <i class="bi bi-trash"></i>
                         </a>
-                    <?php endif; ?>
-                    <a href="<?= base_url('admin/peminjaman/delete/'.$p['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus data peminjaman?')">Delete</a>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>

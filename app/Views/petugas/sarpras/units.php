@@ -25,6 +25,7 @@
                 <th>Kode Inventaris</th>
                 <th>Lokasi</th>
                 <th>Kondisi</th>
+                <th>Status</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -39,6 +40,17 @@
                         $badge = $item['kondisi_id'] == 1 ? 'bg-success' : ($item['kondisi_id'] == 2 ? 'bg-warning text-dark' : 'bg-danger');
                     ?>
                     <span class="badge <?= $badge ?>"><?= esc($item['nama_kondisi']) ?></span>
+                </td>
+                <td>
+                    <?php
+                        $statusBadge = 'bg-secondary';
+                        $statusLabel = strtoupper($item['status']);
+                        if ($item['status'] == 'tersedia') $statusBadge = 'bg-success';
+                        elseif ($item['status'] == 'dipinjam') $statusBadge = 'bg-primary';
+                        elseif ($item['status'] == 'rusak') $statusBadge = 'bg-warning text-dark';
+                        elseif ($item['status'] == 'hilang') $statusBadge = 'bg-danger';
+                    ?>
+                    <span class="badge <?= $statusBadge ?>"><?= $statusLabel ?></span>
                 </td>
                 <td>
                     <a href="<?= base_url('petugas/sarpras/show/'.$item['id']) ?>" class="btn btn-sm btn-info text-white" title="Detail"><i class="bi bi-eye"></i> Detail</a>

@@ -7,12 +7,11 @@ use App\Models\SarprasModel;
 use App\Models\KategoriSarprasModel;
 use App\Models\LocationModel;
 use App\Models\KondisiAlatModel;
+use App\Models\PeminjamanModel;
 
 /**
  * Sarpras Controller
- * 
- * Handles management of school assets (Sarana & Prasarana).
- * Supports Master-Variant item structure.
+ * Handles school asset management (Master-Variant structure).
  */
 class Sarpras extends BaseController
 {
@@ -20,6 +19,7 @@ class Sarpras extends BaseController
     protected $categoryModel;
     protected $locationModel;
     protected $kondisiModel;
+    protected $peminjamanModel;
 
     public function __construct()
     {
@@ -27,6 +27,7 @@ class Sarpras extends BaseController
         $this->categoryModel = new KategoriSarprasModel();
         $this->locationModel = new LocationModel();
         $this->kondisiModel = new KondisiAlatModel();
+        $this->peminjamanModel = new PeminjamanModel();
     }
 
     /**
@@ -34,38 +35,43 @@ class Sarpras extends BaseController
      */
     public function index()
     {
-        $items = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, kategori_sarpras.nama as nama_kategori, 
+        $q = $this->request->getGet('q');
+        
+        $query = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, kategori_sarpras.nama as nama_kategori, 
                                              COUNT(*) as total_unit, 
                                              SUM(CASE WHEN sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as tersedia,
                                              MIN(sarpras.id) as id")
-                                     ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id', 'left')
-                                     ->groupBy('sarpras.nama, sarpras.kategori_id')
-                                     ->orderBy('kategori_sarpras.nama', 'ASC')
-                                     ->orderBy('sarpras.nama', 'ASC')
-                                     ->findAll();
+                                     ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id', 'left');
+
+        if ($q) {
+            $query->like('sarpras.nama', $q);
+        }
+
+        $items = $query->groupBy('sarpras.nama, sarpras.kategori_id')
+                       ->orderBy('kategori_sarpras.nama', 'ASC')
+                       ->orderBy('sarpras.nama', 'ASC')
+                       ->findAll();
         
-        $data = ['items' => $items];
+        $data = [
+            'items' => $items,
+            'q' => $q
+        ];
         return view('admin/sarpras/index', $data);
     }
 
-    /**
-     * Show create item form
-     */
     public function create()
     {
         $data = [
             'categories' => $this->categoryModel->where('is_deleted', 0)->findAll(),
             'locations' => $this->locationModel->findAll(),
             'conditions' => $this->kondisiModel->findAll(),
+            'all_sarpras' => $this->sarprasModel->where('is_deleted', 0)->orderBy('nama', 'ASC')->findAll(),
         ];
         return view('admin/sarpras/form', $data);
     }
 
     /**
-     * Store a new asset
-     */
-    /**
-     * Store a new asset
+     * Store new assets (supports multi-unit/batch)
      */
     public function store()
     {
@@ -103,6 +109,10 @@ class Sarpras extends BaseController
                 'stok' => 1, 
                 'kondisi_id' => $kondisiId,
                 'status' => $status,
+                'maintenance_interval' => $this->request->getVar('maintenance_interval') ?: null,
+                'tgl_pengadaan' => $this->request->getVar('tgl_pengadaan') ?: null,
+                'harga_beli' => $this->request->getVar('harga_beli') ?: 0,
+                'parent_id' => $this->request->getVar('parent_id') ?: null,
             ];
 
             if (!$this->sarprasModel->insert($saveData)) {
@@ -159,9 +169,6 @@ class Sarpras extends BaseController
         return $prefix . '-' . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
     }
 
-    /**
-     * Show edit form
-     */
     public function edit($id)
     {
         $data = [
@@ -169,6 +176,10 @@ class Sarpras extends BaseController
             'categories' => $this->categoryModel->where('is_deleted', 0)->findAll(),
             'locations' => $this->locationModel->findAll(),
             'conditions' => $this->kondisiModel->findAll(),
+            'all_sarpras' => $this->sarprasModel->where('is_deleted', 0)
+                                                ->where('id !=', $id)
+                                                ->orderBy('nama', 'ASC')
+                                                ->findAll(),
         ];
         return view('admin/sarpras/form', $data);
     }
@@ -184,6 +195,10 @@ class Sarpras extends BaseController
             'kategori_id' => $this->request->getVar('kategori_id'),
             'location_id' => $this->request->getVar('location_id'),
             'kondisi_id' => $this->request->getVar('kondisi_id'),
+            'maintenance_interval' => $this->request->getVar('maintenance_interval') ?: null,
+            'tgl_pengadaan' => $this->request->getVar('tgl_pengadaan') ?: null,
+            'harga_beli' => $this->request->getVar('harga_beli') ?: 0,
+            'parent_id' => $this->request->getVar('parent_id') ?: null,
         ];
 
         // Sync status based on condition (T1-PINJAM-010)
@@ -211,6 +226,15 @@ class Sarpras extends BaseController
 
     public function delete($id)
     {
+        // Check for active or pending loans (T1-PINJAM-011)
+        $activeLoans = $this->peminjamanModel->where('sarpras_id', $id)
+                                              ->whereIn('status_id', [1, 2])
+                                              ->countAllResults();
+        
+        if ($activeLoans > 0) {
+            return redirect()->back()->with('error', 'Barang masih dipinjam dan tidak dapat dihapus.');
+        }
+
         $this->sarprasModel->delete($id);
         log_activity('Hapus Sarpras', "Hapus/Soft delete item id: $id");
         return redirect()->back()->with('success', 'Data Sarpras berhasil dihapus');
@@ -221,6 +245,17 @@ class Sarpras extends BaseController
         $nama = $this->request->getGet('nama');
         if (!$nama) {
             return redirect()->to('/admin/sarpras')->with('error', 'Gagal menghapus: Nama barang tidak ditemukan.');
+        }
+
+        // Check if any unit in this group is currently borrowed or pending
+        $activeLoans = $this->peminjamanModel->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
+                                              ->where('sarpras.nama', $nama)
+                                              ->where('sarpras.kategori_id', $kategoriId)
+                                              ->whereIn('peminjaman.status_id', [1, 2])
+                                              ->countAllResults();
+
+        if ($activeLoans > 0) {
+            return redirect()->to('/admin/sarpras')->with('error', 'Beberapa unit barang ini masih dipinjam dan tidak dapat dihapus.');
         }
 
         $this->sarprasModel->where('nama', $nama)

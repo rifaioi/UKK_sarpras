@@ -30,9 +30,6 @@ class Sarpras extends BaseController
         return view('petugas/sarpras/index', $data);
     }
 
-    /**
-     * List all individual units for petugas (Read Only)
-     */
     public function units()
     {
         $nama = $this->request->getGet('nama');
@@ -58,9 +55,6 @@ class Sarpras extends BaseController
         return view('petugas/sarpras/units', $data);
     }
 
-    /**
-     * Show detail of a single asset unit for petugas
-     */
     public function show($id)
     {
         $item = $this->sarprasModel->select('sarpras.*, kategori_sarpras.nama as nama_kategori, locations.nama_lokasi, kondisi_alat.nama_kondisi')

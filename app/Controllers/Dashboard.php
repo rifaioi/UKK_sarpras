@@ -9,6 +9,7 @@ use App\Models\PeminjamanModel;
 use App\Models\PengaduanModel;
 use App\Models\PengembalianModel;
 use App\Models\ActivityLogModel;
+use App\Models\MaintenanceReminderModel;
 
 class Dashboard extends BaseController
 {
@@ -23,7 +24,6 @@ class Dashboard extends BaseController
             $pengaduanModel = new PengaduanModel();
             $pengembalianModel = new PengembalianModel();
             
-            // Chart Data: Borrows per month for current year
             $currentYear = date('Y');
             $monthlyStats = [];
             for ($m=1; $m<=12; $m++) {
@@ -39,14 +39,18 @@ class Dashboard extends BaseController
                                               ->limit(5)
                                               ->findAll();
 
-            $data = [
+            $reminderModel = new MaintenanceReminderModel();
+            $reminderModel->generateReminders(); // Refresh alerts
+            $reminders = $reminderModel->getUnreadReminders();
 
+            $data = [
                 'total_sarpras' => $sarprasModel->where('is_deleted', 0)->countAllResults(),
                 'active_peminjaman' => $peminjamanModel->where('status_id', 2)->countAllResults(), // 2 = Disetujui/Dipinjam
-                'damaged_sarpras' => $pengembalianModel->where('kondisi_id !=', 1)->where('is_restocked', 0)->countAllResults(), // Items in repair (not Baik, not yet restocked)
+                'damaged_sarpras' => $sarprasModel->whereIn('kondisi_id', [2, 3])->where('is_deleted', 0)->countAllResults(), // Rusak Ringan/Berat & Not Deleted
                 'pengaduan_masuk' => $pengaduanModel->where('status_id', 1)->countAllResults(), // 1 = Belum Ditindaklanjuti
                 'chart_data' => json_encode($monthlyStats),
-                'recent_activities' => $recentActivities
+                'recent_activities' => $recentActivities,
+                'maintenance_alerts' => $reminders
             ];
 
             return view('admin/dashboard', $data);

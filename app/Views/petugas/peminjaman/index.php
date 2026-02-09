@@ -48,6 +48,7 @@
         <thead>
             <tr>
                 <th>No</th>
+                <th>Kode Pinjam</th>
                 <th>Peminjam</th>
                 <th>Barang</th>
                 <th>Jumlah</th>
@@ -61,6 +62,7 @@
             <?php foreach($peminjaman as $i => $p): ?>
             <tr>
                 <td><?= $i+1 ?></td>
+                <td><code class="text-primary"><?= esc($p['kode_peminjaman'] ?? '-') ?></code></td>
                 <td><?= esc($p['nama_lengkap']) ?></td>
                 <td><?= esc($p['nama_barang']) ?></td>
                 <td><?= esc($p['jumlah']) ?></td>
@@ -77,12 +79,24 @@
                     <span class="badge <?= $badgeClass ?>"><?= esc($p['nama_status']) ?></span>
                 </td>
                 <td>
-                    <?php if($p['nama_status'] == 'Menunggu Persetujuan'): ?>
-                        <a href="<?= base_url('petugas/peminjaman/approve/'.$p['id']) ?>" class="btn btn-sm btn-success" onclick="return confirm('Setujui peminjaman?')">Approve</a>
-                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal" data-id="<?= $p['id'] ?>">
-                            Reject
-                        </button>
-                    <?php endif; ?>
+                    <div class="d-flex gap-1 justify-content-center">
+                        <?php if($p['nama_status'] == 'Menunggu Persetujuan'): ?>
+                            <a href="<?= base_url('petugas/peminjaman/approve/'.$p['id']) ?>" class="btn btn-action text-success" title="Approve" onclick="return confirm('Setujui peminjaman?')">
+                                <i class="bi bi-check-lg"></i>
+                            </a>
+                            <button type="button" class="btn btn-action text-danger" title="Reject" data-bs-toggle="modal" data-bs-target="#rejectModal<?= $p['id'] ?>">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        <?php endif; ?>
+                        <?php if($p['nama_status'] == 'Disetujui'): ?>
+                            <a href="<?= base_url('petugas/peminjaman/print/'.$p['id']) ?>" class="btn btn-action text-info" title="Cetak" target="_blank">
+                                <i class="bi bi-printer"></i>
+                            </a>
+                        <?php endif; ?>
+                        <a href="<?= base_url('petugas/peminjaman/delete/'.$p['id']) ?>" class="btn btn-action text-muted" title="Hapus" onclick="return confirm('Hapus data peminjaman?')">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -90,39 +104,34 @@
     </table>
 </div>
 
-<!-- Reject Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+<!-- Rejection Modals -->
+<?php foreach($peminjaman as $p): ?>
+<div class="modal fade" id="rejectModal<?= $p['id'] ?>" tabindex="-1" aria-labelledby="rejectModalLabel<?= $p['id'] ?>" aria-hidden="true">
     <div class="modal-dialog">
-        <form action="" method="post" id="rejectForm">
-            <div class="modal-content bg-dark text-white border-secondary">
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title" id="rejectModalLabel">Tolak Peminjaman</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <form action="<?= base_url('petugas/peminjaman/reject/'.$p['id']) ?>" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel<?= $p['id'] ?>">Tolak Peminjaman</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menolak peminjaman ini?</p>
+                    <p><strong>Peminjam:</strong> <?= esc($p['nama_lengkap']) ?></p>
+                    <p><strong>Barang:</strong> <?= esc($p['nama_barang']) ?> (<?= $p['jumlah'] ?>)</p>
+                    
                     <div class="mb-3">
-                        <label for="rejection_reason" class="form-label text-white-50">Alasan Penolakan (Opsional)</label>
-                        <textarea class="form-control bg-dark text-white border-secondary" name="rejection_reason" id="rejection_reason" rows="3" placeholder="Contoh: Stok sedang habis dipesan orang lain, atau barang sedang dalam pemeliharaan..."></textarea>
+                        <label for="rejection_reason<?= $p['id'] ?>" class="form-label">Alasan Penolakan (Opsional)</label>
+                        <textarea class="form-control" id="rejection_reason<?= $p['id'] ?>" name="rejection_reason" rows="3" placeholder="Masukkan alasan penolakan..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-secondary">
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-danger">Tolak Peminjaman</button>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
+<?php endforeach; ?>
 
-<script>
-    const rejectModal = document.getElementById('rejectModal');
-    if (rejectModal) {
-        rejectModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const form = document.getElementById('rejectForm');
-            form.action = "<?= base_url('petugas/peminjaman/reject') ?>/" + id;
-        });
-    }
-</script>
 <?= $this->endSection() ?>

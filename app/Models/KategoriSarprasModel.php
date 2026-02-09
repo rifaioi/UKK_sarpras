@@ -10,5 +10,5 @@ class KategoriSarprasModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $allowedFields    = ['nama', 'is_deleted'];
+    protected $allowedFields    = ['nama', 'expected_lifespan', 'is_deleted'];
 }

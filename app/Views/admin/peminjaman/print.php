@@ -119,12 +119,8 @@
         <div class="qr-section">
             <p><strong>Scan QR Code untuk verifikasi:</strong></p>
             <?php 
-                $qrData = "Kode: " . $loan_code . "\n" .
-                          "Peminjam: " . $peminjaman['nama_lengkap'] . "\n" .
-                          "Barang: " . $peminjaman['nama_barang'] . "\n" .
-                          "Jumlah: " . $peminjaman['jumlah'] . " Unit\n" .
-                          "Pinjam: " . date('d/m/Y', strtotime($peminjaman['tgl_pinjam'])) . "\n" .
-                          "Kembali: " . date('d/m/Y', strtotime($peminjaman['tgl_kembali_rencana']));
+                // Format PJID:[DATABASE_ID] for the scanner to easily parse
+                $qrData = "PJID:" . $peminjaman['id'];
             ?>
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=<?= urlencode($qrData) ?>" alt="QR Code" style="max-width: 200px;">
             <p class="mt-2 text-muted small"><?= $loan_code ?></p>

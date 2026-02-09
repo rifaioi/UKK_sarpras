@@ -1,47 +1,25 @@
 <?php
-$hostname = 'localhost';
-$username = 'root';
-$password = ''; // Default Laragon password is empty
-$database = 'ukk_sarpras';
+// Load CodeIgniter's bootstrap file
+require 'app/Config/Paths.php';
+$paths = new Config\Paths();
+require 'system/bootstrap.php';
 
-$mysqli = new mysqli($hostname, $username, $password, $database);
+use Config\Database;
 
-if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error . "\n");
-}
-
-echo "Connected successfully to database '$database'.\n";
-
-if ($argc > 1) {
-    $sqls = array_slice($argv, 1);
-    foreach ($sqls as $sql) {
-        echo "Executing: $sql\n";
-        $result = $mysqli->query($sql);
-        if ($result === TRUE) {
-            echo "Query executed successfully.\n";
-        } elseif ($result instanceof mysqli_result) {
-            echo "Result:\n";
-            while ($row = $result->fetch_assoc()) {
-                print_r($row);
-            }
-        } else {
-            echo "Error: " . $mysqli->error . "\n";
-        }
+try {
+    $db = Database::connect();
+    echo "Connected to DB\n";
+    
+    // Check Columns of inspection_checklist_items
+    $query = $db->query("SHOW COLUMNS FROM inspection_checklist_items");
+    $columns = $query->getResultArray();
+    
+    echo "Columns in inspection_checklist_items:\n";
+    foreach ($columns as $col) {
+        echo "- " . $col['Field'] . " (" . $col['Type'] . ")\n";
     }
-} else {
-    foreach (['users', 'peminjaman', 'pengaduan', 'pengembalian', 'sarpras'] as $table) {
-        $result = $mysqli->query("DESCRIBE $table");
-        if ($result) {
-            echo "Columns in '$table' table:\n";
-            while ($row = $result->fetch_assoc()) {
-                echo "- " . $row['Field'] . " (" . $row['Type'] . ")\n";
-            }
-        } else {
-            echo "Error describing table $table: " . $mysqli->error . "\n";
-        }
-        echo "\n";
-    }
-}
 
-$mysqli->close();
-?>
+} catch (\Throwable $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+    echo $e->getTraceAsString();
+}

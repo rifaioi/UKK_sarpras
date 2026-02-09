@@ -24,7 +24,13 @@ class SarprasModel extends Model
         'location_id', 
         'stok', 
         'kondisi_id',
-        'status'
+        'status',
+        'maintenance_interval',
+        'last_maintenance_date',
+        'next_maintenance_date',
+        'tgl_pengadaan',
+        'harga_beli',
+        'parent_id'
     ];
 
     // Dates
@@ -40,7 +46,6 @@ class SarprasModel extends Model
         'kode'        => 'required|max_length[50]',
         'kategori_id' => 'required|numeric',
         'location_id' => 'required|numeric',
-        'stok'        => 'required|numeric|greater_than_equal_to[0]',
         'kondisi_id'  => 'required|numeric',
         'status'      => 'required|in_list[tersedia,dipinjam,rusak,hilang]',
     ];
@@ -49,9 +54,6 @@ class SarprasModel extends Model
         'nama' => [
             'required' => 'Nama barang harus diisi.',
             'min_length' => 'Nama barang minimal 3 karakter.'
-        ],
-        'stok' => [
-            'greater_than_equal_to' => 'Stok tidak boleh negatif.'
         ]
     ];
 

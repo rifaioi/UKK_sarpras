@@ -12,7 +12,6 @@ class Pengaduan extends BaseController
     protected $pengaduanModel;
     protected $locationModel;
     protected $sarprasModel;
-    protected $damageModel;
 
     public function __construct()
     {
@@ -58,7 +57,7 @@ class Pengaduan extends BaseController
             'deskripsi' => $this->request->getVar('deskripsi'),
             'lokasi' => $this->request->getVar('lokasi'),
             'bukti_foto' => $fileName,
-            'status_id' => 1 // Belum Ditindaklanjuti
+            'status_id' => 1
         ]);
 
         log_activity('Buat Pengaduan', 'Membuat laporan: ' . $this->request->getVar('judul'));

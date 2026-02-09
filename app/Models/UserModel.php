@@ -32,7 +32,7 @@ class UserModel extends Model
 
     // Validation
     protected $validationRules = [
-        'username'     => 'required|alpha_numeric|min_length[4]|max_length[100]|is_unique[users.username,id,{id}]',
+        'username'     => 'required|regex_match[/^[a-zA-Z0-9._]+$/]|min_length[4]|max_length[100]|is_unique[users.username,id,{id}]',
         'nama_lengkap' => 'required|min_length[3]|max_length[150]',
         'role_id'      => 'required|numeric',
     ];
@@ -40,7 +40,7 @@ class UserModel extends Model
     protected $validationMessages = [
         'username' => [
             'is_unique' => 'Username sudah digunakan.',
-            'alpha_numeric' => 'Username hanya boleh huruf dan angka.'
+            'regex_match' => 'Username hanya boleh huruf, angka, titik(.) dan underscore(_).'
         ]
     ];
 

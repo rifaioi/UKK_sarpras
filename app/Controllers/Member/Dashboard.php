@@ -26,15 +26,15 @@ class Dashboard extends BaseController
         $userId = session()->get('id');
 
         $activeLoans = $this->peminjamanModel->where('user_id', $userId)
-                                             ->where('status_id', 2) // Disetujui
+                                             ->where('status_id', 2)
                                              ->countAllResults();
                                              
         $pendingLoans = $this->peminjamanModel->where('user_id', $userId)
-                                              ->where('status_id', 1) // Menunggu
+                                              ->where('status_id', 1)
                                               ->countAllResults();
                                               
         $activeComplaints = $this->pengaduanModel->where('user_id', $userId)
-                                                 ->where('status_id !=', 3) // Not Selesai
+                                                 ->where('status_id !=', 3)
                                                  ->countAllResults();
 
         $activityModel = new ActivityLogModel();
@@ -72,17 +72,31 @@ class Dashboard extends BaseController
              return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $tglPinjam = $this->request->getVar('tgl_pinjam');
-        $tglKembali = $this->request->getVar('tgl_kembali_rencana');
+        // Robust parsing: Handle slash (D/M/Y) and dash (Y-m-d) formats
+        $parseDate = function($input) {
+            if (empty($input)) return null;
+            if (strpos($input, '/') !== false) {
+                $dt = \DateTime::createFromFormat('d/m/Y', $input);
+                if ($dt) return $dt->format('Y-m-d');
+            }
+            $ts = strtotime($input);
+            return $ts ? date('Y-m-d', $ts) : null;
+        };
+
+        $tglPinjam = $parseDate($this->request->getVar('tgl_pinjam'));
+        $tglKembali = $parseDate($this->request->getVar('tgl_kembali_rencana'));
+
+        if (!$tglPinjam || !$tglKembali) {
+            return redirect()->back()->withInput()->with('error', 'Format tanggal tidak valid (gunakan YYYY-MM-DD atau DD/MM/YYYY).');
+        }
 
         if (strtotime($tglKembali) < strtotime($tglPinjam)) {
-            return redirect()->back()->withInput()->with('error', 'Tanggal kembali rencana tidak boleh lebih awal dari tanggal pinjam.');
+            return redirect()->back()->withInput()->with('error', 'Tanggal kembali (rencana) tidak boleh lebih dahulu/kecil dari tanggal pinjam.');
         }
 
         $sarprasId = $this->request->getVar('sarpras_id');
         $jumlah = (int) $this->request->getVar('jumlah');
-        $tglPinjam = $this->request->getVar('tgl_pinjam');
-        $tglKembali = $this->request->getVar('tgl_kembali_rencana');
+        // Dates are already normalized above
         
         $item = $this->sarprasModel->find($sarprasId);
         if (!$item) {
@@ -94,8 +108,8 @@ class Dashboard extends BaseController
         $allUnits = $this->sarprasModel->where('nama', $item['nama'])
                                        ->where('kategori_id', $item['kategori_id'])
                                        ->where('location_id', $item['location_id'])
-                                       ->where('kondisi_id', 1) // Only Baik
-                                       ->whereNotIn('status', ['rusak', 'hilang']) // Not broken or lost
+                                       ->where('kondisi_id', 1)
+                                       ->whereNotIn('status', ['rusak', 'hilang'])
                                        ->findAll();
 
         if (count($allUnits) < $jumlah) {
@@ -107,9 +121,8 @@ class Dashboard extends BaseController
         $db = \Config\Database::connect();
 
         foreach ($allUnits as $unit) {
-            $isBooked = $db->table('peminjaman')
-                           ->where('sarpras_id', $unit['id'])
-                           ->whereIn('status_id', [1, 2]) // Menunggu or Disetujui
+            $isBooked = $this->peminjamanModel->where('sarpras_id', $unit['id'])
+                           ->whereIn('status_id', [1, 2])
                            ->groupStart()
                                 ->where('tgl_pinjam <=', $tglKembali)
                                 ->where('tgl_kembali_rencana >=', $tglPinjam)
@@ -136,7 +149,7 @@ class Dashboard extends BaseController
                 'kode_peminjaman' => $jumlah > 1 ? $pjCode . '-' . ($index + 1) : $pjCode,
                 'user_id' => session()->get('id'),
                 'sarpras_id' => $unit['id'],
-                'jumlah' => 1, // Store as 1 unit per record for true individual tracking
+                'jumlah' => 1,
                 'tgl_pinjam' => $tglPinjam,
                 'tgl_kembali_rencana' => $tglKembali,
                 'status_id' => 1 
@@ -185,6 +198,8 @@ class Dashboard extends BaseController
         }
 
         $this->peminjamanModel->delete($id);
+
+        log_activity('Batal Peminjaman', "Membatalkan permintaan peminjaman id: $id");
 
         return redirect()->to('/member/dashboard')->with('success', 'Permintaan peminjaman dibatalkan.');
     }

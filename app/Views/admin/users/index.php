@@ -1,11 +1,11 @@
 <?= $this->extend('admin/layout') ?>
-<?= $this->Section('page_title'); ?>Manajemen User<?= $this->endSection(); ?>
+<?= $this->Section('page_title'); ?>Data Peminjam<?= $this->endSection(); ?>
 <?= $this->section('content') ?>
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Manajemen User</h1>
+    <h1 class="h2">Data Peminjam</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="<?= base_url('admin/users/create') ?>" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-person-plus-fill"></i> Tambah User
+        <a href="<?= base_url('admin/users/create') ?>" class="btn btn-tambah btn-sm-tambah">
+            <i class="bi bi-person-plus-fill me-1"></i> Tambah User
         </a>
     </div>
 </div>
@@ -32,14 +32,21 @@
                 <td><?= esc($user['nama_lengkap']) ?></td>
                 <td>
                     <?php 
+                        $displayRole = $user['nama_role'] == 'Member' ? 'Peminjam' : $user['nama_role'];
                         $role_badge = $user['nama_role'] == 'Admin' ? 'bg-primary' : ($user['nama_role'] == 'Petugas' ? 'bg-warning text-dark' : 'bg-success');
                     ?>
-                    <span class="badge <?= $role_badge ?>"><?= esc($user['nama_role']) ?></span>
+                    <span class="badge <?= $role_badge ?>"><?= esc($displayRole) ?></span>
                 </td>
                 <td><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>
                 <td>
-                    <a href="<?= base_url('admin/users/edit/'.$user['id']) ?>" class="btn btn-sm btn-warning">Edit</a>
-                    <a href="<?= base_url('admin/users/delete/'.$user['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Apakah anda yakin?')">Delete</a>
+                    <div class="d-flex gap-1">
+                        <a href="<?= base_url('admin/users/edit/'.$user['id']) ?>" class="btn btn-action text-warning" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="<?= base_url('admin/users/delete/'.$user['id']) ?>" class="btn btn-action text-danger" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>

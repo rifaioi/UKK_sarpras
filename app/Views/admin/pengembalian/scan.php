@@ -33,14 +33,20 @@
     function onScanSuccess(decodedText, decodedResult) {
         console.log(`Scan result: ${decodedText}`);
         let pjId = decodedText;
-        if(decodedText.includes('peminjaman/detail/')) {
-             pjId = decodedText.split('/').pop();
+
+        // Handle new format PJID:123
+        if(decodedText.startsWith('PJID:')) {
+            pjId = decodedText.split(':')[1];
+        } 
+        // Handle URL format if scanned from a browser URL
+        else if(decodedText.includes('peminjaman/detail/')) {
+            pjId = decodedText.split('/').pop();
         }
 
-        if(!isNaN(pjId)) {
-            window.location.href = "<?= base_url('admin/pengembalian/process/') ?>/" + pjId;
+        if(!isNaN(pjId) && pjId.trim() !== "") {
+            window.location.href = "<?= base_url('admin/pengembalian/process/') ?>/" + pjId.trim();
         } else {
-            alert("QR Code tidak valid.");
+            alert("QR Code tidak valid atau format salah. Pastikan Anda melakukan scan dari Bukti Peminjaman yang sah.");
         }
     }
 

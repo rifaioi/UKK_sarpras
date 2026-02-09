@@ -9,7 +9,7 @@
 
 
 <div class="table-responsive">
-    <table class="table table-striped table-sm">
+    <table class="table table-striped table-sm text-white">
         <thead>
             <tr>
                 <th>No</th>
@@ -24,9 +24,9 @@
         </thead>
         <tbody>
             <?php if(count($riwayat_pengembalian) > 0): ?>
-                <?php foreach($riwayat_pengembalian as $r): ?>
+                <?php foreach($riwayat_pengembalian as $i => $r): ?>
                 <tr>
-                    <td><?= $r['id'] ?></td>
+                    <td><?= count($riwayat_pengembalian) - $i ?></td>
                     <td><?= esc($r['nama_lengkap']) ?></td>
                     <td><?= esc($r['nama_barang']) ?></td>
                     <td><?= esc($r['jumlah']) ?></td>

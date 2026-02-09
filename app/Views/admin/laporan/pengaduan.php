@@ -20,21 +20,36 @@
 <div class="card mb-4 d-print-none">
     <div class="card-body">
         <form action="<?= base_url('admin/reports/pengaduan') ?>" method="get" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label">Tanggal Awal</label>
+                <input type="date" name="tgl_awal" class="form-control" value="<?= $filter['tgl_awal'] ?>">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tanggal Akhir</label>
+                <input type="date" name="tgl_akhir" class="form-control" value="<?= $filter['tgl_akhir'] ?>">
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">Filter Status</label>
                 <select name="status_id" class="form-select">
                     <option value="">-- Semua Status --</option>
                     <?php foreach($statuses as $s): ?>
-                        <option value="<?= $s['id'] ?>" <?= $filter_status == $s['id'] ? 'selected' : '' ?>><?= $s['nama_status'] ?></option>
+                        <option value="<?= $s['id'] ?>" <?= $filter['status_id'] == $s['id'] ? 'selected' : '' ?>><?= $s['nama_status'] ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2 fw-bold">Filter</button>
-                <a href="<?= base_url('admin/reports/pengaduan') ?>" class="btn btn-secondary me-2">Reset</a>
-                <button type="button" onclick="window.print()" class="btn btn-success fw-bold">
-                    <i class="bi bi-printer me-1"></i> Cetak PDF
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-tambah btn-sm-tambah fw-bold h-100 flex-grow-1">
+                    <i class="bi bi-filter me-1"></i> Filter
                 </button>
+                <a href="<?= base_url('admin/reports/pengaduan') ?>" class="btn btn-action px-3 h-100 d-flex align-items-center">Reset</a>
+            </div>
+            <div class="col-md-12 d-flex justify-content-end mt-2">
+                <?php 
+                    $params = http_build_query(array_merge($filter, ['print' => 1]));
+                ?>
+                <a href="<?= base_url('admin/reports/pengaduan?' . $params) ?>" target="_blank" class="btn btn-action text-success fw-bold px-3">
+                    <i class="bi bi-printer me-1"></i> Cetak PDF
+                </a>
             </div>
         </form>
     </div>

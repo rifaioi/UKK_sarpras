@@ -17,9 +17,6 @@ class Pengaduan extends BaseController
         $this->statusModel = new StatusPengaduanModel();
     }
 
-    /**
-     * Display list of non-deleted complaints
-     */
     public function index()
     {
         $data = [
@@ -49,8 +46,6 @@ class Pengaduan extends BaseController
         return redirect()->back()->with('success', 'Pengaduan berhasil diupdate');
     }
     
-    // Keeping these for backward compatibility or direct links if needed, 
-    // but the Modal will likely use update_status
     public function process($id)
     {
         $this->pengaduanModel->update($id, ['status_id' => 2]); // Sedang Diproses
@@ -63,9 +58,6 @@ class Pengaduan extends BaseController
         return redirect()->back()->with('success', 'Status diubah menjadi Selesai');
     }
     
-    /**
-     * Soft delete a complaint
-     */
     public function delete($id)
     {
          $this->pengaduanModel->delete($id);

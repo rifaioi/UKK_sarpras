@@ -5,18 +5,18 @@
 
 <div class="row pt-4 mb-4">
     <div class="col-12">
-        <h4 class="fw-bold mb-4">Dashboard Siswa</h4>
+        <h4 class="fw-bold mb-4">Dashboard Peminjam</h4>
         
         <!-- Quick Actions Area -->
         <div class="row g-3 mb-5">
             <div class="col-md-4">
                 <a href="<?= base_url('member/items') ?>" class="text-decoration-none h-100 d-block">
-                    <div class="card h-100 border-0">
+                    <div class="card h-100 border-0 card-gradient-primary">
                         <div class="card-body p-4 text-center">
                             <div class="bg-accent-primary p-3 rounded-circle d-inline-block mb-3">
-                                <i class="bi bi-plus-circle-fill text-accent-primary fs-2"></i>
+                                <i class="bi bi-plus-circle-fill text-primary fs-2"></i>
                             </div>
-                            <h6 class="fw-bold text-white mb-1">Pinjam Barang</h6>
+                            <h6 class="fw-bold text-primary mb-1">Pinjam Barang</h6>
                             <p class="small text-secondary mb-0">Klik sini untuk pinjam</p>
                         </div>
                     </div>
@@ -24,12 +24,12 @@
             </div>
             <div class="col-md-4">
                 <a href="<?= base_url('member/pengaduan') ?>" class="text-decoration-none h-100 d-block">
-                    <div class="card h-100 border-0">
+                    <div class="card h-100 border-0 card-gradient-danger">
                         <div class="card-body p-4 text-center">
                             <div class="bg-accent-danger p-3 rounded-circle d-inline-block mb-3">
-                                <i class="bi bi-exclamation-square-fill text-accent-danger fs-2"></i>
+                                <i class="bi bi-exclamation-square-fill text-danger fs-2"></i>
                             </div>
-                            <h6 class="fw-bold text-white mb-1">Lapor Rusak</h6>
+                            <h6 class="fw-bold text-danger mb-1">Lapor Rusak</h6>
                             <p class="small text-secondary mb-0">Lapor barang yang rusak</p>
                         </div>
                     </div>
@@ -37,12 +37,12 @@
             </div>
             <div class="col-md-4">
                 <a href="<?= base_url('member/history') ?>" class="text-decoration-none h-100 d-block">
-                    <div class="card h-100 border-0">
+                    <div class="card h-100 border-0 card-gradient-info">
                         <div class="card-body p-4 text-center">
                             <div class="bg-accent-primary p-3 rounded-circle d-inline-block mb-3" style="filter: hue-rotate(240deg);">
                                 <i class="bi bi-clock-fill text-info fs-2"></i>
                             </div>
-                            <h6 class="fw-bold text-white mb-1">Riwayat Saya</h6>
+                            <h6 class="fw-bold text-info mb-1">Riwayat Saya</h6>
                             <p class="small text-secondary mb-0">Cek barang yang dipinjam</p>
                         </div>
                     </div>

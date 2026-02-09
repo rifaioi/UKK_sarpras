@@ -56,15 +56,19 @@
                     <?php endif; ?>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-sm btn-primary btn-update" 
-                        data-id="<?= $p['id'] ?>"
-                        data-status="<?= $p['status_id'] ?>"
-                        data-catatan="<?= esc($p['catatan']) ?>"
-                        data-deskripsi="<?= esc($p['deskripsi']) ?>"
-                        data-bs-toggle="modal" data-bs-target="#updateModal">
-                        Update
-                    </button>
-                    <a href="<?= base_url('petugas/pengaduan/delete/'.$p['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus?')">Delete</a>
+                    <div class="d-flex gap-1 justify-content-center">
+                        <button type="button" class="btn btn-action text-primary btn-update" 
+                            data-id="<?= $p['id'] ?>"
+                            data-status="<?= $p['status_id'] ?>"
+                            data-catatan="<?= esc($p['catatan']) ?>"
+                            data-deskripsi="<?= esc($p['deskripsi']) ?>"
+                            data-bs-toggle="modal" data-bs-target="#updateModal" title="Update Status">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <a href="<?= base_url('petugas/pengaduan/delete/'.$p['id']) ?>" class="btn btn-action text-danger" onclick="return confirm('Hapus?')" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -86,7 +90,7 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">Masalah Dilaporkan:</label>
-                        <p id="modal_deskripsi" class="p-2 bg-light border rounded small mb-0"></p>
+                        <p id="modal_deskripsi" class="p-2 border rounded small mb-0" style="background: rgba(255,255,255,0.03);"></p>
                     </div>
 
                     <div class="mb-3">

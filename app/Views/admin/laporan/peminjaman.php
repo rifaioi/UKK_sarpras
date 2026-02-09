@@ -28,10 +28,33 @@
                 <label class="form-label">Tanggal Akhir</label>
                 <input type="date" name="tgl_akhir" class="form-control" value="<?= $filter['tgl_akhir'] ?>">
             </div>
-            <div class="col-md-5 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2 fw-bold">Filter</button>
-                <a href="<?= base_url('admin/reports/peminjaman') ?>" class="btn btn-secondary me-2">Reset</a>
-                <a href="<?= base_url('admin/reports/peminjaman?print=1&tgl_awal='.$filter['tgl_awal'].'&tgl_akhir='.$filter['tgl_akhir']) ?>" target="_blank" class="btn btn-success fw-bold">
+            <div class="col-md-3">
+                <label class="form-label">Peminjam</label>
+                <select name="user_id" class="form-select">
+                    <option value="">-- Semua Peminjam --</option>
+                    <?php foreach($users as $u): ?>
+                        <option value="<?= $u['id'] ?>" <?= $filter['user_id'] == $u['id'] ? 'selected' : '' ?>><?= $u['nama_lengkap'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Kategori</label>
+                <select name="category_id" class="form-select">
+                    <option value="">-- Semua Kategori --</option>
+                    <?php foreach($categories as $c): ?>
+                        <option value="<?= $c['id'] ?>" <?= $filter['category_id'] == $c['id'] ? 'selected' : '' ?>><?= $c['nama'] ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-12 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-tambah btn-sm-tambah fw-bold">
+                    <i class="bi bi-filter me-1"></i> Filter
+                </button>
+                <a href="<?= base_url('admin/reports/peminjaman') ?>" class="btn btn-action px-3">Reset</a>
+                <?php 
+                    $params = http_build_query(array_merge($filter, ['print' => 1]));
+                ?>
+                <a href="<?= base_url('admin/reports/peminjaman?' . $params) ?>" target="_blank" class="btn btn-action text-success fw-bold px-3">
                     <i class="bi bi-printer me-1"></i> Cetak PDF
                 </a>
             </div>

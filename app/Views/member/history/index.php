@@ -10,8 +10,8 @@
     </div>
 </div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+<div class="card border-0">
+    <div class="card-header border-bottom-0 pt-4 pb-0">
         <ul class="nav nav-tabs card-header-tabs" id="historyTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="loans-tab" data-bs-toggle="tab" data-bs-target="#loans" type="button" role="tab">
@@ -53,8 +53,8 @@
                                 <td><?= esc($b['nama_barang']) ?></td>
                                 <td><?= $b['jumlah'] ?> Unit</td>
                                 <td>
-                                    Pinjam: <?= date('d/m/y', strtotime($b['tgl_pinjam'])) ?><br>
-                                    Kembali: <?= date('d/m/y', strtotime($b['tgl_kembali_rencana'])) ?>
+                                    Pinjam: <?= date('d/m/Y', strtotime($b['tgl_pinjam'])) ?><br>
+                                    Kembali: <?= date('d/m/Y', strtotime($b['tgl_kembali_rencana'])) ?>
                                 </td>
                                 <td>
                                     <?php 
@@ -73,7 +73,9 @@
                                 </td>
                                 <td>
                                     <?php if($b['nama_status'] == 'Menunggu Persetujuan'): ?>
-                                        <a href="<?= base_url('member/borrow/cancel/'.$b['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Batalkan pengajuan?')">Batal</a>
+                                        <a href="<?= base_url('member/borrow/cancel/'.$b['id']) ?>" class="btn btn-action text-danger" onclick="return confirm('Batalkan pengajuan?')" title="Cancel">
+                                            <i class="bi bi-x-circle me-1"></i> Batal
+                                        </a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

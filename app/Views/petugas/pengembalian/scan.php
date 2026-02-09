@@ -32,26 +32,32 @@
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
     function onScanSuccess(decodedText, decodedResult) {
-        // Assume QR contains just the numeric ID or a URL with ID
         console.log(`Scan result: ${decodedText}`);
         
         document.getElementById('result').classList.remove('d-none');
         document.getElementById('scan-val').innerText = decodedText;
         
-        // If it's a URL, extract ID. If just ID, use it.
         let pjId = decodedText;
-        if(decodedText.includes('peminjaman/detail/')) {
-             pjId = decodedText.split('/').pop();
-        } else if (decodedText.startsWith('PJ-')) {
-             // If we had a way to lookup by PJ Code via AJAX, we'd do it here.
-             // For now, let's assume QR has the numeric database ID for simplicity matching T1 requirements.
-             // Usually UKK systems use IDs for faster lookup.
+        
+        // Handle new format PJID:123
+        if(decodedText.startsWith('PJID:')) {
+            pjId = decodedText.split(':')[1];
+        } 
+        // Handle URL format if scanned from a browser URL
+        else if(decodedText.includes('peminjaman/detail/')) {
+            pjId = decodedText.split('/').pop();
+        }
+        // Handle legacy multi-line format if possible (extract from "Kode: " line if the numeric ID was there, 
+        // but typically the numeric ID is cleaner)
+        else if(decodedText.includes('Kode:')) {
+            // This is a fallback for the old format, although old format likely didn't have the numeric database ID
+            // If the user scanned the old one, we still might fail if it's not numeric, which is handled below.
         }
 
-        if(!isNaN(pjId)) {
-            window.location.href = "<?= base_url('petugas/pengembalian/process/') ?>/" + pjId;
+        if(!isNaN(pjId) && pjId.trim() !== "") {
+            window.location.href = "<?= base_url('petugas/pengembalian/process/') ?>/" + pjId.trim();
         } else {
-            alert("QR Code tidak valid atau format salah.");
+            alert("QR Code tidak valid atau format salah. Pastikan Anda melakukan scan dari Bukti Peminjaman yang sah.");
         }
     }
 
