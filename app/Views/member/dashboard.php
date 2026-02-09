@@ -8,13 +8,13 @@
         <h4 class="fw-bold mb-4">Dashboard Peminjam</h4>
         
         <!-- Quick Actions Area -->
-        <div class="row g-3 mb-5">
-            <div class="col-md-4">
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-4">
                 <a href="<?= base_url('member/items') ?>" class="text-decoration-none h-100 d-block">
                     <div class="card h-100 border-0 card-gradient-primary">
-                        <div class="card-body p-4 text-center">
-                            <div class="bg-accent-primary p-3 rounded-circle d-inline-block mb-3">
-                                <i class="bi bi-plus-circle-fill text-primary fs-2"></i>
+                        <div class="card-body p-3 p-lg-4 text-center">
+                            <div class="bg-accent-primary p-2 p-lg-3 rounded-circle d-inline-block mb-2">
+                                <i class="bi bi-plus-circle-fill text-primary fs-3 fs-lg-2"></i>
                             </div>
                             <h6 class="fw-bold text-primary mb-1">Pinjam Barang</h6>
                             <p class="small text-secondary mb-0">Klik sini untuk pinjam</p>
@@ -22,12 +22,12 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-sm-6 col-lg-4">
                 <a href="<?= base_url('member/pengaduan') ?>" class="text-decoration-none h-100 d-block">
                     <div class="card h-100 border-0 card-gradient-danger">
-                        <div class="card-body p-4 text-center">
-                            <div class="bg-accent-danger p-3 rounded-circle d-inline-block mb-3">
-                                <i class="bi bi-exclamation-square-fill text-danger fs-2"></i>
+                        <div class="card-body p-3 p-lg-4 text-center">
+                            <div class="bg-accent-danger p-2 p-lg-3 rounded-circle d-inline-block mb-2">
+                                <i class="bi bi-exclamation-square-fill text-danger fs-3 fs-lg-2"></i>
                             </div>
                             <h6 class="fw-bold text-danger mb-1">Lapor Rusak</h6>
                             <p class="small text-secondary mb-0">Lapor barang yang rusak</p>
@@ -35,12 +35,12 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-4 col-12">
                 <a href="<?= base_url('member/history') ?>" class="text-decoration-none h-100 d-block">
                     <div class="card h-100 border-0 card-gradient-info">
-                        <div class="card-body p-4 text-center">
-                            <div class="bg-accent-primary p-3 rounded-circle d-inline-block mb-3" style="filter: hue-rotate(240deg);">
-                                <i class="bi bi-clock-fill text-info fs-2"></i>
+                        <div class="card-body p-3 p-lg-4 text-center">
+                            <div class="bg-accent-primary p-2 p-lg-3 rounded-circle d-inline-block mb-2" style="filter: hue-rotate(240deg);">
+                                <i class="bi bi-clock-fill text-info fs-3 fs-lg-2"></i>
                             </div>
                             <h6 class="fw-bold text-info mb-1">Riwayat Saya</h6>
                             <p class="small text-secondary mb-0">Cek barang yang dipinjam</p>
@@ -51,25 +51,25 @@
         </div>
 
         <!-- Recent Status -->
-        <div class="row g-4 mb-5">
-             <div class="col-md-4">
+        <div class="row g-3 mb-4">
+             <div class="col-sm-6 col-lg-4">
                 <div class="card border-0">
-                    <div class="card-body py-3 px-4 d-flex align-items-center">
+                    <div class="card-body py-2 py-lg-3 px-3 px-lg-4 d-flex align-items-center">
                         <div class="me-3 text-accent-primary"><i class="bi bi-box-seam fs-4"></i></div>
                         <div>
-                            <div class="small opacity-50">Sedang Dipinjam</div>
-                            <div class="fw-bold text-accent-primary"><?= $active_loans_count ?> Barang</div>
+                            <div class="small opacity-50" style="font-size: 0.75rem;">Dipinjam</div>
+                            <div class="fw-bold text-accent-primary small-md"><?= $active_loans_count ?> Barang</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-sm-6 col-lg-4">
                 <div class="card border-0">
-                    <div class="card-body py-3 px-4 d-flex align-items-center">
+                    <div class="card-body py-2 py-lg-3 px-3 px-lg-4 d-flex align-items-center">
                         <div class="me-3 text-accent-warning"><i class="bi bi-hourglass-split fs-4"></i></div>
                         <div>
-                            <div class="small opacity-50">Menunggu Approval</div>
-                            <div class="fw-bold text-accent-warning"><?= $pending_loans_count ?> Permintaan</div>
+                            <div class="small opacity-50" style="font-size: 0.75rem;">Menunggu</div>
+                            <div class="fw-bold text-accent-warning small-md"><?= $pending_loans_count ?> Permintaan</div>
                         </div>
                     </div>
                 </div>

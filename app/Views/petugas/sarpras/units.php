@@ -17,48 +17,56 @@
     </div>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-striped table-sm text-white">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Kode Inventaris</th>
-                <th>Lokasi</th>
-                <th>Kondisi</th>
-                <th>Status</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($items as $i => $item): ?>
-            <tr>
-                <td><?= $i+1 ?></td>
-                <td><code><?= esc($item['kode']) ?></code></td>
-                <td><?= esc($item['nama_lokasi']) ?></td>
-                <td>
-                    <?php
-                        $badge = $item['kondisi_id'] == 1 ? 'bg-success' : ($item['kondisi_id'] == 2 ? 'bg-warning text-dark' : 'bg-danger');
-                    ?>
-                    <span class="badge <?= $badge ?>"><?= esc($item['nama_kondisi']) ?></span>
-                </td>
-                <td>
-                    <?php
-                        $statusBadge = 'bg-secondary';
-                        $statusLabel = strtoupper($item['status']);
-                        if ($item['status'] == 'tersedia') $statusBadge = 'bg-success';
-                        elseif ($item['status'] == 'dipinjam') $statusBadge = 'bg-primary';
-                        elseif ($item['status'] == 'rusak') $statusBadge = 'bg-warning text-dark';
-                        elseif ($item['status'] == 'hilang') $statusBadge = 'bg-danger';
-                    ?>
-                    <span class="badge <?= $statusBadge ?>"><?= $statusLabel ?></span>
-                </td>
-                <td>
-                    <a href="<?= base_url('petugas/sarpras/show/'.$item['id']) ?>" class="btn btn-sm btn-info text-white" title="Detail"><i class="bi bi-eye"></i> Detail</a>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Kode Inventaris</th>
+                        <th>Lokasi</th>
+                        <th>Kondisi</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($items as $i => $item): ?>
+                    <tr>
+                        <td><?= $i+1 ?></td>
+                        <td><code><?= esc($item['kode']) ?></code></td>
+                        <td><?= esc($item['nama_lokasi']) ?></td>
+                        <td>
+                            <?php
+                                $badge = $item['kondisi_id'] == 1 ? 'bg-success' : ($item['kondisi_id'] == 2 ? 'bg-warning text-dark' : 'bg-danger');
+                            ?>
+                            <span class="badge <?= $badge ?>"><?= esc($item['nama_kondisi']) ?></span>
+                        </td>
+                        <td>
+                            <?php
+                                $statusBadge = 'bg-secondary';
+                                $statusLabel = strtoupper($item['status']);
+                                if ($item['status'] == 'tersedia') $statusBadge = 'bg-success';
+                                elseif ($item['status'] == 'dipinjam') $statusBadge = 'bg-primary';
+                                elseif ($item['status'] == 'rusak') $statusBadge = 'bg-warning text-dark';
+                                elseif ($item['status'] == 'hilang') $statusBadge = 'bg-danger';
+                            ?>
+                            <span class="badge <?= $statusBadge ?>"><?= $statusLabel ?></span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 justify-content-center">
+                                <a href="<?= base_url('petugas/sarpras/show/'.$item['id']) ?>" class="btn btn-action text-info" title="Detail">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <?= $this->endSection() ?>

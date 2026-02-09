@@ -1,0 +1,46 @@
+<?= $this->extend('admin/layout') ?>
+<?= $this->Section('page_title'); ?>Recycle Bin: Lokasi<?= $this->endSection(); ?>
+<?= $this->section('content') ?>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Recycle Bin: Lokasi</h1>
+    <div class="btn-toolbar mb-2 mb-md-0 gap-2">
+        <a href="<?= base_url('admin/locations') ?>" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Kembali ke Data Aktif
+        </a>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm text-white">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Lokasi</th>
+                <th>Keterangan</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if(empty($locations)): ?>
+                <tr>
+                    <td colspan="4" class="text-center py-3 text-muted italic">Tidak ada data di tempat sampah.</td>
+                </tr>
+            <?php endif; ?>
+            <?php foreach($locations as $i => $loc): ?>
+            <tr class="text-decoration-line-through text-muted">
+                <td><?= $i+1 ?></td>
+                <td><?= esc($loc['nama_lokasi']) ?></td>
+                <td><?= esc($loc['keterangan']) ?></td>
+                <td>
+                    <div class="d-flex gap-1 justify-content-center">
+                        <a href="<?= base_url('admin/locations/restore/'.$loc['id']) ?>" class="btn btn-action text-success btn-confirm" title="Restore">
+                            <i class="bi bi-arrow-counterclockwise"></i> Restore
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+<?= $this->endSection() ?>

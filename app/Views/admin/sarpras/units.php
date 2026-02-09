@@ -56,7 +56,7 @@
                     <div class="btn-group">
                         <a href="<?= base_url('admin/sarpras/show/'.$item['id']) ?>" class="btn btn-sm btn-info text-white" title="Detail"><i class="bi bi-eye"></i></a>
                         <a href="<?= base_url('admin/sarpras/edit/'.$item['id']) ?>" class="btn btn-sm btn-warning" title="Edit"><i class="bi bi-pencil"></i></a>
-                        <a href="<?= base_url('admin/sarpras/delete/'.$item['id']) ?>" class="btn btn-sm btn-danger" title="Hapus"><i class="bi bi-trash"></i></a>
+                        <a href="<?= base_url('admin/sarpras/delete/'.$item['id']) ?>" class="btn btn-sm btn-danger btn-delete" title="Hapus"><i class="bi bi-trash"></i></a>
                     </div>
                 </td>
             </tr>

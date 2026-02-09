@@ -133,12 +133,70 @@ class Peminjaman extends BaseController
     {
         $rejectionReason = $this->request->getPost('rejection_reason');
 
+        $peminjaman = $this->peminjamanModel->find($id);
+        if ($peminjaman && $peminjaman['status_id'] == 2) {
+            // Restore unit if it was already reserved/approved
+            $this->sarprasModel->skipValidation(true)->update($peminjaman['sarpras_id'], [
+                'stok' => 1,
+                'status' => 'tersedia'
+            ]);
+        }
+
         $this->peminjamanModel->update($id, [
             'status_id' => 3,
             'rejection_reason' => $rejectionReason
         ]);
 
         log_activity('Reject Peminjaman', "Menolak peminjaman id: $id" . ($rejectionReason ? " Alasan: $rejectionReason" : ""));
-        return redirect()->to('/petugas/peminjaman')->with('success', 'Peminjaman ditolak');
+        return redirect()->to('/petugas/peminjaman')->with('success', 'Peminjaman ditolak dan stok dikembalikan');
+    }
+
+    public function delete($id)
+    {
+        $peminjaman = $this->peminjamanModel->find($id);
+        
+        if (!$peminjaman) {
+             $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
+             return redirect()->to('/' . $role . '/peminjaman')->with('error', 'Data tidak ditemukan');
+        }
+
+        // Forbid deleting active loans to maintain data integrity
+        if ($peminjaman['status_id'] == 2) { // Disetujui
+             $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
+             return redirect()->to('/' . $role . '/peminjaman')->with('error', 'Peminjaman masih berjalan (Disetujui). Silahkan proses pengembalian terlebih dahulu.');
+        }
+
+        $this->peminjamanModel->delete($id);
+        $roleName = session()->get('role_id') == 1 ? 'Admin' : 'Petugas';
+        log_activity('Hapus Peminjaman', "Menghapus data peminjaman id: $id ($roleName)");
+        $roleUrl = session()->get('role_id') == 1 ? 'admin' : 'petugas';
+        return redirect()->to('/' . $roleUrl . '/peminjaman')->with('success', 'Data peminjaman dihapus');
+    }
+
+    /**
+     * Print loan receipt with QR code
+     */
+    public function print($id)
+    {
+        $peminjaman = $this->peminjamanModel->select('peminjaman.*, users.nama_lengkap, sarpras.nama as nama_barang, sarpras.kode, status_peminjaman.nama_status')
+                                            ->join('users', 'users.id = peminjaman.user_id')
+                                            ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
+                                            ->join('status_peminjaman', 'status_peminjaman.id = peminjaman.status_id')
+                                            ->find($id);
+        
+        $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
+
+        if (!$peminjaman) {
+            return redirect()->to('/' . $role . '/peminjaman')->with('error', 'Data tidak ditemukan');
+        }
+
+        $loanCode = $peminjaman['kode_peminjaman'] ?? ($peminjaman['kode'] . '-' . str_pad($id, 5, '0', STR_PAD_LEFT));
+
+        $data = [
+            'peminjaman' => $peminjaman,
+            'loan_code' => $loanCode
+        ];
+
+        return view($role . '/peminjaman/print', $data);
     }
 }

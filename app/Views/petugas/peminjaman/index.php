@@ -81,7 +81,7 @@
                 <td>
                     <div class="d-flex gap-1 justify-content-center">
                         <?php if($p['nama_status'] == 'Menunggu Persetujuan'): ?>
-                            <a href="<?= base_url('petugas/peminjaman/approve/'.$p['id']) ?>" class="btn btn-action text-success" title="Approve" onclick="return confirm('Setujui peminjaman?')">
+                            <a href="<?= base_url('petugas/peminjaman/approve/'.$p['id']) ?>" class="btn btn-action text-success btn-confirm" title="Approve">
                                 <i class="bi bi-check-lg"></i>
                             </a>
                             <button type="button" class="btn btn-action text-danger" title="Reject" data-bs-toggle="modal" data-bs-target="#rejectModal<?= $p['id'] ?>">
@@ -93,7 +93,10 @@
                                 <i class="bi bi-printer"></i>
                             </a>
                         <?php endif; ?>
-                        <a href="<?= base_url('petugas/peminjaman/delete/'.$p['id']) ?>" class="btn btn-action text-muted" title="Hapus" onclick="return confirm('Hapus data peminjaman?')">
+
+
+
+                        <a href="<?= base_url('petugas/peminjaman/delete/'.$p['id']) ?>" class="btn btn-action text-muted btn-delete" title="Hapus">
                             <i class="bi bi-trash"></i>
                         </a>
                     </div>
@@ -109,7 +112,7 @@
 <div class="modal fade" id="rejectModal<?= $p['id'] ?>" tabindex="-1" aria-labelledby="rejectModalLabel<?= $p['id'] ?>" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="<?= base_url('petugas/peminjaman/reject/'.$p['id']) ?>" method="post">
+            <form action="<?= base_url('petugas/peminjaman/reject/'.$p['id']) ?>" method="post" class="form-confirm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="rejectModalLabel<?= $p['id'] ?>">Tolak Peminjaman</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

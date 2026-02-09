@@ -50,11 +50,17 @@
             </ul>
         </div>
 
+        <!-- Sidebar Overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
         <!-- Main Content Wrapper -->
         <div class="content-wrapper d-flex flex-column">
             
             <!-- Topbar -->
             <div class="topbar">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
                 <div class="user-menu border-start ps-3">
                     <div class="user-info d-none d-md-block me-2 text-end">
                         <div class="fw-bold small lh-1 mb-1"><?= session()->get('nama') ?></div>
@@ -105,6 +111,7 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Sidebar Scroll Persistence
         document.addEventListener('DOMContentLoaded', function() {
@@ -122,16 +129,97 @@
                 link.addEventListener('click', saveScroll);
             });
             window.addEventListener('beforeunload', saveScroll);
-        });
 
-        // Global delete confirmation
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('confirm-delete')) {
-                e.preventDefault();
-                if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                    window.location.href = e.target.href;
+
+            // Mobile Sidebar Toggle
+            const sidebarBtn = document.getElementById('sidebarToggle');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            };
+
+            sidebarBtn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+
+            // Global Confirmation Dialog
+            document.addEventListener('click', function(e) {
+                const confirmBtn = e.target.closest('.btn-confirm');
+                const deleteBtn = e.target.closest('.btn-delete');
+                const logoutBtn = e.target.closest('.dropdown-item.text-danger[href*="logout"]');
+
+                if (confirmBtn || deleteBtn) {
+                    e.preventDefault();
+                    const url = (confirmBtn || deleteBtn).getAttribute('href') || (confirmBtn || deleteBtn).getAttribute('data-url');
+                    const title = deleteBtn ? 'Apakah Anda yakin?' : 'Konfirmasi Action';
+                    const text = deleteBtn ? 'Data yang dihapus mungkin tidak dapat dikembalikan!' : 'Apakah Anda yakin ingin melanjutkan tindakan ini?';
+                    const icon = deleteBtn ? 'warning' : 'question';
+                    const confirmText = deleteBtn ? 'Ya, Hapus!' : 'Ya, Lanjutkan';
+
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: icon,
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: confirmText,
+                        cancelButtonText: 'Batal',
+                        background: '#1e1e1e',
+                        color: '#fff'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
                 }
-            }
+
+                if (logoutBtn) {
+                    e.preventDefault();
+                    const url = logoutBtn.getAttribute('href');
+                    Swal.fire({
+                        title: 'Logout',
+                        text: 'Apakah Anda yakin ingin keluar dari sistem?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Logout',
+                        cancelButtonText: 'Batal',
+                        background: '#1e1e1e',
+                        color: '#fff'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                }
+            });
+
+            // Global Form Confirmation
+            document.addEventListener('submit', function(e) {
+                const form = e.target.closest('.form-confirm');
+                if (form) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Konfirmasi Simpan',
+                        text: 'Apakah Anda yakin ingin menyimpan perubahan ini?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya, Simpan!',
+                        cancelButtonText: 'Batal',
+                        background: '#1e1e1e',
+                        color: '#fff'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
         });
     </script>
 </body>

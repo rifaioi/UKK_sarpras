@@ -29,7 +29,7 @@
                 </li>
                 <li>
                     <a href="<?= base_url('petugas/sarpras') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/sarpras') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-box-seam me-2"></i> Cek Stok & Daftar Unit
+                        <i class="bi bi-box-seam me-2"></i> Daftar Sarpras
                     </a>
                 </li>
 
@@ -38,10 +38,11 @@
                     <span class="text-secondary small text-uppercase fw-bold px-3">Operasional</span>
                 </li>
                 <li>
-                    <a href="<?= base_url('petugas/peminjaman') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/peminjaman') !== false ? 'active' : '' ?>">
+                    <a href="<?= base_url('petugas/peminjaman') ?>" class="nav-link <?= (uri_string() == 'petugas/peminjaman' && !strpos($_SERVER['QUERY_STRING'] ?? '', 'status_id=2')) ? 'active' : '' ?>">
                         <i class="bi bi-cart-check me-2"></i> Persetujuan Pinjam
                     </a>
                 </li>
+
                 <li>
                     <a href="<?= base_url('petugas/pengembalian') ?>" class="nav-link <?= (strpos(uri_string(), 'petugas/pengembalian') !== false && strpos(uri_string(), 'petugas/pengembalian/rusak') === false) ? 'active' : '' ?>">
                         <i class="bi bi-arrow-return-left me-2"></i> Proses Kembali
@@ -52,39 +53,27 @@
                         <i class="bi bi-exclamation-triangle-fill me-2"></i> Laporan Pengaduan
                     </a>
                 </li>
-
-                <!-- 3. PEMELIHARAAN -->
-                <li class="nav-item border-top border-secondary mt-2 pt-2">
-                    <span class="text-secondary small text-uppercase fw-bold px-3">Maintenance</span>
-                </li>
-                <li>
-                    <a href="<?= base_url('petugas/pengembalian/rusak') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/pengembalian/rusak') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-wrench-adjustable me-2"></i> Sedang Perbaikan
-                    </a>
-                </li>
-                <li>
-                    <a href="<?= base_url('petugas/maintenance/upcoming') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/maintenance/upcoming') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-calendar-event me-2"></i> Jadwal Mendatang
-                    </a>
-                </li>
-                <li>
-                    <a href="<?= base_url('petugas/maintenance/frequent-damage') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/maintenance/frequent-damage') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-bar-chart-steps me-2"></i> Unit Sering Rusak
-                    </a>
-                </li>
                 <li>
                     <a href="<?= base_url('petugas/maintenance/records') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/maintenance/records') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-clock-history me-2"></i> Riwayat Servis
+                        <i class="bi bi-tools me-2"></i> Maintenance
                     </a>
                 </li>
+
+
             </ul>
         </div>
+
+        <!-- Sidebar Overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
         <!-- Main Content Wrapper -->
         <div class="content-wrapper d-flex flex-column">
             
             <!-- Topbar -->
             <div class="topbar">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
                 <div class="user-menu border-start ps-3">
                     <div class="user-info d-none d-md-block me-2 text-end">
                         <div class="fw-bold small lh-1 mb-1"><?= session()->get('nama') ?></div>
@@ -135,6 +124,7 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Sidebar Scroll Persistence
         document.addEventListener('DOMContentLoaded', function() {
@@ -152,20 +142,97 @@
                 link.addEventListener('click', saveScroll);
             });
             window.addEventListener('beforeunload', saveScroll);
-        });
 
-        // Global delete confirmation
-        document.addEventListener('click', function(e) {
-            const deleteBtn = e.target.closest('.btn-danger');
-            if (deleteBtn && deleteBtn.tagName === 'A' && 
-                (deleteBtn.innerText.trim().toLowerCase().includes('delete') || 
-                 deleteBtn.innerText.trim().toLowerCase().includes('hapus') || 
-                 deleteBtn.getAttribute('title')?.toLowerCase().includes('hapus'))) {
-                
-                if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+
+            // Mobile Sidebar Toggle
+            const sidebarBtn = document.getElementById('sidebarToggle');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            };
+
+            sidebarBtn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+
+            // Global Confirmation Dialog
+            document.addEventListener('click', function(e) {
+                const confirmBtn = e.target.closest('.btn-confirm');
+                const deleteBtn = e.target.closest('.btn-delete');
+                const logoutBtn = e.target.closest('.dropdown-item.text-danger[href*="logout"]');
+
+                if (confirmBtn || deleteBtn) {
                     e.preventDefault();
+                    const url = (confirmBtn || deleteBtn).getAttribute('href') || (confirmBtn || deleteBtn).getAttribute('data-url');
+                    const title = deleteBtn ? 'Apakah Anda yakin?' : 'Konfirmasi Action';
+                    const text = deleteBtn ? 'Data yang dihapus mungkin tidak dapat dikembalikan!' : 'Apakah Anda yakin ingin melanjutkan tindakan ini?';
+                    const icon = deleteBtn ? 'warning' : 'question';
+                    const confirmText = deleteBtn ? 'Ya, Hapus!' : 'Ya, Lanjutkan';
+
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: icon,
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: confirmText,
+                        cancelButtonText: 'Batal',
+                        background: '#1e1e1e',
+                        color: '#fff'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
                 }
-            }
+
+                if (logoutBtn) {
+                    e.preventDefault();
+                    const url = logoutBtn.getAttribute('href');
+                    Swal.fire({
+                        title: 'Logout',
+                        text: 'Apakah Anda yakin ingin keluar dari sistem?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Logout',
+                        cancelButtonText: 'Batal',
+                        background: '#1e1e1e',
+                        color: '#fff'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                }
+            });
+
+            // Global Form Confirmation
+            document.addEventListener('submit', function(e) {
+                const form = e.target.closest('.form-confirm');
+                if (form) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Konfirmasi Simpan',
+                        text: 'Apakah Anda yakin ingin menyimpan perubahan ini?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya, Simpan!',
+                        cancelButtonText: 'Batal',
+                        background: '#1e1e1e',
+                        color: '#fff'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
         });
     </script>
 </body>

@@ -148,7 +148,11 @@
                                         <td class="ps-4">
                                             <span class="fw-bold text-dark"><?= esc($item['nama_item']) ?></span>
                                             <?php if ($isChanged): ?>
-                                                <div class="badge bg-danger ms-2" style="font-size: 0.6rem;">ADA PERUBAHAN</div>
+                                                <div class="ms-1 mt-1">
+                                                    <span class="badge bg-danger rounded-pill" style="font-size: 0.65rem;">
+                                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>KONDISI BERUBAH
+                                                    </span>
+                                                </div>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-center">

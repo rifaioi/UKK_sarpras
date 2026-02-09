@@ -31,11 +31,12 @@
             <!-- Loans Tab -->
             <div class="tab-pane fade show active" id="loans" role="tabpanel">
                 <div class="table-responsive">
-                    <table class="table table-striped table-sm text-white">
+                    <table class="table table-hover table-striped">
                         <thead>
                             <tr>
                                 <th>No</th>
                                 <th>Kode Pinjam</th>
+                                <th>Kode Barang</th>
                                 <th>Tanggal</th>
                                 <th>Barang</th>
                                 <th>Jumlah</th>
@@ -49,6 +50,7 @@
                             <tr>
                                 <td><?= $i+1 ?></td>
                                 <td><code class="text-primary"><?= esc($b['kode_peminjaman'] ?? '-') ?></code></td>
+                                <td><span class="badge bg-dark border border-secondary"><?= esc($b['kode_barang'] ?? '-') ?></span></td>
                                 <td><?= date('d/m/Y', strtotime($b['tgl_pinjam'])) ?></td>
                                 <td><?= esc($b['nama_barang']) ?></td>
                                 <td><?= $b['jumlah'] ?> Unit</td>
@@ -73,7 +75,7 @@
                                 </td>
                                 <td>
                                     <?php if($b['nama_status'] == 'Menunggu Persetujuan'): ?>
-                                        <a href="<?= base_url('member/borrow/cancel/'.$b['id']) ?>" class="btn btn-action text-danger" onclick="return confirm('Batalkan pengajuan?')" title="Cancel">
+                                        <a href="<?= base_url('member/borrow/cancel/'.$b['id']) ?>" class="btn btn-action text-danger btn-confirm" title="Cancel">
                                             <i class="bi bi-x-circle me-1"></i> Batal
                                         </a>
                                     <?php endif; ?>
@@ -88,7 +90,7 @@
             <!-- Complaints Tab -->
             <div class="tab-pane fade" id="complaints" role="tabpanel">
                 <div class="table-responsive">
-                    <table class="table table-striped table-sm text-white">
+                    <table class="table table-hover table-striped">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -96,6 +98,7 @@
                                 <th>Judul Laporan</th>
                                 <th>Lokasi</th>
                                 <th>Status</th>
+                                <th>Bukti</th>
                                 <th>Catatan Admin</th>
                             </tr>
                         </thead>
@@ -122,6 +125,15 @@
                                             elseif($c['nama_status'] == 'Selesai') $badgeClass = 'bg-success';
                                         ?>
                                         <span class="badge <?= $badgeClass ?>"><?= $c['nama_status'] ?></span>
+                                    </td>
+                                    <td>
+                                        <?php if(!empty($c['bukti_foto'])): ?>
+                                            <a href="<?= base_url('uploads/pengaduan/' . $c['bukti_foto']) ?>" target="_blank" class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-image"></i> Lihat
+                                            </a>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if($c['catatan']): ?>

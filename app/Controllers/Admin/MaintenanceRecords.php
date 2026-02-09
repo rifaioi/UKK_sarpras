@@ -2,75 +2,113 @@
 
 namespace App\Controllers\Admin;
 
-use App\Controllers\Petugas\MaintenanceRecords as PetugasMaintenanceRecords;
-use App\Models\PengembalianModel;
+use App\Controllers\BaseController;
+use App\Models\MaintenanceRecordModel;
+use App\Models\MaintenanceScheduleModel;
 use App\Models\SarprasModel;
+use App\Models\KondisiAlatModel;
 
-class MaintenanceRecords extends PetugasMaintenanceRecords
+class MaintenanceRecords extends BaseController
 {
-    /**
-     * Admin-specific: Priority Dashboard with Predictive Analytics
-     */
-    public function priorityDashboard()
+    protected $recordModel;
+    protected $scheduleModel;
+    protected $sarprasModel;
+    protected $kondisiModel;
+
+    public function __construct()
     {
-        $pengembalianModel = new PengembalianModel();
-        $sarprasModel = new SarprasModel();
+        $this->recordModel = new MaintenanceRecordModel();
+        $this->scheduleModel = new MaintenanceScheduleModel();
+        $this->sarprasModel = new SarprasModel();
+        $this->kondisiModel = new KondisiAlatModel();
+    }
 
-        // Get breakdown frequency per asset
-        $breakdownStats = $pengembalianModel->select('
-            peminjaman.sarpras_id,
-            sarpras.nama as nama_barang,
-            sarpras.kode,
-            COUNT(*) as breakdown_count,
-            SUM(CASE WHEN pengembalian.kondisi_id != 1 THEN 1 ELSE 0 END) as damage_count
-        ')
-        ->join('peminjaman', 'peminjaman.id = pengembalian.peminjaman_id')
-        ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
-        ->where('sarpras.deleted_at', null)
-        ->groupBy('peminjaman.sarpras_id')
-        ->having('damage_count >', 0)
-        ->findAll();
+    public function index()
+    {
+        $q = $this->request->getGet('q');
 
-        // Calculate priority scores
-        $priorities = [];
-        foreach ($breakdownStats as $stat) {
-            $sarprasId = $stat['sarpras_id'];
-            
-            // Get last maintenance date
-            $lastMaintenance = $this->recordModel->getLatestByAsset($sarprasId);
-            $daysSinceLastMaintenance = 0;
-            
-            if ($lastMaintenance) {
-                $daysSinceLastMaintenance = (strtotime(date('Y-m-d')) - strtotime($lastMaintenance['maintenance_date'])) / (60 * 60 * 24);
-            } else {
-                $daysSinceLastMaintenance = 365; // If never maintained, high priority
-            }
+        $query = $this->recordModel->select('maintenance_records.*, ms.maintenance_type, ms.action_type, ms.technician, s.nama as asset_name, s.kode as asset_kode, k.nama_kondisi')
+                                   ->join('maintenance_schedules ms', 'ms.id = maintenance_records.schedule_id', 'left')
+                                   ->join('sarpras s', 's.id = ms.sarpras_id', 'left')
+                                   ->join('kondisi_alat k', 'k.id = maintenance_records.condition_after');
 
-            // Priority Score = (Damage Count * 2) + (Days Since Last Maintenance / 30)
-            $priorityScore = ($stat['damage_count'] * 2) + ($daysSinceLastMaintenance / 30);
-
-            $priorities[] = [
-                'sarpras_id' => $sarprasId,
-                'nama_barang' => $stat['nama_barang'],
-                'kode' => $stat['kode'],
-                'breakdown_count' => $stat['breakdown_count'],
-                'damage_count' => $stat['damage_count'],
-                'days_since_maintenance' => round($daysSinceLastMaintenance),
-                'priority_score' => round($priorityScore, 2),
-                'last_maintenance_date' => $lastMaintenance ? $lastMaintenance['maintenance_date'] : 'Belum pernah',
-            ];
+        if ($q) {
+            $query->groupStart()
+                  ->like('s.nama', $q)
+                  ->orLike('ms.technician', $q)
+                  ->groupEnd();
         }
 
-        // Sort by priority score descending
-        usort($priorities, function($a, $b) {
-            return $b['priority_score'] <=> $a['priority_score'];
-        });
+        $records = $query->orderBy('maintenance_records.completion_date', 'DESC')->findAll();
 
         $data = [
-            'title' => 'Priority Maintenance Dashboard',
-            'priorities' => $priorities,
+            'records' => $records,
+            'filter_q' => $q
         ];
 
-        return view('admin/maintenance/priority_dashboard', $data);
+        return view('admin/maintenance/records', $data);
+    }
+
+    /**
+     * Store maintenance result and update asset
+     */
+    public function store()
+    {
+        $rules = [
+            'schedule_id'     => 'required|numeric',
+            'completion_date' => 'required|valid_date',
+            'result'          => 'required',
+            'condition_after' => 'required|numeric',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $scheduleId = $this->request->getPost('schedule_id');
+        $schedule = $this->scheduleModel->find($scheduleId);
+
+        if (!$schedule) {
+            return redirect()->back()->with('error', 'Jadwal tidak ditemukan');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        // 1. Save results
+        $this->recordModel->save([
+            'schedule_id'     => $scheduleId,
+            'completion_date' => $this->request->getPost('completion_date'),
+            'result'          => $this->request->getPost('result'),
+            'condition_after' => $this->request->getPost('condition_after'),
+            'cost'            => $this->request->getPost('cost') ?: 0,
+            'notes'           => $this->request->getPost('notes'),
+        ]);
+
+        // 2. Update schedule status
+        $this->scheduleModel->update($scheduleId, ['status' => 'Completed']);
+
+        // 3. Update Asset
+        $sarpras = $this->sarprasModel->find($schedule['sarpras_id']);
+        $nextDate = null;
+        if ($sarpras['maintenance_interval'] > 0) {
+            $nextDate = date('Y-m-d', strtotime($this->request->getPost('completion_date') . ' + ' . $sarpras['maintenance_interval'] . ' days'));
+        }
+
+        $this->sarprasModel->update($schedule['sarpras_id'], [
+            'kondisi_id'            => $this->request->getPost('condition_after'),
+            'last_maintenance_date' => $this->request->getPost('completion_date'),
+            'next_maintenance_date' => $nextDate,
+            'status'                => 'tersedia' // Reset to available after maintenance
+        ]);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+             return redirect()->back()->with('error', 'Gagal menyimpan data maintenance');
+        }
+
+        log_activity('Selesaikan Maintenance', "Menyelesaikan maintenance asset id: " . $schedule['sarpras_id']);
+        return redirect()->back()->with('success', 'Maintenance berhasil dicatat');
     }
 }

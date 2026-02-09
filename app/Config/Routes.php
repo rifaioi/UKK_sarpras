@@ -16,30 +16,37 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
      */
     // Users
     $routes->get('users', 'Admin\Users::index');
+    $routes->get('users/trash', 'Admin\Users::trash');
     $routes->get('users/create', 'Admin\Users::create');
     $routes->post('users/store', 'Admin\Users::store');
     $routes->get('users/edit/(:num)', 'Admin\Users::edit/$1');
     $routes->post('users/update/(:num)', 'Admin\Users::update/$1');
     $routes->get('users/delete/(:num)', 'Admin\Users::delete/$1');
+    $routes->get('users/restore/(:num)', 'Admin\Users::restore/$1');
     
     // Locations
     $routes->get('locations', 'Admin\Locations::index');
+    $routes->get('locations/trash', 'Admin\Locations::trash');
     $routes->get('locations/create', 'Admin\Locations::create');
     $routes->post('locations/store', 'Admin\Locations::store');
     $routes->get('locations/edit/(:num)', 'Admin\Locations::edit/$1');
     $routes->post('locations/update/(:num)', 'Admin\Locations::update/$1');
     $routes->get('locations/delete/(:num)', 'Admin\Locations::delete/$1');
+    $routes->get('locations/restore/(:num)', 'Admin\Locations::restore/$1');
     
     // Categories
     $routes->get('categories', 'Admin\Categories::index');
+    $routes->get('categories/trash', 'Admin\Categories::trash');
     $routes->get('categories/create', 'Admin\Categories::create');
     $routes->post('categories/store', 'Admin\Categories::store');
     $routes->get('categories/edit/(:num)', 'Admin\Categories::edit/$1');
     $routes->post('categories/update/(:num)', 'Admin\Categories::update/$1');
     $routes->get('categories/delete/(:num)', 'Admin\Categories::delete/$1');
+    $routes->get('categories/restore/(:num)', 'Admin\Categories::restore/$1');
     
     // Sarpras (Master Items & Units)
     $routes->get('sarpras', 'Admin\Sarpras::index');
+    $routes->get('sarpras/trash', 'Admin\Sarpras::trash');
     $routes->get('sarpras/create', 'Admin\Sarpras::create');
     $routes->get('sarpras/create/(:num)', 'Admin\Sarpras::create/$1');
     $routes->post('sarpras/store', 'Admin\Sarpras::store');
@@ -49,6 +56,8 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     $routes->get('sarpras/show/(:num)', 'Admin\Sarpras::show/$1');
     $routes->get('sarpras/delete/(:num)', 'Admin\Sarpras::delete/$1');
     $routes->get('sarpras/delete_group/(:num)', 'Admin\Sarpras::delete_group/$1');
+    $routes->get('sarpras/restore/(:num)', 'Admin\Sarpras::restore/$1');
+    $routes->get('sarpras/restore_group/(:num)', 'Admin\Sarpras::restore_group/$1');
 
     /** 
      * TRANSAKSI 
@@ -78,16 +87,20 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
 
     // Pengaduan
     $routes->get('pengaduan', 'Admin\Pengaduan::index');
+    $routes->get('pengaduan/trash', 'Admin\Pengaduan::trash');
     $routes->get('pengaduan/process/(:num)', 'Admin\Pengaduan::process/$1');
     $routes->get('pengaduan/complete/(:num)', 'Admin\Pengaduan::complete/$1');
     $routes->post('pengaduan/update_status', 'Admin\Pengaduan::update_status');
     $routes->get('pengaduan/delete/(:num)', 'Admin\Pengaduan::delete/$1');
+    $routes->get('pengaduan/restore/(:num)', 'Admin\Pengaduan::restore/$1');
 
     // Inspections & Checklists
     $routes->get('inspection-templates', 'Admin\InspectionTemplates::index');
     $routes->get('inspection-templates/manage/(:num)', 'Admin\InspectionTemplates::manage/$1');
     $routes->post('inspection-templates/store', 'Admin\InspectionTemplates::store');
     $routes->get('inspection-templates/delete/(:num)', 'Admin\InspectionTemplates::delete/$1');
+    $routes->get('inspection-templates/restore/(:num)', 'Admin\InspectionTemplates::restore/$1');
+    $routes->get('inspection-templates/trash/(:num)', 'Admin\InspectionTemplates::trash_items/$1');
     $routes->get('inspections/create/(:num)', 'Petugas\Inspections::create/$1');
     $routes->post('inspections/store', 'Petugas\Inspections::store');
 
@@ -176,7 +189,9 @@ $routes->group('petugas', ['filter' => 'petugas'], function($routes) {
     // Peminjaman
     $routes->get('peminjaman', 'Petugas\Peminjaman::index');
     $routes->get('peminjaman/approve/(:num)', 'Petugas\Peminjaman::approve/$1');
-    $routes->get('peminjaman/reject/(:num)', 'Petugas\Peminjaman::reject/$1');
+    $routes->post('peminjaman/reject/(:num)', 'Petugas\Peminjaman::reject/$1');
+    $routes->get('peminjaman/print/(:num)', 'Petugas\Peminjaman::print/$1');
+    $routes->get('peminjaman/delete/(:num)', 'Petugas\Peminjaman::delete/$1');
     
     // Pengembalian
     $routes->get('pengembalian', 'Petugas\Pengembalian::index');

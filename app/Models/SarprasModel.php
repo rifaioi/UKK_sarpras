@@ -16,7 +16,7 @@ class SarprasModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = true;
+    protected $useSoftDeletes   = false;
     protected $allowedFields    = [
         'kode', 
         'nama', 
@@ -30,7 +30,8 @@ class SarprasModel extends Model
         'next_maintenance_date',
         'tgl_pengadaan',
         'harga_beli',
-        'parent_id'
+        'parent_id',
+        'is_deleted'
     ];
 
     // Dates

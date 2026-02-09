@@ -32,6 +32,7 @@ class UserModel extends Model
 
     // Validation
     protected $validationRules = [
+        'id'           => 'permit_empty|numeric',
         'username'     => 'required|regex_match[/^[a-zA-Z0-9._]+$/]|min_length[4]|max_length[100]|is_unique[users.username,id,{id}]',
         'nama_lengkap' => 'required|min_length[3]|max_length[150]',
         'role_id'      => 'required|numeric',

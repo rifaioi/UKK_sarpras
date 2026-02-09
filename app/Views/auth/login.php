@@ -143,9 +143,9 @@
         <div class="subtitle">Sistem Informasi Sarana & Prasarana</div>
     </div>
 
-    <?php if (session()->getFlashdata('msg')) : ?>
+    <?php if (session()->getFlashdata('error')) : ?>
         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-            <?= session()->getFlashdata('msg') ?>
+            <?= session()->getFlashdata('error') ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>

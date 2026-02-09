@@ -90,8 +90,9 @@ class AnalyticsModel extends Model
     public function getMaintenanceCosts()
     {
         return $this->db->table('maintenance_records')
-            ->select('sarpras_id, SUM(cost) as total_cost')
-            ->groupBy('sarpras_id')
+            ->select('maintenance_schedules.sarpras_id, SUM(maintenance_records.cost) as total_cost')
+            ->join('maintenance_schedules', 'maintenance_schedules.id = maintenance_records.schedule_id')
+            ->groupBy('maintenance_schedules.sarpras_id')
             ->get()
             ->getResultArray();
     }

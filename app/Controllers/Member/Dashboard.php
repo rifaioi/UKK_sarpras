@@ -108,7 +108,7 @@ class Dashboard extends BaseController
         $allUnits = $this->sarprasModel->where('nama', $item['nama'])
                                        ->where('kategori_id', $item['kategori_id'])
                                        ->where('location_id', $item['location_id'])
-                                       ->where('kondisi_id', 1)
+                                       ->whereIn('sarpras.kondisi_id', [1, 2])
                                        ->whereNotIn('status', ['rusak', 'hilang'])
                                        ->findAll();
 

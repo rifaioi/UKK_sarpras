@@ -22,7 +22,7 @@ class History extends BaseController
         $userId = session()->get('id');
 
         $data = [
-            'my_borrowings' => $this->peminjamanModel->select('peminjaman.*, sarpras.nama as nama_barang, status_peminjaman.nama_status')
+            'my_borrowings' => $this->peminjamanModel->select('peminjaman.*, sarpras.nama as nama_barang, sarpras.kode as kode_barang, status_peminjaman.nama_status')
                                                      ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
                                                      ->join('status_peminjaman', 'status_peminjaman.id = peminjaman.status_id')
                                                      ->where('peminjaman.user_id', $userId)

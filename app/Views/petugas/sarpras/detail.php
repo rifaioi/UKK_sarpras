@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div class="row justify-content-center mt-4">
+<div class="row">
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-body p-4 text-white">
@@ -27,36 +27,57 @@
                     <code class="fs-5 text-primary"><?= esc($item['kode']) ?></code>
                 </div>
 
-                <div class="row g-3">
-                    <div class="col-6">
-                        <label class="text-white-50 small d-block">Kategori</label>
-                        <span class="fw-bold"><?= esc($item['nama_kategori']) ?></span>
-                    </div>
-                    <div class="col-6">
-                        <label class="text-white-50 small d-block">Lokasi</label>
-                        <span class="fw-bold"><?= esc($item['nama_lokasi']) ?></span>
-                    </div>
-                    <div class="col-6">
-                        <label class="text-white-50 small d-block">Kondisi</label>
-                        <?php
-                            $badge = $item['kondisi_id'] == 1 ? 'bg-success' : ($item['kondisi_id'] == 2 ? 'bg-warning text-dark' : 'bg-danger');
-                        ?>
-                        <span class="badge <?= $badge ?>"><?= esc($item['nama_kondisi']) ?></span>
-                    </div>
-                    <div class="col-6">
-                        <label class="text-white-50 small d-block">Status Unit</label>
-                        <?php
-                            $statusBadge = 'bg-secondary';
-                            $statusLabel = strtoupper($item['status']);
-                            if ($item['status'] == 'tersedia') $statusBadge = 'bg-success';
-                            elseif ($item['status'] == 'dipinjam') $statusBadge = 'bg-primary';
-                            elseif ($item['status'] == 'rusak') $statusBadge = 'bg-warning text-dark';
-                            elseif ($item['status'] == 'hilang') $statusBadge = 'bg-danger';
-                        ?>
-                        <span class="badge <?= $statusBadge ?>"><?= $statusLabel ?></span>
-                    </div>
+                <table class="table table-borderless mt-4 text-white">
+                    <tr>
+                        <th width="40%">Kategori</th>
+                        <td>: <?= esc($item['nama_kategori']) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Lokasi</th>
+                        <td>: <?= esc($item['nama_lokasi']) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Kondisi</th>
+                        <td>: 
+                            <?php
+                                $badge = $item['kondisi_id'] == 1 ? 'bg-success' : ($item['kondisi_id'] == 2 ? 'bg-warning text-dark' : 'bg-danger');
+                            ?>
+                            <span class="badge <?= $badge ?>"><?= esc($item['nama_kondisi']) ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Status Unit</th>
+                        <td>: 
+                            <?php
+                                $statusBadge = 'bg-secondary';
+                                $statusLabel = strtoupper($item['status']);
+                                if ($item['status'] == 'tersedia') $statusBadge = 'bg-success';
+                                elseif ($item['status'] == 'dipinjam') $statusBadge = 'bg-primary';
+                                elseif ($item['status'] == 'rusak') $statusBadge = 'bg-warning text-dark';
+                                elseif ($item['status'] == 'hilang') $statusBadge = 'bg-danger';
+                            ?>
+                            <span class="badge <?= $statusBadge ?>"><?= $statusLabel ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Terdaftar pada</th>
+                        <td>: <?= date('d M Y, H:i', strtotime($item['created_at'])) ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm bg-dark">
+            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                <h5 class="card-title text-white">Riwayat / Aktivitas Unit</h5>
+            </div>
+            <div class="card-body p-4 text-white">
+                <div class="alert alert-info border-0 bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-info-circle me-2"></i> Setiap unit barang memiliki identitas unik untuk keperluan pelacakan peminjaman dan pemeliharaan secara spesifik.
                 </div>
-
+                
                 <div class="timeline mt-4">
                     <div class="d-flex mb-3">
                         <div class="me-3">

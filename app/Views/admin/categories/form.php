@@ -7,7 +7,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form action="<?= isset($category) ? base_url('admin/categories/update/'.$category['id']) : base_url('admin/categories/store') ?>" method="post">
+        <form action="<?= isset($category) ? base_url('admin/categories/update/'.$category['id']) : base_url('admin/categories/store') ?>" method="post" class="form-confirm">
             <div class="mb-3">
                 <label class="form-label">Nama Kategori</label>
                 <input type="text" class="form-control" name="nama" value="<?= isset($category) ? $category['nama'] : old('nama') ?>" required placeholder="Contoh: Laptop, Meja, Proyektor">

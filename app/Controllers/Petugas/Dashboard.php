@@ -33,24 +33,15 @@ class Dashboard extends BaseController
                                           ->limit(5)
                                           ->findAll();
 
-        // Maintenance Reminders - read from sarpras.next_maintenance_date directly
-        $sarprasModel = new \App\Models\SarprasModel();
-        $today = date('Y-m-d');
-        $reminderDate = date('Y-m-d', strtotime('+7 days'));
-        
-        $maintenanceReminders = $sarprasModel->select('sarpras.id, sarpras.nama, sarpras.kode, sarpras.next_maintenance_date,
-                                                        DATEDIFF(sarpras.next_maintenance_date, CURDATE()) as days_until')
-                                              ->where('sarpras.next_maintenance_date IS NOT NULL')
-                                              ->where('sarpras.next_maintenance_date <=', $reminderDate)
-                                              ->orderBy('sarpras.next_maintenance_date', 'ASC')
-                                              ->findAll();
+        $scheduleModel = new \App\Models\MaintenanceScheduleModel();
+        $upcomingMaintenance = $scheduleModel->getUpcoming(5);
 
         $data = [
             'pending_peminjaman' => $pendingPeminjaman,
             'active_peminjaman' => $activePeminjaman,
             'active_pengaduan' => $activePengaduan,
             'recent_activities' => $recentActivities,
-            'maintenance_reminders' => $maintenanceReminders,
+            'upcoming_maintenance' => $upcomingMaintenance
         ];
 
         return view('petugas/dashboard', $data);

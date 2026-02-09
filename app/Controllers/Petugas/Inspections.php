@@ -67,14 +67,12 @@ class Inspections extends BaseController
 
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
 
-        $data = [
-            'title' => 'Pemeriksaan & Checklist Barang',
-            'peminjaman' => $peminjaman,
-            'checklistItems' => $checklistItems,
-            'type' => $type,
-            'preBorrowResults' => $preBorrowResults,
-            'role' => $role
-        ];
+        $data['title'] = 'Pemeriksaan & Checklist Barang';
+        $data['peminjaman'] = $peminjaman;
+        $data['checklistItems'] = $checklistItems;
+        $data['type'] = $type;
+        $data['preBorrowResults'] = $preBorrowResults;
+        $data['role'] = $role;
 
         return view('petugas/inspections/form', $data);
     }
@@ -140,6 +138,17 @@ class Inspections extends BaseController
         if ($type == 'keluar') {
             // Update Status to 'Dipinjam' (2)
             $this->peminjamanModel->update($peminjamanId, ['status_id' => 2]);
+            
+            // Sync Sarpras State (Ensure stock is 0 and status is dipinjam)
+            $peminjaman = $this->peminjamanModel->find($peminjamanId);
+            if ($peminjaman) {
+                // T1-PINJAM-010: Officially decrease stock when items leave the storage
+                $this->sarprasModel->skipValidation(true)->update($peminjaman['sarpras_id'], [
+                    'stok' => 0,
+                    'status' => 'dipinjam'
+                ]);
+            }
+            
             log_activity('Inspeksi Keluar', "Inspeksi barang keluar untuk peminjaman #$peminjamanId selesai.");
             $redirectUrl = '/petugas/peminjaman';
             $msg = 'Inspeksi keluar selesai. Barang siap diserahkan.';
@@ -170,7 +179,7 @@ class Inspections extends BaseController
                 'tgl_pengembalian' => date('Y-m-d'),
                 'kondisi_id' => $overallConditionId,
                 'deskripsi' => "Pemeriksaan: " . implode(", ", $damageDetails) . ". Notes: " . $notes,
-                'foto' => $photoName,
+                'foto' => $photoName ? 'uploads/inspections/' . $photoName : null,
                 'is_restocked' => ($overallConditionId == 1) ? 1 : 0 // Auto restock if good
             ]);
 

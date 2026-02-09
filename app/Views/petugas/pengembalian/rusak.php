@@ -46,7 +46,7 @@
                                 <i class="bi bi-tools me-1"></i> Selesai
                             </a>
                             <a href="<?= base_url('petugas/pengembalian/scrap/' . $item['id']) ?>" 
-                               class="btn btn-sm btn-danger mb-1" onclick="return confirm('Yakin ingin menghapus/memusnahkan barang ini dari daftar aset?');">
+                               class="btn btn-sm btn-danger mb-1">
                                 <i class="bi bi-trash me-1"></i> Delete
                             </a>
                         </td>

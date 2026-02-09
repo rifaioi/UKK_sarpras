@@ -19,12 +19,26 @@ class Users extends BaseController
 
     public function index()
     {
+        $builder = $this->userModel->select('users.*, roles.nama_role')
+                                   ->join('roles', 'roles.id = users.role_id')
+                                   ->where('users.is_deleted', 0);
+        
         $data = [
-            'users' => $this->userModel->select('users.*, roles.nama_role')
-                                       ->join('roles', 'roles.id = users.role_id')
-                                       ->findAll()
+            'users' => $builder->findAll()
         ];
         return view('admin/users/index', $data);
+    }
+
+    public function trash()
+    {
+        $builder = $this->userModel->select('users.*, roles.nama_role')
+                                   ->join('roles', 'roles.id = users.role_id')
+                                   ->where('users.is_deleted', 1);
+        
+        $data = [
+            'users' => $builder->findAll()
+        ];
+        return view('admin/users/trash', $data);
     }
 
     public function create()
@@ -106,8 +120,15 @@ class Users extends BaseController
 
     public function delete($id)
     {
-        $this->userModel->delete($id);
+        $this->userModel->update($id, ['is_deleted' => 1]);
         log_activity('Hapus User', "Menghapus user id: $id");
-        return redirect()->to('/admin/users')->with('success', 'User deleted successfully');
+        return redirect()->to('/admin/users')->with('success', 'User berhasil dihapus');
+    }
+
+    public function restore($id)
+    {
+        $this->userModel->update($id, ['is_deleted' => 0]);
+        log_activity('Restore User', "Mengembalikan user id: $id");
+        return redirect()->to('/admin/users?show_deleted=1')->with('success', 'User berhasil dikembalikan');
     }
 }

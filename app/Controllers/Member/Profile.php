@@ -67,7 +67,7 @@ class Profile extends BaseController
         }
 
         $this->userModel->update($id, [
-            'password_hash' => password_hash($this->request->getVar('password_baru'), PASSWORD_DEFAULT)
+            'password_hash' => password_hash($this->request->getVar('password_baru'), PASSWORD_BCRYPT)
         ]);
         
         log_activity('Ubah Password', 'Peminjam mengubah password sendiri');

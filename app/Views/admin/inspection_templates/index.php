@@ -33,9 +33,9 @@ Checklist Pemeriksaan
                         <?php foreach ($categories as $index => $cat) : 
                             // Hitung jumlah item checklist (opsional, bisa dioptimasi join)
                             $db = \Config\Database::connect();
-                            $count = $db->table('inspection_checklist_items')
+                            $count = $db->table('inspection_template_items')
                                         ->where('kategori_id', $cat['id'])
-                                        ->where('deleted_at', null)
+                                        ->where('is_deleted', 0)
                                         ->countAllResults();
                         ?>
                             <tr>

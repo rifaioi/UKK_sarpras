@@ -17,9 +17,17 @@ class Locations extends BaseController
     public function index()
     {
         $data = [
-            'locations' => $this->locationModel->findAll()
+            'locations' => $this->locationModel->where('is_deleted', 0)->findAll()
         ];
         return view('admin/locations/index', $data);
+    }
+
+    public function trash()
+    {
+        $data = [
+            'locations' => $this->locationModel->where('is_deleted', 1)->findAll()
+        ];
+        return view('admin/locations/trash', $data);
     }
 
     public function create()
@@ -74,7 +82,13 @@ class Locations extends BaseController
 
     public function delete($id)
     {
-        $this->locationModel->delete($id);
+        $this->locationModel->update($id, ['is_deleted' => 1]);
         return redirect()->to('/admin/locations')->with('success', 'Lokasi berhasil dihapus');
+    }
+
+    public function restore($id)
+    {
+        $this->locationModel->update($id, ['is_deleted' => 0]);
+        return redirect()->to('/admin/locations?show_deleted=1')->with('success', 'Lokasi berhasil dikembalikan');
     }
 }

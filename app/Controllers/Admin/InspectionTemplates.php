@@ -33,14 +33,35 @@ class InspectionTemplates extends BaseController
             return redirect()->to('admin/inspection-templates')->with('error', 'Kategori tidak ditemukan');
         }
 
-        $items = $this->checklistItemModel->where('kategori_id', $kategori_id)->findAll();
-
+        $items = $this->checklistItemModel->where('kategori_id', $kategori_id)
+                                          ->where('is_deleted', 0)
+                                          ->findAll();
+        
         $data = [
             'title' => 'Kelola Checklist: ' . $category['nama'],
             'category' => $category,
             'items' => $items
         ];
         return view('admin/inspection_templates/manage', $data);
+    }
+
+    public function trash_items($kategori_id)
+    {
+        $category = $this->kategoriModel->find($kategori_id);
+        if (!$category) {
+            return redirect()->to('admin/inspection-templates')->with('error', 'Kategori tidak ditemukan');
+        }
+
+        $items = $this->checklistItemModel->where('kategori_id', $kategori_id)
+                                          ->where('is_deleted', 1)
+                                          ->findAll();
+        
+        $data = [
+            'title' => 'Recycle Bin Checklist: ' . $category['nama'],
+            'category' => $category,
+            'items' => $items
+        ];
+        return view('admin/inspection_templates/trash_items', $data);
     }
 
     public function store()
@@ -64,12 +85,13 @@ class InspectionTemplates extends BaseController
 
     public function delete($id)
     {
-        $item = $this->checklistItemModel->find($id);
-        if (!$item) {
-            return redirect()->back()->with('error', 'Item tidak ditemukan');
-        }
-
-        $this->checklistItemModel->delete($id);
+        $this->checklistItemModel->update($id, ['is_deleted' => 1]);
         return redirect()->back()->with('success', 'Item checklist berhasil dihapus');
+    }
+
+    public function restore($id)
+    {
+        $this->checklistItemModel->update($id, ['is_deleted' => 0]);
+        return redirect()->back()->with('success', 'Item checklist berhasil dikembalikan');
     }
 }

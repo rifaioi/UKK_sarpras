@@ -10,7 +10,7 @@
                 <h5><?= esc($item['nama']) ?></h5>
                 <!-- Removed original h5 and p tags as they are replaced by the new input field -->
                 <hr>
-                <form action="<?= base_url('member/store_borrow') ?>" method="post">
+                <form action="<?= base_url('member/store_borrow') ?>" method="post" class="form-confirm">
                     <input type="hidden" name="sarpras_id" value="<?= $item['id'] ?>">
                     
                     <div class="mb-3">
@@ -20,8 +20,11 @@
 
                     <div class="mb-3">
                         <label>Jumlah Pinjam</label>
-                        <input type="number" name="jumlah" class="form-control" min="1" max="<?= $item['stok'] ?>" required>
-                        <small class="text-muted">Stok tersedia saat ini: <?= $item['stok'] ?></small>
+                        <input type="number" name="jumlah" class="form-control" min="1" max="<?= $item['stok'] ?>" value="1" required>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">Stok tersedia: <?= $item['stok'] ?> Unit</small>
+                            <small class="text-info"><i class="bi bi-info-circle"></i> Bisa pinjam lebih dari 1 unit</small>
+                        </div>
                     </div>
 
                     <div class="mb-3">

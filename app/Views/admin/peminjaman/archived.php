@@ -1,8 +1,8 @@
 <?= $this->extend('admin/layout') ?>
-<?= $this->Section('page_title'); ?>Arsip Peminjaman<?= $this->endSection(); ?>
+<?= $this->Section('page_title'); ?>Recycle Bin: Peminjaman<?= $this->endSection(); ?>
 <?= $this->section('content') ?>
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Arsip Peminjaman</h1>
+    <h1 class="h2">Recycle Bin: Peminjaman</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
         <a href="<?= base_url('admin/peminjaman') ?>" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Kembali
@@ -24,7 +24,6 @@
                 <th>Tgl Pinjam</th>
                 <th>Rencana Kembali</th>
                 <th>Status</th>
-                <th>Dihapus Pada</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -41,9 +40,10 @@
                 <td>
                     <span class="badge bg-secondary"><?= esc($p['nama_status']) ?></span>
                 </td>
-                <td><?= $p['deleted_at'] ?></td>
                 <td>
-                    <a href="<?= base_url('admin/peminjaman/restore/'.$p['id']) ?>" class="btn btn-sm btn-success" onclick="return confirm('Kembalikan data ini dari arsip?')">Restore</a>
+                    <a href="<?= base_url('admin/peminjaman/restore/'.$p['id']) ?>" class="btn btn-sm btn-success text-white">
+                        <i class="bi bi-arrow-counterclockwise"></i> Restore
+                    </a>
                 </td>
             </tr>
             <?php endforeach; ?>

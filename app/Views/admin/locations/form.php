@@ -7,7 +7,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form action="<?= isset($location) ? base_url('admin/locations/update/'.$location['id']) : base_url('admin/locations/store') ?>" method="post">
+        <form action="<?= isset($location) ? base_url('admin/locations/update/'.$location['id']) : base_url('admin/locations/store') ?>" method="post" class="form-confirm">
             <div class="mb-3">
                 <label class="form-label">Nama Lokasi</label>
                 <input type="text" class="form-control" name="nama_lokasi" value="<?= isset($location) ? $location['nama_lokasi'] : old('nama_lokasi') ?>" required>

@@ -12,7 +12,7 @@
     <div class="col-md-8">
         <div class="card border-0">
             <div class="card-body p-4">
-                <form action="<?= isset($item) ? base_url('admin/sarpras/update/'.$item['id']) : base_url('admin/sarpras/store') ?>" method="post">
+                <form action="<?= isset($item) ? base_url('admin/sarpras/update/'.$item['id']) : base_url('admin/sarpras/store') ?>" method="post" class="form-confirm">
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -64,18 +64,14 @@
                     </div>
 
                     <div class="row">
+                        <?php if(!isset($item)): ?>
                         <div class="col-md-6 mb-3">
-                            <label for="tgl_pengadaan" class="form-label">Tanggal Pengadaan</label>
-                            <input type="date" name="tgl_pengadaan" class="form-control" id="tgl_pengadaan" value="<?= isset($item) ? $item['tgl_pengadaan'] : '' ?>">
+                            <label class="form-label">Jumlah Unit (Stok) <span class="text-danger">*</span></label>
+                            <input type="number" name="stok" class="form-control" value="1" min="1" required>
+                            <small class="text-muted">Masukkan jumlah unit yang akan ditambahkan sekaligus.</small>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="harga_beli" class="form-label">Harga Beli (Rp)</label>
-                            <input type="number" name="harga_beli" step="0.01" class="form-control" id="harga_beli" value="<?= isset($item) ? $item['harga_beli'] : '0' ?>">
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-12 mb-4">
+                        <?php endif; ?>
+                        <div class="<?= isset($item) ? 'col-md-12' : 'col-md-6' ?> mb-4">
                             <label class="form-label">Kondisi <span class="text-danger">*</span></label>
                             <select class="form-select" name="kondisi_id" required>
                                 <?php foreach($conditions as $cond): ?>
@@ -86,26 +82,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <label class="form-label">Interval Maintenance (Opsional)</label>
-                            <select class="form-select" name="maintenance_interval">
-                                <option value="">-- Tidak Ada Jadwal --</option>
-                                <option value="1" <?= (isset($item) && $item['maintenance_interval'] == 1) ? 'selected' : '' ?>>Setiap 1 Bulan</option>
-                                <option value="3" <?= (isset($item) && $item['maintenance_interval'] == 3) ? 'selected' : '' ?>>Setiap 3 Bulan</option>
-                                <option value="6" <?= (isset($item) && $item['maintenance_interval'] == 6) ? 'selected' : '' ?>>Setiap 6 Bulan</option>
-                                <option value="12" <?= (isset($item) && $item['maintenance_interval'] == 12) ? 'selected' : '' ?>>Setiap 12 Bulan (1 Tahun)</option>
-                            </select>
-                        </div>
-                        <?php if(isset($item) && $item['next_maintenance_date']): ?>
-                        <div class="col-md-6 mb-4">
-                            <label class="form-label">Maintenance Berikutnya</label>
-                            <input type="text" class="form-control text-warning" value="<?= date('d/m/Y', strtotime($item['next_maintenance_date'])) ?>" readonly>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <div class="pt-3 border-top border-secondary border-opacity-10 d-flex gap-2">
+
                         <button type="submit" class="btn btn-primary px-5">
                             <i class="bi bi-save me-2"></i> Simpan
                         </button>

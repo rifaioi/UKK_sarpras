@@ -9,7 +9,6 @@ use App\Models\PeminjamanModel;
 use App\Models\PengaduanModel;
 use App\Models\PengembalianModel;
 use App\Models\ActivityLogModel;
-use App\Models\MaintenanceReminderModel;
 
 class Dashboard extends BaseController
 {
@@ -39,9 +38,8 @@ class Dashboard extends BaseController
                                               ->limit(5)
                                               ->findAll();
 
-            $reminderModel = new MaintenanceReminderModel();
-            $reminderModel->generateReminders(); // Refresh alerts
-            $reminders = $reminderModel->getUnreadReminders();
+            $scheduleModel = new \App\Models\MaintenanceScheduleModel();
+            $upcomingMaintenance = $scheduleModel->getUpcoming(5);
 
             $data = [
                 'total_sarpras' => $sarprasModel->where('is_deleted', 0)->countAllResults(),
@@ -50,7 +48,7 @@ class Dashboard extends BaseController
                 'pengaduan_masuk' => $pengaduanModel->where('status_id', 1)->countAllResults(), // 1 = Belum Ditindaklanjuti
                 'chart_data' => json_encode($monthlyStats),
                 'recent_activities' => $recentActivities,
-                'maintenance_alerts' => $reminders
+                'upcoming_maintenance' => $upcomingMaintenance
             ];
 
             return view('admin/dashboard', $data);

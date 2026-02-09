@@ -35,6 +35,7 @@ class Sarpras extends BaseController
      */
     public function index()
     {
+        $showDeleted = $this->request->getGet('show_deleted');
         $q = $this->request->getGet('q');
         
         $query = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, kategori_sarpras.nama as nama_kategori, 
@@ -42,6 +43,12 @@ class Sarpras extends BaseController
                                              SUM(CASE WHEN sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as tersedia,
                                              MIN(sarpras.id) as id")
                                      ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id', 'left');
+
+        if ($showDeleted) {
+            $query->where('sarpras.is_deleted', 1);
+        } else {
+            $query->where('sarpras.is_deleted', 0);
+        }
 
         if ($q) {
             $query->like('sarpras.nama', $q);
@@ -237,7 +244,57 @@ class Sarpras extends BaseController
 
         $this->sarprasModel->delete($id);
         log_activity('Hapus Sarpras', "Hapus/Soft delete item id: $id");
-        return redirect()->back()->with('success', 'Data Sarpras berhasil dihapus');
+        return redirect()->to('/admin/sarpras')->with('success', 'Data Sarpras berhasil dihapus');
+    }
+
+    public function restore($id)
+    {
+        $this->sarprasModel->update($id, ['deleted_at' => null]);
+        log_activity('Restore Sarpras', "Mengembalikan item id: $id");
+        return redirect()->to('/admin/sarpras/trash')->with('success', 'Data Sarpras berhasil dikembalikan');
+    }
+
+    public function restore_group($kategoriId)
+    {
+        $nama = $this->request->getGet('nama');
+        if (!$nama) {
+            return redirect()->to('/admin/sarpras/trash')->with('error', 'Gagal restore: Nama barang tidak ditemukan.');
+        }
+
+        $this->sarprasModel->set(['deleted_at' => null])
+                           ->where('nama', $nama)
+                           ->where('kategori_id', $kategoriId)
+                           ->where('deleted_at IS NOT NULL')
+                           ->update();
+        
+        log_activity('Restore Sarpras', "Mengembalikan grup item: $nama");
+        return redirect()->to('/admin/sarpras/trash')->with('success', "Semua unit $nama berhasil dikembalikan");
+    }
+
+    public function trash()
+    {
+        $q = $this->request->getGet('q');
+        
+        $query = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, kategori_sarpras.nama as nama_kategori, 
+                                             COUNT(*) as total_unit, 
+                                             MIN(sarpras.id) as id")
+                                     ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id', 'left')
+                                     ->onlyDeleted();
+
+        if ($q) {
+            $query->like('sarpras.nama', $q);
+        }
+
+        $items = $query->groupBy('sarpras.nama, sarpras.kategori_id')
+                       ->orderBy('kategori_sarpras.nama', 'ASC')
+                       ->orderBy('sarpras.nama', 'ASC')
+                       ->findAll();
+        
+        $data = [
+            'items' => $items,
+            'q' => $q
+        ];
+        return view('admin/sarpras/trash', $data);
     }
 
     public function delete_group($kategoriId)

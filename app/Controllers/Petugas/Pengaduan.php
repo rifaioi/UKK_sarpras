@@ -19,12 +19,30 @@ class Pengaduan extends BaseController
 
     public function index()
     {
+        $statusId = $this->request->getVar('status');
+        $lokasi = $this->request->getVar('lokasi');
+
+        $builder = $this->pengaduanModel->select('pengaduan.*, users.nama_lengkap, status_pengaduan.nama_status')
+                                        ->join('users', 'users.id = pengaduan.user_id')
+                                        ->join('status_pengaduan', 'status_pengaduan.id = pengaduan.status_id')
+                                        ->where('pengaduan.is_deleted', 0);
+
+        if (!empty($statusId)) {
+            $builder->where('pengaduan.status_id', $statusId);
+        }
+
+        if (!empty($lokasi)) {
+            $builder->where('pengaduan.lokasi', $lokasi);
+        }
+
+        $locationModel = new \App\Models\LocationModel();
+        
         $data = [
-            'pengaduan' => $this->pengaduanModel->select('pengaduan.*, users.nama_lengkap, status_pengaduan.nama_status')
-                                                ->join('users', 'users.id = pengaduan.user_id')
-                                                ->join('status_pengaduan', 'status_pengaduan.id = pengaduan.status_id')
-                                                ->orderBy('pengaduan.created_at', 'DESC')
-                                                ->findAll()
+            'pengaduan' => $builder->orderBy('pengaduan.created_at', 'DESC')->findAll(),
+            'statuses' => $this->statusModel->findAll(),
+            'locations' => $locationModel->where('is_deleted', 0)->findAll(),
+            'filterStatus' => $statusId,
+            'filterLokasi' => $lokasi
         ];
         return view('petugas/pengaduan/index', $data);
     }
@@ -60,7 +78,7 @@ class Pengaduan extends BaseController
     
     public function delete($id)
     {
-         $this->pengaduanModel->delete($id);
+         $this->pengaduanModel->update($id, ['is_deleted' => 1]);
          log_activity('Hapus Pengaduan', "Menghapus pengaduan id: $id");
          return redirect()->to('/petugas/pengaduan')->with('success', 'Pengaduan dihapus');
     }

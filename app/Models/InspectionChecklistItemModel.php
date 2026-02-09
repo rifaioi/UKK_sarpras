@@ -10,8 +10,8 @@ class InspectionChecklistItemModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = true;
-    protected $allowedFields    = ['kategori_id', 'nama_item'];
+    protected $useSoftDeletes   = false;
+    protected $allowedFields    = ['kategori_id', 'nama_item', 'is_deleted'];
 
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';

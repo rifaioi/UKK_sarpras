@@ -19,7 +19,7 @@ Kelola Checklist - <?= esc($category['nama']) ?>
                 <h5 class="card-title mb-0">Tambah Item Checklist</h5>
             </div>
             <div class="card-body">
-                <form action="<?= base_url('admin/inspection-templates/store') ?>" method="post">
+                <form action="<?= base_url('admin/inspection-templates/store') ?>" method="post" class="form-confirm">
                     <?= csrf_field() ?>
                     <input type="hidden" name="kategori_id" value="<?= $category['id'] ?>">
                     
@@ -38,19 +38,22 @@ Kelola Checklist - <?= esc($category['nama']) ?>
 
     <!-- List Item -->
     <div class="col-md-8">
-        <div class="card">
-            <div class="card-header pb-0">
-                <h5 class="card-title mb-0">Daftar Item Checklist</h5>
+        <div class="card mb-4">
+            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Daftar Item Checklist Aktif</h5>
+                <a href="<?= base_url('admin/inspection-templates/trash/' . $category['id']) ?>" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-trash"></i> Recycle Bin
+                </a>
             </div>
             <div class="card-body">
                 <?php if (empty($items)) : ?>
-                    <div class="alert alert-info">Belum ada item checklist untuk kategori ini.</div>
+                    <div class="alert alert-info border-0 shadow-none" style="background: rgba(255,255,255,0.03);">Belum ada item checklist aktif untuk kategori ini.</div>
                 <?php else : ?>
                     <ul class="list-group list-group-flush">
                         <?php foreach ($items as $item) : ?>
                             <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-transparent border-secondary border-opacity-25">
                                 <span class="text-white"><?= esc($item['nama_item']) ?></span>
-                                <a href="<?= base_url('admin/inspection-templates/delete/' . $item['id']) ?>" class="btn btn-action text-danger" onclick="return confirm('Hapus item ini?')" title="Delete">
+                                <a href="<?= base_url('admin/inspection-templates/delete/' . $item['id']) ?>" class="btn btn-action text-danger btn-delete" title="Delete">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </li>
@@ -58,7 +61,6 @@ Kelola Checklist - <?= esc($category['nama']) ?>
                     </ul>
                 <?php endif; ?>
             </div>
-        </div>
     </div>
 </div>
 <?= $this->endSection() ?>

@@ -1,9 +1,12 @@
 <?= $this->extend('admin/layout') ?>
-<?= $this->Section('page_title'); ?>Data Peminjam<?= $this->endSection(); ?>
+<?= $this->Section('page_title'); ?>Data User<?= $this->endSection(); ?>
 <?= $this->section('content') ?>
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Data Peminjam</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
+    <h1 class="h2">Data User</h1>
+    <div class="btn-toolbar mb-2 mb-md-0 gap-2">
+        <a href="<?= base_url('admin/users/trash') ?>" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-trash"></i> Recycle Bin
+        </a>
         <a href="<?= base_url('admin/users/create') ?>" class="btn btn-tambah btn-sm-tambah">
             <i class="bi bi-person-plus-fill me-1"></i> Tambah User
         </a>
@@ -39,11 +42,11 @@
                 </td>
                 <td><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>
                 <td>
-                    <div class="d-flex gap-1">
+                    <div class="d-flex gap-1 justify-content-center">
                         <a href="<?= base_url('admin/users/edit/'.$user['id']) ?>" class="btn btn-action text-warning" title="Edit">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <a href="<?= base_url('admin/users/delete/'.$user['id']) ?>" class="btn btn-action text-danger" title="Delete">
+                        <a href="<?= base_url('admin/users/delete/'.$user['id']) ?>" class="btn btn-action text-danger btn-delete" title="Delete">
                             <i class="bi bi-trash"></i>
                         </a>
                     </div>

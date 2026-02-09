@@ -51,6 +51,14 @@ class Peminjaman extends PetugasPeminjaman
 
         $rejectionReason = $this->request->getPost('rejection_reason');
 
+        if ($peminjaman['status_id'] == 2) {
+            // Restore unit if it was already reserved/approved
+            $this->sarprasModel->skipValidation(true)->update($peminjaman['sarpras_id'], [
+                'stok' => 1,
+                'status' => 'tersedia'
+            ]);
+        }
+
         $this->peminjamanModel->update($id, [
             'status_id' => 3,
             'rejection_reason' => $rejectionReason
@@ -58,7 +66,7 @@ class Peminjaman extends PetugasPeminjaman
 
         log_activity('Tolak Peminjaman', "Menolak peminjaman id: $id" . ($rejectionReason ? " dengan alasan: $rejectionReason" : ""));
         
-        return redirect()->to('/admin/peminjaman')->with('success', 'Peminjaman ditolak');
+        return redirect()->to('/admin/peminjaman')->with('success', 'Peminjaman ditolak dan stok dikembalikan');
     }
 
     /**

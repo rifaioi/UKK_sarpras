@@ -41,6 +41,14 @@
                     
                     <h5 class="fw-bold text-white mb-2"><?= esc($item['nama']) ?></h5>
                     
+                    <?php if ($item['jumlah_rusak_ringan'] > 0): ?>
+                        <div class="mb-2">
+                            <span class="badge bg-warning text-dark border-0 shadow-sm" style="font-size: 0.65rem;">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Termasuk unit Rusak Ringan
+                            </span>
+                        </div>
+                    <?php endif; ?>
+                    
                     <div class="mb-4">
                         <div class="d-flex align-items-center text-secondary small mb-2">
                             <i class="bi bi-geo-alt me-2"></i>

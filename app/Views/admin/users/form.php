@@ -9,7 +9,7 @@
     <div class="col-md-6">
 
 
-        <form action="<?= isset($user) ? base_url('admin/users/update/'.$user['id']) : base_url('admin/users/store') ?>" method="post">
+        <form action="<?= isset($user) ? base_url('admin/users/update/'.$user['id']) : base_url('admin/users/store') ?>" method="post" class="form-confirm">
             
             <div class="mb-3">
                 <label class="form-label">Username</label>

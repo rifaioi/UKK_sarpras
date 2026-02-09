@@ -8,7 +8,7 @@
                 <h5 class="mb-0">Profil Admin</h5>
             </div>
             <div class="card-body">
-                <form action="<?= base_url('admin/profile/update') ?>" method="post">
+                <form action="<?= base_url('admin/profile/update') ?>" method="post" class="form-confirm">
                     <?= csrf_field() ?>
                     <div class="mb-3">
                         <label class="form-label">Nama Lengkap</label>
@@ -30,7 +30,7 @@
                 <h5 class="mb-0">Ubah Password</h5>
             </div>
             <div class="card-body">
-                <form action="<?= base_url('admin/profile/update_password') ?>" method="post">
+                <form action="<?= base_url('admin/profile/update_password') ?>" method="post" class="form-confirm">
                     <?= csrf_field() ?>
                     <div class="mb-3 position-relative">
                         <label class="form-label">Password Lama</label>

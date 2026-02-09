@@ -59,7 +59,7 @@
 
         <div class="card border-0 shadow-sm border-start border-4 border-warning">
             <div class="card-body p-4">
-                <form action="<?= base_url('admin/pengembalian/store') ?>" method="post" enctype="multipart/form-data" id="returnForm">
+                <form action="<?= base_url('admin/pengembalian/store') ?>" method="post" enctype="multipart/form-data" id="returnForm" class="form-confirm">
                     <input type="hidden" name="peminjaman_id" value="<?= $peminjaman['id'] ?>">
                     
                     <h5 class="section-title mb-4 border-bottom pb-2">Pemeriksaan Pengembalian</h5>

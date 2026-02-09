@@ -4,7 +4,10 @@
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Inventaris Sarpras</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-toolbar mb-2 mb-md-0 gap-2">
+        <a href="<?= base_url('admin/sarpras/trash') ?>" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-trash"></i> Recycle Bin
+        </a>
         <a href="<?= base_url('admin/sarpras/create') ?>" class="btn btn-tambah btn-sm-tambah">
             <i class="bi bi-plus-lg me-1"></i> Tambah Barang
         </a>
@@ -37,7 +40,6 @@
         <tbody>
             <?php foreach ($items as $i => $item): ?>
             <tr>
-            <tr>
                 <td><?= $i+1 ?></td>
                 <td><?= esc($item['nama']) ?></td>
                 <td><?= esc($item['nama_kategori']) ?></td>
@@ -46,11 +48,11 @@
                     <span class="badge bg-secondary"><?= esc($item['total_unit']) ?> Total</span>
                 </td>
                 <td>
-                    <div class="d-flex gap-1">
+                    <div class="d-flex gap-1 justify-content-center">
                         <a href="<?= base_url('admin/sarpras/units?nama='.urlencode($item['nama']).'&kategori_id='.$item['kategori_id']) ?>" class="btn btn-action btn-sm btn-info text-white" title="Lihat Unit">
                             <i class="bi bi-list-ul"></i> Lihat Unit
                         </a>
-                        <a href="<?= base_url('admin/sarpras/delete_group/'.$item['kategori_id'].'?nama='.urlencode($item['nama'])) ?>" class="btn btn-action text-danger" title="Hapus Grup" onclick="return confirm('Yakin ingin menghapus SEMUA unit dari barang ini?')">
+                        <a href="<?= base_url('admin/sarpras/delete_group/'.$item['kategori_id'].'?nama='.urlencode($item['nama'])) ?>" class="btn btn-action text-danger btn-delete" title="Hapus Grup">
                             <i class="bi bi-trash"></i>
                         </a>
                     </div>

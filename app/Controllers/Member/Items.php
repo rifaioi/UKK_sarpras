@@ -21,11 +21,12 @@ class Items extends BaseController
 
         $query = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, MAX(sarpras.id) as id, kategori_sarpras.nama as nama_kategori, locations.nama_lokasi, 
                                              COUNT(*) as total_unit, 
-                                             SUM(CASE WHEN sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as tersedia")
+                                             SUM(CASE WHEN sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as tersedia,
+                                             SUM(CASE WHEN sarpras.kondisi_id = 2 AND sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as jumlah_rusak_ringan")
                                      ->join('locations', 'locations.id = sarpras.location_id')
                                      ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id')
                                      ->where('sarpras.is_deleted', 0)
-                                     ->where('sarpras.kondisi_id', 1); // Only Good condition base items usually
+                                     ->whereIn('sarpras.kondisi_id', [1, 2]); // T1-PINJAM-001: Baik & Rusak Ringan eligible
 
         if ($q) {
             $query->like('sarpras.nama', $q);

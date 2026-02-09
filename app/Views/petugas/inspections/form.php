@@ -62,13 +62,15 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($checklistItems as $item) : ?>
+                                    <?php foreach ($checklistItems as $item) : 
+                                        $preStatus = 'ok'; // Default for handover or missing data
+                                    ?>
                                         <tr>
                                             <td><?= esc($item['nama_item']) ?></td>
                                             
                                             <?php if ($type == 'kembali') : 
                                                 $preItem = $preBorrowResults[$item['id']] ?? null;
-                                                $preStatus = $preItem['status'] ?? '-';
+                                                $preStatus = $preItem['status'] ?? 'ok';
                                                 
                                                 $bgClass = 'table-info text-dark'; // Default comparison bg
                                                 $icon = '';
@@ -86,8 +88,11 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                                             <?php endif; ?>
 
                                             <td>
-                                                <select name="results[<?= $item['id'] ?>]" class="form-select form-select-sm" required>
-                                                    <option value="ok">OK / Baik</option>
+                                                <select name="results[<?= $item['id'] ?>]" 
+                                                        class="form-select form-select-sm status-select" 
+                                                        data-pre-status="<?= strtolower($preStatus) ?>"
+                                                        required>
+                                                    <option value="ok" <?= ($preStatus == 'ok') ? 'selected' : '' ?>>OK / Baik</option>
                                                     <option value="damaged">Rusak / Cacat</option>
                                                     <option value="missing">Hilang</option>
                                                     <option value="n/a">Tidak Ada / N/A</option>
@@ -125,4 +130,48 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selects = document.querySelectorAll('.status-select');
+    
+    function checkChanges(select) {
+        const row = select.closest('tr');
+        const preStatus = select.getAttribute('data-pre-status');
+        const currentStatus = select.value;
+        const isReturn = <?= ($type == 'kembali') ? 'true' : 'false' ?>;
+
+        if (isReturn && preStatus && preStatus !== 'n/a' && preStatus !== '-') {
+            if (currentStatus !== preStatus) {
+                row.classList.add('table-warning');
+                row.style.borderLeft = '4px solid #ffc107';
+                
+                // Add indicator if not present
+                if (!row.querySelector('.change-badge')) {
+                    const cell = row.cells[0];
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-warning text-dark ms-2 change-badge';
+                    badge.innerHTML = '<i class="bi bi-exclamation-triangle"></i> BERUBAH';
+                    cell.appendChild(badge);
+                }
+            } else {
+                row.classList.remove('table-warning');
+                row.style.borderLeft = 'none';
+                const badge = row.querySelector('.change-badge');
+                if (badge) badge.remove();
+            }
+        }
+    }
+
+    selects.forEach(select => {
+        // Initial check
+        checkChanges(select);
+        
+        // Listen for changes
+        select.addEventListener('change', function() {
+            checkChanges(this);
+        });
+    });
+});
+</script>
 <?= $this->endSection() ?>

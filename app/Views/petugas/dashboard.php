@@ -2,8 +2,8 @@
 
 <?= $this->section('content') ?>
 <h2>Dashboard Petugas</h2>
-<div class="row g-5 mb-5">
-    <div class="col-md-4">
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-4">
         <div class="card border-0 h-100 card-gradient-warning">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
@@ -11,7 +11,7 @@
                         <i class="bi bi-hourglass-split fs-3 text-warning"></i>
                     </div>
                     <div>
-                        <h6 class="text-warning small fw-bold text-uppercase mb-1">Menunggu Persetujuan</h6>
+                        <h6 class="text-warning small fw-bold text-uppercase mb-1">Menunggu Approval</h6>
                         <h2 class="fw-bold mb-0 text-warning"><?= $pending_peminjaman ?></h2>
                     </div>
                 </div>
@@ -19,7 +19,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-sm-6 col-lg-4">
         <div class="card border-0 h-100 card-gradient-success">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
@@ -31,11 +31,11 @@
                         <h2 class="fw-bold mb-0 text-success"><?= $active_peminjaman ?></h2>
                     </div>
                 </div>
-                <a href="<?= base_url('petugas/pengembalian') ?>" class="btn btn-success text-white btn-sm w-100 rounded-pill fw-bold">Kelola Pengembalian</a>
+                <a href="<?= base_url('petugas/pengembalian') ?>" class="btn btn-success text-white btn-sm w-100 rounded-pill fw-bold">Kelola Kembali</a>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-4 col-12">
         <div class="card border-0 h-100 card-gradient-danger">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
@@ -54,32 +54,37 @@
 </div>
 
 <!-- Maintenance Reminders -->
-<?php if(!empty($maintenance_reminders)): ?>
-<div class="alert alert-warning border-0 mb-4">
-    <div class="d-flex align-items-center mb-2">
-        <i class="bi bi-bell-fill fs-5 me-2"></i>
-        <h6 class="mb-0 fw-bold">Maintenance Reminders (<?= count($maintenance_reminders) ?>)</h6>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent fw-bold py-3">
+                <i class="bi bi-calendar-check text-info me-2"></i> Jadwal Maintenance Mendatang
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <?php if (empty($upcoming_maintenance)): ?>
+                        <div class="p-4 text-center text-muted small">Tidak ada jadwal maintenance terdekat.</div>
+                    <?php endif; ?>
+                    <?php foreach ($upcoming_maintenance as $m): ?>
+                        <div class="list-group-item py-3">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1 fw-bold text-white"><?= esc($m['asset_name']) ?></h6>
+                                    <small class="text-secondary small"><?= esc($m['maintenance_type']) ?> - <?= esc($m['technician']) ?></small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="badge bg-info text-dark mb-1"><?= date('d M Y', strtotime($m['scheduled_date'])) ?></div>
+                                    <a href="<?= base_url('petugas/maintenance/records') ?>" class="btn btn-sm btn-outline-info d-block">Detail</a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
     </div>
-    <ul class="mb-2">
-        <?php foreach($maintenance_reminders as $r): ?>
-        <li class="mb-1">
-            <strong><?= esc($r['nama']) ?></strong> (<?= esc($r['kode']) ?>)
-            - Due: <?= date('d/m/Y', strtotime($r['next_maintenance_date'])) ?>
-            <?php 
-            $days = (int)$r['days_until'];
-            if($days < 0): ?>
-                <span class="badge bg-danger">Terlambat <?= abs($days) ?> hari</span>
-            <?php elseif($days == 0): ?>
-                <span class="badge bg-danger">HARI INI</span>
-            <?php else: ?>
-                <span class="badge bg-warning"><?= $days ?> hari lagi</span>
-            <?php endif; ?>
-        </li>
-        <?php endforeach; ?>
-    </ul>
-    <a href="<?= base_url('petugas/maintenance/upcoming') ?>" class="btn btn-sm btn-warning">Lihat Semua</a>
 </div>
-<?php endif; ?>
+
 
 <div class="row">
     <div class="col-md-12">

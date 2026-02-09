@@ -8,20 +8,28 @@ use App\Models\KategoriSarprasModel;
 class Categories extends BaseController
 {
     protected $categoryModel;
+    protected $sarprasModel;
 
     public function __construct()
     {
         $this->categoryModel = new KategoriSarprasModel();
+        $this->sarprasModel = new \App\Models\SarprasModel();
     }
 
     public function index()
     {
         $data = [
-            'categories' => $this->categoryModel->where('is_deleted', 0)
-                                                ->orderBy('nama', 'ASC')
-                                                ->findAll()
+            'categories' => $this->categoryModel->where('is_deleted', 0)->orderBy('nama', 'ASC')->findAll()
         ];
         return view('admin/categories/index', $data);
+    }
+
+    public function trash()
+    {
+        $data = [
+            'categories' => $this->categoryModel->where('is_deleted', 1)->orderBy('nama', 'ASC')->findAll()
+        ];
+        return view('admin/categories/trash', $data);
     }
 
     public function create()
@@ -32,7 +40,7 @@ class Categories extends BaseController
     public function store()
     {
         $rules = [
-            'nama' => 'required|min_length[3]',
+            'nama' => 'required',
         ];
 
         if (!$this->validate($rules)) {
@@ -42,6 +50,7 @@ class Categories extends BaseController
         $this->categoryModel->save([
             'nama' => $this->request->getVar('nama'),
             'expected_lifespan' => $this->request->getVar('expected_lifespan') ?? 5,
+            'is_deleted' => 0
         ]);
 
         return redirect()->to('/admin/categories')->with('success', 'Kategori berhasil ditambahkan');
@@ -58,7 +67,7 @@ class Categories extends BaseController
     public function update($id)
     {
         $rules = [
-            'nama' => "required|min_length[3]",
+            'nama' => "required",
         ];
 
         if (!$this->validate($rules)) {
@@ -76,7 +85,22 @@ class Categories extends BaseController
 
     public function delete($id)
     {
+        // Check if there are assets in this category
+        $hasAssets = $this->sarprasModel->where('kategori_id', $id)
+                                        ->where('is_deleted', 0)
+                                        ->countAllResults();
+
+        if ($hasAssets > 0) {
+            return redirect()->back()->with('error', 'Kategori tidak bisa dihapus karena masih memiliki barang di dalamnya.');
+        }
+
         $this->categoryModel->update($id, ['is_deleted' => 1]);
         return redirect()->to('/admin/categories')->with('success', 'Kategori berhasil dihapus');
+    }
+
+    public function restore($id)
+    {
+        $this->categoryModel->update($id, ['is_deleted' => 0]);
+        return redirect()->to('/admin/categories?show_deleted=1')->with('success', 'Kategori berhasil dikembalikan');
     }
 }

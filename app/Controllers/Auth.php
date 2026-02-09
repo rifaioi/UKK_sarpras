@@ -38,11 +38,11 @@ class Auth extends BaseController
                 log_activity('Login', 'User logged in');
                 return redirect()->to('/dashboard');
             } else {
-                $session->setFlashdata('msg', 'Password Salah');
+                $session->setFlashdata('error', 'Password Salah');
                 return redirect()->to('/');
             }
         } else {
-            $session->setFlashdata('msg', 'Username tidak ditemukan');
+            $session->setFlashdata('error', 'Username tidak ditemukan');
             return redirect()->to('/');
         }
     }

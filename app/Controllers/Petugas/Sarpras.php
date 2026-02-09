@@ -16,17 +16,28 @@ class Sarpras extends BaseController
 
     public function index()
     {
-        $items = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, kategori_sarpras.nama as nama_kategori, 
+        $q = $this->request->getGet('q');
+        
+        $query = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, kategori_sarpras.nama as nama_kategori, 
                                              COUNT(*) as total_unit, 
                                              SUM(CASE WHEN sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as tersedia,
                                              MIN(sarpras.id) as id")
                                      ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id', 'left')
-                                     ->groupBy('sarpras.nama, sarpras.kategori_id')
-                                     ->orderBy('kategori_sarpras.nama', 'ASC')
-                                     ->orderBy('sarpras.nama', 'ASC')
-                                     ->findAll();
+                                     ->where('sarpras.is_deleted', 0);
+
+        if ($q) {
+            $query->like('sarpras.nama', $q);
+        }
+
+        $items = $query->groupBy('sarpras.nama, sarpras.kategori_id')
+                       ->orderBy('kategori_sarpras.nama', 'ASC')
+                       ->orderBy('sarpras.nama', 'ASC')
+                       ->findAll();
         
-        $data = ['items' => $items];
+        $data = [
+            'items' => $items,
+            'q' => $q
+        ];
         return view('petugas/sarpras/index', $data);
     }
 

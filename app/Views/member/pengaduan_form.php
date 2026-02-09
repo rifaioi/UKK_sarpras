@@ -10,7 +10,7 @@
         <div class="card">
             <div class="card-header">Buat Pengaduan</div>
             <div class="card-body">
-                <form action="<?= base_url('member/pengaduan/store') ?>" method="post" enctype="multipart/form-data">
+                <form action="<?= base_url('member/pengaduan/store') ?>" method="post" enctype="multipart/form-data" class="form-confirm">
                     <div class="mb-3">
                         <label class="form-label">Judul Laporan</label>
                         <input type="text" class="form-control" name="judul" required placeholder="Contoh: AC Bocor">
