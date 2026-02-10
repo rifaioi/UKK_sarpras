@@ -1,4 +1,4 @@
-<?= $this->extend($role . '/layout') ?>
+n<?= $this->extend($role . '/layout') ?>
 
 <?= $this->section('page_title') ?>
 Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
@@ -37,10 +37,10 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                                     <tr>
                                         <th style="width: 30%;">Bagian / Item</th>
                                         <?php if ($type == 'kembali') : ?>
-                                            <th class="table-info text-dark" style="width: 20%;">Kondisi Keluar</th>
+                                            <th class="text-white-50" style="width: 20%; background: rgba(161, 107, 255, 0.05);">Kondisi Keluar</th>
                                         <?php endif; ?>
                                         <th style="width: 25%;">Kondisi Saat Ini</th>
-                                        <th>Keterangan (Opsional)</th>
+                                        <th id="column-keterangan">Detail Masalah / Catatan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -54,17 +54,16 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                                                 $preItem = $preBorrowResults[$item['id']] ?? null;
                                                 $preStatus = $preItem['status'] ?? 'ok';
                                                 
-                                                $bgClass = 'table-info text-dark'; // Default comparison bg
                                                 $icon = '';
                                                 
                                                 if ($preStatus == 'ok') $icon = '<i class="bi bi-check-circle-fill text-success"></i> ';
                                                 if ($preStatus == 'damaged') $icon = '<i class="bi bi-exclamation-circle-fill text-danger"></i> ';
                                                 if ($preStatus == 'missing') $icon = '<i class="bi bi-x-circle-fill text-danger"></i> ';
                                             ?>
-                                                <td class="<?= $bgClass ?>">
-                                                    <?= $icon . strtoupper($preStatus) ?>
+                                                <td style="background: rgba(161, 107, 255, 0.03); border-right: 1px solid var(--border-glass);">
+                                                    <span class="small text-white opacity-75"><?= $icon . strtoupper($preStatus) ?></span>
                                                     <?php if(!empty($preItem['description'])): ?>
-                                                        <div class="small fst-italic text-muted">(<?= esc($preItem['description']) ?>)</div>
+                                                        <div class="small fst-italic text-white-50">(<?= esc($preItem['description']) ?>)</div>
                                                     <?php endif; ?>
                                                 </td>
                                             <?php endif; ?>
@@ -81,7 +80,11 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                                                 </select>
                                             </td>
                                             <td>
-                                                <input type="text" name="descriptions[<?= $item['id'] ?>]" class="form-control form-control-sm" placeholder="Detail kerusakan...">
+                                                <input type="text" 
+                                                       name="descriptions[<?= $item['id'] ?>]" 
+                                                       class="form-control form-control-sm item-desc" 
+                                                       placeholder="Catatan jika ada masalah..."
+                                                       data-item-name="<?= esc($item['nama_item']) ?>">
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -92,7 +95,7 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
 
                     <!-- Bukti Foto Section -->
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Bukti Foto (Wajib)</label>
+                        <label class="form-label fw-bold"><?= $type == 'kembali' ? 'Perbandingan Bukti Foto (Wajib)' : 'Bukti Foto (Wajib)' ?></label>
                         
                         <?php if ($type == 'kembali') : ?>
                             <!-- Comparison Layout for Returns -->
@@ -118,7 +121,7 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                                         <div class="col-md-6">
                                             <h6 class="text-primary mb-3 small text-uppercase">Kondisi Sekarang (Baru)</h6>
                                             
-                                            <div class="mb-3">
+                                            <div class="mb-3 text-start">
                                                 <input type="file" class="form-control form-control-sm" name="photo" id="photo" accept="image/*" required onchange="previewImage(this)">
                                             </div>
 
@@ -143,8 +146,8 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                     </div>
 
                     <div class="mb-3">
-                        <label for="notes" class="form-label fw-bold">Catatan Tambahan</label>
-                        <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
+                        <label for="notes" class="form-label fw-bold" id="notes-label">Catatan Tambahan</label>
+                        <textarea class="form-control" name="notes" id="notes" rows="3" placeholder="Sebutkan detail kondisi atau alasan jika ada masalah..."></textarea>
                     </div>
 
                     <div class="d-flex gap-2 mt-4">
@@ -173,22 +176,67 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (isReturn && preStatus && preStatus !== 'n/a' && preStatus !== '-') {
             if (currentStatus !== preStatus) {
-                row.classList.add('table-warning');
-                row.style.borderLeft = '4px solid #ffc107';
+                row.style.backgroundColor = 'rgba(161, 107, 255, 0.15)';
+                row.style.borderLeft = '4px solid var(--accent-purple)';
                 
                 // Add indicator if not present
                 if (!row.querySelector('.change-badge')) {
                     const cell = row.cells[0];
                     const badge = document.createElement('span');
-                    badge.className = 'badge bg-warning text-dark ms-2 change-badge';
+                    badge.className = 'badge ms-2 change-badge';
+                    badge.style.background = 'var(--accent-purple)';
+                    badge.style.color = 'white';
                     badge.innerHTML = '<i class="bi bi-exclamation-triangle"></i> BERUBAH';
                     cell.appendChild(badge);
                 }
             } else {
-                row.classList.remove('table-warning');
+                row.style.backgroundColor = '';
                 row.style.borderLeft = 'none';
                 const badge = row.querySelector('.change-badge');
                 if (badge) badge.remove();
+            }
+        }
+
+        // T1-KEMBALI-REQUIRED-LOGIC
+        updateNotesRequirement();
+    }
+
+    function updateNotesRequirement() {
+        if (<?= ($type == 'kembali' ? 'true' : 'false') ?>) {
+            const allSelects = document.querySelectorAll('.status-select');
+            const notesTextarea = document.getElementById('notes');
+            const notesLabel = document.getElementById('notes-label');
+            
+            let hasIssue = false;
+            allSelects.forEach(s => {
+                const row = s.closest('tr');
+                const descInput = row.querySelector('.item-desc');
+                
+                if (s.value === 'damaged' || s.value === 'missing') {
+                    hasIssue = true;
+                    // Item-level mandatory logic
+                    if (descInput) {
+                        descInput.required = true;
+                        descInput.classList.add('border-danger');
+                        descInput.placeholder = "WAJIB: Jelaskan masalah " + descInput.getAttribute('data-item-name') + "...";
+                    }
+                } else {
+                    if (descInput) {
+                        descInput.required = false;
+                        descInput.classList.remove('border-danger');
+                        descInput.placeholder = "Catatan jika ada masalah...";
+                    }
+                }
+            });
+
+            if (hasIssue) {
+                notesTextarea.required = true;
+                notesLabel.innerHTML = 'Catatan Tambahan <span class="text-danger">* (Sertakan kesimpulan kerusakan)</span>';
+                notesTextarea.classList.add('border-danger');
+            } else {
+                notesTextarea.required = false;
+                notesLabel.innerHTML = 'Catatan Tambahan';
+                notesTextarea.classList.remove('border-danger');
             }
         }
     }

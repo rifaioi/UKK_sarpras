@@ -259,8 +259,12 @@ class Sarpras extends BaseController
         return redirect()->to('/admin/sarpras/trash')->with('success', 'Data Sarpras berhasil dikembalikan');
     }
 
-    public function restore_group($kategoriId)
+    public function restore_group($kategoriId = null)
     {
+        if ($kategoriId === null) {
+            return redirect()->to('/admin/sarpras/trash')->with('error', 'ID Kategori tidak valid.');
+        }
+
         $nama = $this->request->getGet('nama');
         if (!$nama) {
             return redirect()->to('/admin/sarpras/trash')->with('error', 'Gagal restore: Nama barang tidak ditemukan.');
@@ -274,6 +278,11 @@ class Sarpras extends BaseController
         
         log_activity('Restore Sarpras', "Mengembalikan grup item: $nama");
         return redirect()->to('/admin/sarpras/trash')->with('success', "Semua unit $nama berhasil dikembalikan");
+    }
+
+    public function restore_group_redirect()
+    {
+        return redirect()->to('/admin/sarpras/trash')->with('error', 'ID Kategori tidak valid.');
     }
 
     public function trash()
@@ -300,6 +309,20 @@ class Sarpras extends BaseController
             'q' => $q
         ];
         return view('admin/sarpras/trash', $data);
+    }
+
+    public function delete_permanently($id)
+    {
+        // Check if item is already soft-deleted
+        $item = $this->sarprasModel->onlyDeleted()->find($id);
+        
+        if (!$item) {
+             return redirect()->to('/admin/sarpras/trash')->with('error', 'Item tidak ditemukan di sampah.');
+        }
+
+        $this->sarprasModel->delete($id, true); // true = hard delete
+        log_activity('Hapus Permanen', "Menghapus permanen item id: $id");
+        return redirect()->to('/admin/sarpras/trash')->with('success', 'Item berhasil dihapus permanen.');
     }
 
     public function delete_group($kategoriId)
@@ -376,5 +399,40 @@ class Sarpras extends BaseController
 
         $data = ['item' => $item];
         return view('admin/sarpras/detail', $data);
+    }
+
+    /**
+     * Rename an entire group of assets
+     */
+    public function rename_group()
+    {
+        $oldName = $this->request->getPost('old_name');
+        $newName = $this->request->getPost('new_name');
+        $kategoriId = $this->request->getPost('kategori_id');
+
+        if (!$oldName || !$newName || !$kategoriId) {
+            return redirect()->back()->with('error', 'Data tidak lengkap.');
+        }
+
+        if ($oldName === $newName) {
+            return redirect()->back()->with('info', 'Nama baru sama dengan nama lama.');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $this->sarprasModel->set(['nama' => $newName])
+                           ->where('nama', $oldName)
+                           ->where('kategori_id', $kategoriId)
+                           ->update();
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Gagal mengubah nama barang.');
+        }
+
+        log_activity('Rename Group Sarpras', "Mengubah nama grup '$oldName' menjadi '$newName'");
+        return redirect()->to('/admin/sarpras')->with('success', "Grup '$oldName' berhasil diubah menjadi '$newName'");
     }
 }

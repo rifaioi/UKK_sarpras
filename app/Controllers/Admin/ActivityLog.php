@@ -56,7 +56,7 @@ class ActivityLog extends BaseController
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['ID', 'Waktu', 'User', 'Role', 'Aksi', 'Deskripsi']);
+        fputcsv($output, ['ID', 'Waktu', 'User', 'Role', 'Aksi', 'Deskripsi', 'IP Address', 'Metadata']);
 
         foreach ($logs as $log) {
             fputcsv($output, [
@@ -65,7 +65,9 @@ class ActivityLog extends BaseController
                 $log['nama_lengkap'] ?? 'System',
                 $log['nama_role'] ?? 'N/A',
                 $log['aksi'],
-                $log['deskripsi']
+                $log['deskripsi'],
+                $log['ip_address'],
+                $log['metadata']
             ]);
         }
 

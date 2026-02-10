@@ -53,10 +53,10 @@
     </div>
 </div>
 
-<!-- Maintenance Reminders -->
+<!-- Maintenance Schedule -->
 <div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card border-0 shadow-sm">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-transparent fw-bold py-3">
                 <i class="bi bi-calendar-check text-info me-2"></i> Jadwal Maintenance Mendatang
             </div>

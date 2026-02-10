@@ -123,8 +123,8 @@
                     <p><strong>Barang:</strong> <?= esc($p['nama_barang']) ?> (<?= $p['jumlah'] ?>)</p>
                     
                     <div class="mb-3">
-                        <label for="rejection_reason<?= $p['id'] ?>" class="form-label">Alasan Penolakan (Opsional)</label>
-                        <textarea class="form-control" id="rejection_reason<?= $p['id'] ?>" name="rejection_reason" rows="3" placeholder="Masukkan alasan penolakan..."></textarea>
+                        <label for="rejection_reason<?= $p['id'] ?>" class="form-label">Alasan Penolakan <span class="text-danger">* (Wajib, min 20 karakter)</span></label>
+                        <textarea class="form-control" id="rejection_reason<?= $p['id'] ?>" name="rejection_reason" rows="3" placeholder="Masukkan alasan penolakan..." required minlength="20"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

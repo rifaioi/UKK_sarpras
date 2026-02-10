@@ -76,10 +76,4 @@ class Pengaduan extends BaseController
         return redirect()->back()->with('success', 'Status diubah menjadi Selesai');
     }
     
-    public function delete($id)
-    {
-         $this->pengaduanModel->update($id, ['is_deleted' => 1]);
-         log_activity('Hapus Pengaduan', "Menghapus pengaduan id: $id");
-         return redirect()->to('/petugas/pengaduan')->with('success', 'Pengaduan dihapus');
-    }
 }

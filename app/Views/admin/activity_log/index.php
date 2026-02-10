@@ -44,6 +44,8 @@
                 <th>Role</th>
                 <th>Aksi</th>
                 <th>Deskripsi</th>
+                <th>IP Address</th>
+                <th>Metadata</th>
                 <th>Waktu</th>
             </tr>
         </thead>
@@ -55,6 +57,8 @@
                 <td><span class="badge bg-secondary"><?= esc($log['nama_role']) ?></span></td>
                 <td><span class="badge bg-primary"><?= esc($log['aksi']) ?></span></td>
                 <td><?= esc($log['deskripsi']) ?></td>
+                <td><small class="font-monospace"><?= esc($log['ip_address'] ?: '-') ?></small></td>
+                <td><small><?= esc($log['metadata'] ?: '-') ?></small></td>
                 <td><?= date('d/m/Y H:i', strtotime($log['created_at'])) ?></td>
             </tr>
             <?php endforeach; ?>

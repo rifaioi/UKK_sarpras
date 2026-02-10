@@ -74,7 +74,7 @@
                 <td><?= esc($p['nama_lengkap']) ?></td>
                 <td><?= esc($p['judul']) ?></td>
                 <td><?= esc($p['lokasi']) ?></td>
-                <td><?= date('d/m/Y', strtotime($p['created_at'])) ?></td>
+                <td><?= date('d/m/Y H:i', strtotime($p['created_at'])) ?></td>
                 <td>
                     <span class="badge bg-secondary"><?= esc($p['nama_status']) ?></span>
                 </td>

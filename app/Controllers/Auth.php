@@ -38,11 +38,13 @@ class Auth extends BaseController
                 log_activity('Login', 'User logged in');
                 return redirect()->to('/dashboard');
             } else {
-                $session->setFlashdata('error', 'Password Salah');
+                log_activity('Login Gagal', 'Username ditemukan, tapi password salah', 'Password Salah');
+                $session->setFlashdata('error', 'Username atau Password Salah');
                 return redirect()->to('/');
             }
         } else {
-            $session->setFlashdata('error', 'Username tidak ditemukan');
+            log_activity('Login Gagal', 'Upaya login gagal untuk username: '.$username, 'Username/Password Salah (Keduanya)');
+            $session->setFlashdata('error', 'Username atau Password Salah');
             return redirect()->to('/');
         }
     }

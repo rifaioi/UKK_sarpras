@@ -46,7 +46,7 @@
                         <a href="<?= base_url('admin/users/edit/'.$user['id']) ?>" class="btn btn-action text-warning" title="Edit">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <a href="<?= base_url('admin/users/delete/'.$user['id']) ?>" class="btn btn-action text-danger btn-delete" title="Delete">
+                        <a href="<?= base_url('admin/users/delete/'.$user['id']) ?>" class="btn btn-action text-danger btn-delete" title="Delete" <?= $user['id'] == session()->get('id') ? 'onclick="return confirm(\'PERINGATAN: Anda akan menghapus akun Anda sendiri dan akan langsung dikeluarkan dari sistem. Lanjutkan?\')"' : '' ?>>
                             <i class="bi bi-trash"></i>
                         </a>
                     </div>

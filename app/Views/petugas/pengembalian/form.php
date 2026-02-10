@@ -76,8 +76,8 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Laporan / Catatan Tambahan</label>
-                        <textarea class="form-control" name="deskripsi" rows="3" placeholder="Sebutkan jika ada kerusakan kecil, lecet, atau kelengkapan yang hilang..."></textarea>
+                        <label class="form-label fw-bold" id="desc-label">Laporan / Catatan Tambahan</label>
+                        <textarea class="form-control" name="deskripsi" id="deskripsi" rows="3" placeholder="Sebutkan jika ada kerusakan kecil, lecet, atau kelengkapan yang hilang..."></textarea>
                     </div>
 
                     <div class="mb-4">
@@ -112,6 +112,27 @@
 <script>
     document.getElementById('confirmReturn').addEventListener('change', function() {
         document.getElementById('btnSubmit').disabled = !this.checked;
+    });
+
+    // T1-KEMBALI-MANDATORY-JS
+    const kondisiSelect = document.querySelector('select[name="kondisi_id"]');
+    const descTextarea = document.getElementById('deskripsi');
+    const descLabel = document.getElementById('desc-label');
+
+    kondisiSelect.addEventListener('change', function() {
+        const val = this.value;
+        // ID 1 is 'Baik'. If anything else (2: Rusak Ringan, 3: Rusak Berat, 4: Hilang), make it required.
+        if (val != "" && val != "1") {
+            descTextarea.required = true;
+            descLabel.innerHTML = 'Laporan / Catatan Tambahan <span class="text-danger">* (Wajib diisi jika rusak/hilang)</span>';
+            descTextarea.classList.add('border-danger');
+            descTextarea.placeholder = "WAJIB: Jelaskan detail kerusakan atau alasan kehilangan barang di sini...";
+        } else {
+            descTextarea.required = false;
+            descLabel.innerHTML = 'Laporan / Catatan Tambahan';
+            descTextarea.classList.remove('border-danger');
+            descTextarea.placeholder = "Sebutkan jika ada kerusakan kecil, lecet, atau kelengkapan yang hilang...";
+        }
     });
 </script>
 <?= $this->endSection() ?>

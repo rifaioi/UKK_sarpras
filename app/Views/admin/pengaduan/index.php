@@ -5,9 +5,6 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Manajemen Pengaduan</h1>
     <div class="btn-toolbar mb-2 mb-md-0 gap-2">
-        <a href="<?= base_url('admin/pengaduan/trash') ?>" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-trash"></i> Recycle Bin
-        </a>
     </div>
 </div>
 <div class="card border-0 shadow-sm mb-3">
@@ -69,7 +66,7 @@
                     <?php foreach($pengaduan as $i => $p): ?>
                     <tr>
                         <td><?= $i+1 ?></td>
-                        <td><?= date('d/m/Y', strtotime($p['created_at'])) ?></td>
+                        <td><?= date('d/m/Y H:i', strtotime($p['created_at'])) ?></td>
                         <td><?= esc($p['nama_lengkap']) ?></td>
                         <td>
                             <strong><?= esc($p['judul']) ?></strong><br>
@@ -102,9 +99,6 @@
                                     data-bs-toggle="modal" data-bs-target="#updateModal" title="Update">
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
-                                <a href="<?= base_url('admin/pengaduan/delete/'.$p['id']) ?>" class="btn btn-action text-danger btn-delete" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </a>
                             </div>
                         </td>
                     </tr>
@@ -177,6 +171,21 @@
                 modalStatus.value = this.getAttribute('data-status');
                 modalCatatan.value = this.getAttribute('data-catatan');
                 modalDeskripsi.textContent = this.getAttribute('data-deskripsi');
+                
+                // Logic: If status is Selesai (3) or Ditutup (4), disable ONLY the note
+                if (modalStatus.value == 3 || modalStatus.value == 4) {
+                    modalStatus.disabled = false; // Status tetap bisa diubah
+                    modalCatatan.disabled = true; // Catatan terkunci
+                    modalCatatan.readOnly = true;
+                    document.querySelector('.form-confirm button[type="submit"]').disabled = false;
+                    document.querySelector('.form-confirm button[type="submit"]').textContent = 'Simpan';
+                } else {
+                    modalStatus.disabled = false;
+                    modalCatatan.disabled = false;
+                    modalCatatan.readOnly = false;
+                    document.querySelector('.form-confirm button[type="submit"]').disabled = false;
+                    document.querySelector('.form-confirm button[type="submit"]').textContent = 'Simpan';
+                }
             });
         });
     });

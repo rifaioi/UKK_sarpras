@@ -63,7 +63,7 @@
                     <?php foreach($pengaduan as $i => $p): ?>
                     <tr>
                         <td><?= $i+1 ?></td>
-                        <td><?= date('d/m/Y', strtotime($p['created_at'])) ?></td>
+                        <td><?= date('d/m/Y H:i', strtotime($p['created_at'])) ?></td>
                         <td><?= esc($p['nama_lengkap']) ?></td>
                         <td>
                             <strong><?= esc($p['judul']) ?></strong><br>
@@ -98,9 +98,6 @@
                                     data-bs-toggle="modal" data-bs-target="#updateModal" title="Update Status">
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
-                                <a href="<?= base_url('petugas/pengaduan/delete/'.$p['id']) ?>" class="btn btn-action text-danger btn-delete" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </a>
                             </div>
                         </td>
                     </tr>
@@ -173,6 +170,21 @@
                 modalStatus.value = this.getAttribute('data-status');
                 modalCatatan.value = this.getAttribute('data-catatan');
                 modalDeskripsi.textContent = this.getAttribute('data-deskripsi');
+
+                // Logic: If status is Selesai (3) or Ditutup (4), disable ONLY the note
+                if (modalStatus.value == 3 || modalStatus.value == 4) {
+                    modalStatus.disabled = false; // Status tetap bisa diubah
+                    modalCatatan.disabled = true; // Catatan terkunci
+                    modalCatatan.readOnly = true;
+                    document.querySelector('.form-confirm button[type="submit"]').disabled = false;
+                    document.querySelector('.form-confirm button[type="submit"]').textContent = 'Simpan';
+                } else {
+                    modalStatus.disabled = false;
+                    modalCatatan.disabled = false;
+                    modalCatatan.readOnly = false;
+                    document.querySelector('.form-confirm button[type="submit"]').disabled = false;
+                    document.querySelector('.form-confirm button[type="submit"]').textContent = 'Simpan';
+                }
             });
         });
     });

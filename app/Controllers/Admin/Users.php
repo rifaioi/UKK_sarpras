@@ -111,6 +111,11 @@ class Users extends BaseController
         }
 
         if ($this->userModel->save($data)) {
+            // Update session if editing self
+            if ($id == session()->get('id')) {
+                session()->set('nama', $data['nama_lengkap']);
+                session()->set('username', $data['username']);
+            }
             log_activity('Update User', "Memperbarui profil user ID: $id (" . $data['username'] . ")");
             return redirect()->to('/admin/users')->with('success', 'User berhasil diperbarui');
         } else {
@@ -120,8 +125,16 @@ class Users extends BaseController
 
     public function delete($id)
     {
+        $currentUserId = session()->get('id');
+        
         $this->userModel->update($id, ['is_deleted' => 1]);
         log_activity('Hapus User', "Menghapus user id: $id");
+
+        if ($id == $currentUserId) {
+            session()->destroy();
+            return redirect()->to('/')->with('success', 'Akun Anda telah dihapus. Anda telah dikeluarkan dari sistem.');
+        }
+
         return redirect()->to('/admin/users')->with('success', 'User berhasil dihapus');
     }
 

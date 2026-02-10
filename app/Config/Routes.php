@@ -46,6 +46,7 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     
     // Sarpras (Master Items & Units)
     $routes->get('sarpras', 'Admin\Sarpras::index');
+    $routes->post('sarpras/rename_group', 'Admin\Sarpras::rename_group');
     $routes->get('sarpras/trash', 'Admin\Sarpras::trash');
     $routes->get('sarpras/create', 'Admin\Sarpras::create');
     $routes->get('sarpras/create/(:num)', 'Admin\Sarpras::create/$1');
@@ -57,7 +58,9 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
     $routes->get('sarpras/delete/(:num)', 'Admin\Sarpras::delete/$1');
     $routes->get('sarpras/delete_group/(:num)', 'Admin\Sarpras::delete_group/$1');
     $routes->get('sarpras/restore/(:num)', 'Admin\Sarpras::restore/$1');
+    $routes->get('sarpras/restore_group', 'Admin\Sarpras::restore_group_redirect'); // Fallback or direct access
     $routes->get('sarpras/restore_group/(:num)', 'Admin\Sarpras::restore_group/$1');
+    $routes->get('sarpras/delete_permanently/(:num)', 'Admin\Sarpras::delete_permanently/$1');
 
     /** 
      * TRANSAKSI 
@@ -87,12 +90,9 @@ $routes->group('admin', ['filter' => 'admin'], function($routes) {
 
     // Pengaduan
     $routes->get('pengaduan', 'Admin\Pengaduan::index');
-    $routes->get('pengaduan/trash', 'Admin\Pengaduan::trash');
     $routes->get('pengaduan/process/(:num)', 'Admin\Pengaduan::process/$1');
     $routes->get('pengaduan/complete/(:num)', 'Admin\Pengaduan::complete/$1');
     $routes->post('pengaduan/update_status', 'Admin\Pengaduan::update_status');
-    $routes->get('pengaduan/delete/(:num)', 'Admin\Pengaduan::delete/$1');
-    $routes->get('pengaduan/restore/(:num)', 'Admin\Pengaduan::restore/$1');
 
     // Inspections & Checklists
     $routes->get('inspection-templates', 'Admin\InspectionTemplates::index');
@@ -209,7 +209,6 @@ $routes->group('petugas', ['filter' => 'petugas'], function($routes) {
     $routes->get('pengaduan/process/(:num)', 'Petugas\Pengaduan::process/$1');
     $routes->get('pengaduan/complete/(:num)', 'Petugas\Pengaduan::complete/$1');
     $routes->post('pengaduan/update_status', 'Petugas\Pengaduan::update_status');
-    $routes->get('pengaduan/delete/(:num)', 'Petugas\Pengaduan::delete/$1');
 
     /** 
      * MAINTENANCE & INSPECTIONS 

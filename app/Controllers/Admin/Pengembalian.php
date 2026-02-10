@@ -13,7 +13,7 @@ class Pengembalian extends PetugasPengembalian
      */
     public function form($peminjaman_id)
     {
-        return redirect()->to("/admin/inspections/create/$peminjaman_id?type=post-return");
+        return redirect()->to("/admin/inspections/create/$peminjaman_id?type=kembali");
     }
 
     /**

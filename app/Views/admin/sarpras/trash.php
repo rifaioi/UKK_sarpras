@@ -53,6 +53,9 @@
                         <a href="<?= base_url('admin/sarpras/restore_group/'.$item['kategori_id'].'?nama='.urlencode($item['nama'])) ?>" class="btn btn-action text-success btn-confirm" title="Restore Grup">
                             <i class="bi bi-arrow-counterclockwise"></i> Restore
                         </a>
+                        <a href="<?= base_url('admin/sarpras/delete_group/'.$item['kategori_id'].'?nama='.urlencode($item['nama'])) ?>" class="btn btn-action text-danger btn-delete-permanent" title="Hapus Permanen" onclick="return confirm('Yakin ingin menghapus permanen grup ini? Data tidak bisa dikembalikan.')">
+                            <i class="bi bi-trash"></i> Hapus
+                        </a>
                     </div>
                 </td>
             </tr>

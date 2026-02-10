@@ -36,12 +36,18 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label>Tanggal Mulai Pinjam</label>
-                            <input type="date" name="tgl_pinjam" class="form-control" required min="<?= date('Y-m-d') ?>">
+                            <input type="date" name="tgl_pinjam" id="tgl_pinjam" class="form-control" required min="<?= date('Y-m-d') ?>">
+                            <small class="text-info"><i class="bi bi-info-circle"></i> Hanya hari Senin - Jumat</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Estimasi Kembali</label>
-                            <input type="date" name="tgl_kembali_rencana" class="form-control" required min="<?= date('Y-m-d') ?>">
+                            <input type="date" name="tgl_kembali_rencana" id="tgl_kembali_rencana" class="form-control" required min="<?= date('Y-m-d') ?>">
+                            <small class="text-info"><i class="bi bi-info-circle"></i> Maksimal 7 hari</small>
                         </div>
+                    </div>
+                    
+                    <div id="date-warning" class="alert alert-warning py-2 mb-0 d-none" style="font-size: 0.85rem;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="warning-text"></span>
                     </div>
                     <div class="d-flex gap-2 mt-4">
                         <button type="submit" class="btn btn-primary px-4 flex-grow-1">
@@ -56,4 +62,56 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tglPinjam = document.getElementById('tgl_pinjam');
+    const tglKembali = document.getElementById('tgl_kembali_rencana');
+    const warningDiv = document.getElementById('date-warning');
+    const warningText = document.getElementById('warning-text');
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    function validateDates() {
+        submitBtn.disabled = false;
+        warningDiv.classList.add('d-none');
+
+        const pinjamVal = tglPinjam.value;
+        const kembaliVal = tglKembali.value;
+
+        if (!pinjamVal) return;
+
+        // Check weekend
+        const date = new Date(pinjamVal);
+        const day = date.getUTCDay(); // 0 is Sunday, 6 is Saturday
+        if (day === 0 || day === 6) {
+            warningText.innerText = 'Peminjaman tidak diperbolehkan pada hari Sabtu atau Minggu.';
+            warningDiv.classList.remove('d-none');
+            submitBtn.disabled = true;
+            return;
+        }
+
+        if (!kembaliVal) return;
+
+        // Check duration
+        const start = new Date(pinjamVal);
+        const end = new Date(kembaliVal);
+        const diffInMs = end - start;
+        const diffDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+        if (diffInMs < 0) {
+            warningText.innerText = 'Tanggal kembali tidak boleh lebih kecil dari tanggal pinjam.';
+            warningDiv.classList.remove('d-none');
+            submitBtn.disabled = true;
+        } else if (diffDays > 7) {
+            warningText.innerText = 'Lama peminjaman maksimal adalah 7 hari (Anda memilih ' + diffDays + ' hari).';
+            warningDiv.classList.remove('d-none');
+            submitBtn.disabled = true;
+        }
+    }
+
+    tglPinjam.addEventListener('change', validateDates);
+    tglKembali.addEventListener('change', validateDates);
+});
+</script>
+
 <?= $this->endSection() ?>

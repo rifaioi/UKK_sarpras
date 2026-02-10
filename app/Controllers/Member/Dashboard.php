@@ -94,6 +94,19 @@ class Dashboard extends BaseController
             return redirect()->back()->withInput()->with('error', 'Tanggal kembali (rencana) tidak boleh lebih dahulu/kecil dari tanggal pinjam.');
         }
 
+        // 1. Weekend Constraint: No borrowing on Saturday (6) or Sunday (7)
+        $dayOfWeek = date('N', strtotime($tglPinjam));
+        if ($dayOfWeek >= 6) {
+            return redirect()->back()->withInput()->with('error', 'Maaf, peminjaman tidak diperbolehkan dimulai pada hari Sabtu atau Minggu.');
+        }
+
+        // 2. Maximum Duration Constraint: Max 7 days
+        $diffInSeconds = strtotime($tglKembali) - strtotime($tglPinjam);
+        $diffInDays = floor($diffInSeconds / (60 * 60 * 24));
+        if ($diffInDays > 7) {
+            return redirect()->back()->withInput()->with('error', 'Lama peminjaman maksimal adalah 7 hari. Anda mencoba meminjam selama ' . $diffInDays . ' hari.');
+        }
+
         $sarprasId = $this->request->getVar('sarpras_id');
         $jumlah = (int) $this->request->getVar('jumlah');
         // Dates are already normalized above
@@ -101,6 +114,18 @@ class Dashboard extends BaseController
         $item = $this->sarprasModel->find($sarprasId);
         if (!$item) {
              return redirect()->back()->with('error', 'Barang tidak ditemukan.');
+        }
+
+        // T1-PINJAM-LIMIT: Prevent duplicate pending requests for the same item name
+        $existingPending = $this->peminjamanModel->select('peminjaman.*')
+                            ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
+                            ->where('peminjaman.user_id', session()->get('id'))
+                            ->where('peminjaman.status_id', 1) // Menunggu Persetujuan
+                            ->where('sarpras.nama', $item['nama'])
+                            ->first();
+
+        if ($existingPending) {
+            return redirect()->back()->withInput()->with('error', 'Anda sudah memiliki permintaan peminjaman yang sedang menunggu persetujuan untuk barang "' . $item['nama'] . '".');
         }
 
         // 2. Double Booking / Overlap Check (T1-PINJAM-008, 010)

@@ -131,7 +131,11 @@ class Peminjaman extends BaseController
      */
     public function reject($id)
     {
-        $rejectionReason = $this->request->getPost('rejection_reason');
+        $rejectionReason = trim($this->request->getPost('rejection_reason'));
+
+        if (empty($rejectionReason) || strlen($rejectionReason) < 20) {
+            return redirect()->back()->withInput()->with('error', 'Alasan penolakan wajib diisi (minimal 20 karakter).');
+        }
 
         $peminjaman = $this->peminjamanModel->find($id);
         if ($peminjaman && $peminjaman['status_id'] == 2) {
@@ -147,7 +151,7 @@ class Peminjaman extends BaseController
             'rejection_reason' => $rejectionReason
         ]);
 
-        log_activity('Reject Peminjaman', "Menolak peminjaman id: $id" . ($rejectionReason ? " Alasan: $rejectionReason" : ""));
+        log_activity('Reject Peminjaman', "Menolak peminjaman id: $id. Alasan: $rejectionReason");
         return redirect()->to('/petugas/peminjaman')->with('success', 'Peminjaman ditolak dan stok dikembalikan');
     }
 

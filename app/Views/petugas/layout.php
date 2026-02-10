@@ -12,7 +12,7 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar d-flex flex-column px-2 py-3 text-white">
-            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none border-bottom border-secondary pb-3 w-100">
+            <a href="/" class="d-flex align-items-center justify-content-center mb-3 mb-md-0 text-white text-decoration-none border-bottom border-secondary pb-3 w-100">
                 <span class="fs-5 fw-bold text-primary">Sarpras</span>
             </a>
             
@@ -76,7 +76,7 @@
                 </button>
                 <div class="user-menu border-start ps-3">
                     <div class="user-info d-none d-md-block me-2 text-end">
-                        <div class="fw-bold small lh-1 mb-1"><?= session()->get('nama') ?></div>
+                        <div class="fw-bold small lh-1 mb-1"><?= session()->get('username') ?></div>
                         <span class="role-badge">Petugas</span>
                     </div>
                     <div class="dropdown">

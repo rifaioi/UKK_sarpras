@@ -41,6 +41,10 @@ class Inspections extends BaseController
 
         // Determine type from query string if not set (default keluar)
         $type = $this->request->getGet('type') ?? 'keluar';
+        
+        // Normalize type
+        if ($type == 'post-return' || $type == 'returning') $type = 'kembali';
+        if ($type == 'pre-borrow' || $type == 'borrowing') $type = 'keluar';
 
         // Get checklist items for this category
         $checklistItems = $this->checklistItemModel->where('kategori_id', $peminjaman['kategori_id'])->findAll();
@@ -126,11 +130,19 @@ class Inspections extends BaseController
         $descriptions = $this->request->getPost('descriptions'); // Array [item_id => desc]
 
         foreach ($results as $itemId => $status) {
+            $desc = trim($descriptions[$itemId] ?? '');
+            
+            // T1-KEMBALI-003-LVL2: Mandatory item-level description if status is not OK
+            if ($type == 'kembali' && ($status == 'damaged' || $status == 'missing') && empty($desc)) {
+                $db->transRollback();
+                return redirect()->back()->withInput()->with('error', "Keterangan detail untuk item ID $itemId wajib diisi karena ada masalah/kerusakan.");
+            }
+
             $this->inspectionResultModel->save([
                 'inspection_id' => $inspectionId,
                 'checklist_item_id' => $itemId,
                 'status' => $status,
-                'description' => $descriptions[$itemId] ?? null
+                'description' => $desc
             ]);
         }
 
@@ -153,25 +165,41 @@ class Inspections extends BaseController
             $redirectUrl = '/petugas/peminjaman';
             $msg = 'Inspeksi keluar selesai. Barang siap diserahkan.';
         } else {
-            // Inspeksi Kembali Logic
+            // 159: Inspeksi Kembali Logic
             // Determine Overall Condition based on checklist results
-            // If ANY item is 'damaged' -> Overall Damaged
-            // If ANY item is 'missing' -> Overall Damaged/Lost
+            // T1-KEMBALI-REVISI: If only 1 item is damaged (and 0 missing), ignore it for overall status (keep Baik)
             $overallConditionId = 1; // Default Baik
             $damageDetails = [];
+            $damagedCount = 0;
+            $missingCount = 0;
 
             foreach ($results as $itemId => $status) {
                 if ($status == 'damaged') {
-                    $overallConditionId = 2; // Rusak Ringan (default assumption)
+                    $damagedCount++;
                     $damageDetails[] = "Item $itemId: Rusak";
                 } elseif ($status == 'missing') {
-                    $overallConditionId = 3; // Rusak Berat / Hilang Component
-                     $damageDetails[] = "Item $itemId: Hilang";
+                    $missingCount++;
+                    $damageDetails[] = "Item $itemId: Hilang";
                 }
+            }
+
+            // Logic: If > 1 damaged OR any missing -> Overall NOT Baik
+            if ($missingCount > 0) {
+                $overallConditionId = 3; // Rusak Berat / Hilang Component
+            } elseif ($damagedCount > 1) {
+                $overallConditionId = 2; // Rusak Ringan
+            } else {
+                $overallConditionId = 1; // Still Baik (even if 1 damaged)
             }
             
             // Check manual notes too
-            $notes = $this->request->getPost('notes');
+            $notes = trim($this->request->getPost('notes'));
+
+            // T1-KEMBALI-003: Mandatory notes if ANY damage/missing found (even for lenient 1-damage)
+            if (($damagedCount > 0 || $missingCount > 0) && empty($notes)) {
+                $db->transRollback();
+                return redirect()->back()->withInput()->with('error', 'Catatan Tambahan wajib diisi karena ada item yang terdeteksi Rusak atau Hilang.');
+            }
             
             // Save to Pengembalian Table
             $this->pengembalianModel->save([

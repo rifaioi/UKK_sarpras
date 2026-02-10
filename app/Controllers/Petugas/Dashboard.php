@@ -36,12 +36,24 @@ class Dashboard extends BaseController
         $scheduleModel = new \App\Models\MaintenanceScheduleModel();
         $upcomingMaintenance = $scheduleModel->getUpcoming(5);
 
+        // Top 5 Defective Items
+        $db = \Config\Database::connect();
+        $topDefects = $db->table('maintenance_records')
+                         ->select('sarpras.nama, COUNT(maintenance_records.id) as total_problems')
+                         ->join('maintenance_schedules', 'maintenance_schedules.id = maintenance_records.schedule_id')
+                         ->join('sarpras', 'sarpras.id = maintenance_schedules.sarpras_id')
+                         ->groupBy('sarpras.nama')
+                         ->orderBy('total_problems', 'DESC')
+                         ->limit(5)
+                         ->get()->getResultArray();
+
         $data = [
             'pending_peminjaman' => $pendingPeminjaman,
             'active_peminjaman' => $activePeminjaman,
             'active_pengaduan' => $activePengaduan,
             'recent_activities' => $recentActivities,
-            'upcoming_maintenance' => $upcomingMaintenance
+            'upcoming_maintenance' => $upcomingMaintenance,
+            'top_defects' => $topDefects
         ];
 
         return view('petugas/dashboard', $data);

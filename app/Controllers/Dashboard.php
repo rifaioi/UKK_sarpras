@@ -23,13 +23,16 @@ class Dashboard extends BaseController
             $pengaduanModel = new PengaduanModel();
             $pengembalianModel = new PengembalianModel();
             
-            $currentYear = date('Y');
-            $monthlyStats = [];
-            for ($m=1; $m<=12; $m++) {
-                $monthlyStats[] = $peminjamanModel->where('YEAR(created_at)', $currentYear)
-                                                  ->where('MONTH(created_at)', $m)
-                                                  ->countAllResults();
-            }
+            // Top 5 Defective Items (Based on Maintenance Frequency)
+            $db = \Config\Database::connect();
+            $topDefects = $db->table('maintenance_records')
+                             ->select('sarpras.nama, COUNT(maintenance_records.id) as total_problems')
+                             ->join('maintenance_schedules', 'maintenance_schedules.id = maintenance_records.schedule_id')
+                             ->join('sarpras', 'sarpras.id = maintenance_schedules.sarpras_id')
+                             ->groupBy('sarpras.nama')
+                             ->orderBy('total_problems', 'DESC')
+                             ->limit(5)
+                             ->get()->getResultArray();
 
             $activityModel = new ActivityLogModel();
             $recentActivities = $activityModel->select('activity_log.*, users.nama_lengkap')
@@ -41,14 +44,21 @@ class Dashboard extends BaseController
             $scheduleModel = new \App\Models\MaintenanceScheduleModel();
             $upcomingMaintenance = $scheduleModel->getUpcoming(5);
 
+            // Asset Health Stats
+            $totalSarpras = $sarprasModel->where('is_deleted', 0)->countAllResults();
+            $goodSarpras = $sarprasModel->where('kondisi_id', 1)->where('is_deleted', 0)->countAllResults();
+            $assetHealth = $totalSarpras > 0 ? round(($goodSarpras / $totalSarpras) * 100) : 0;
+
             $data = [
-                'total_sarpras' => $sarprasModel->where('is_deleted', 0)->countAllResults(),
+                'total_sarpras' => $totalSarpras,
                 'active_peminjaman' => $peminjamanModel->where('status_id', 2)->countAllResults(), // 2 = Disetujui/Dipinjam
                 'damaged_sarpras' => $sarprasModel->whereIn('kondisi_id', [2, 3])->where('is_deleted', 0)->countAllResults(), // Rusak Ringan/Berat & Not Deleted
                 'pengaduan_masuk' => $pengaduanModel->where('status_id', 1)->countAllResults(), // 1 = Belum Ditindaklanjuti
-                'chart_data' => json_encode($monthlyStats),
                 'recent_activities' => $recentActivities,
-                'upcoming_maintenance' => $upcomingMaintenance
+                'upcoming_maintenance' => $upcomingMaintenance,
+                'good_sarpras' => $goodSarpras,
+                'asset_health' => $assetHealth,
+                'top_defects' => $topDefects
             ];
 
             return view('admin/dashboard', $data);

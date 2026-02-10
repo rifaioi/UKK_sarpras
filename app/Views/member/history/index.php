@@ -111,7 +111,7 @@
                                 <?php foreach($my_complaints as $i => $c): ?>
                                 <tr>
                                     <td><?= $i+1 ?></td>
-                                    <td><?= date('d/m/Y', strtotime($c['created_at'])) ?></td>
+                                    <td><?= date('d/m/Y H:i', strtotime($c['created_at'])) ?></td>
                                     <td>
                                         <div class="fw-bold"><?= esc($c['judul']) ?></div>
                                         <small class="text-white-50"><?= esc($c['deskripsi']) ?></small>

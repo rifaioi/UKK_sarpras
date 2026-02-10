@@ -49,7 +49,11 @@ class Peminjaman extends PetugasPeminjaman
             return redirect()->to('/admin/peminjaman')->with('error', 'Data tidak ditemukan');
         }
 
-        $rejectionReason = $this->request->getPost('rejection_reason');
+        $rejectionReason = trim($this->request->getPost('rejection_reason'));
+
+        if (empty($rejectionReason) || strlen($rejectionReason) < 20) {
+            return redirect()->back()->withInput()->with('error', 'Alasan penolakan wajib diisi (minimal 20 karakter).');
+        }
 
         if ($peminjaman['status_id'] == 2) {
             // Restore unit if it was already reserved/approved
@@ -64,7 +68,7 @@ class Peminjaman extends PetugasPeminjaman
             'rejection_reason' => $rejectionReason
         ]);
 
-        log_activity('Tolak Peminjaman', "Menolak peminjaman id: $id" . ($rejectionReason ? " dengan alasan: $rejectionReason" : ""));
+        log_activity('Tolak Peminjaman', "Menolak peminjaman id: $id dengan alasan: $rejectionReason");
         
         return redirect()->to('/admin/peminjaman')->with('success', 'Peminjaman ditolak dan stok dikembalikan');
     }
