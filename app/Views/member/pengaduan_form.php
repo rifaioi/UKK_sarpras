@@ -47,7 +47,11 @@
                         <input type="file" class="form-control" name="bukti_foto" accept="image/*">
                     </div>
 
-                    <button type="submit" class="btn btn-warning w-100">Kirim Laporan</button>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4 flex-grow-1">
+                            <i class="bi bi-send me-2"></i>Kirim Laporan
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

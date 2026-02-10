@@ -49,9 +49,13 @@
                 <small class="text-muted">Minimal 8 karakter</small>
             </div>
             
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary px-4">Simpan</button>
-                <a href="<?= base_url('admin/users') ?>" class="btn btn-action px-4 d-flex align-items-center">Batal</a>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-save me-2"></i>Simpan
+                </button>
+                <a href="<?= base_url('admin/users') ?>" class="btn btn-action px-4 d-flex align-items-center">
+                    <i class="bi bi-x-circle me-2"></i>Batal
+                </a>
             </div>
         </form>
     </div>

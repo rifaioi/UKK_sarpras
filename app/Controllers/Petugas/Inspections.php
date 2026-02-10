@@ -180,7 +180,7 @@ class Inspections extends BaseController
                 'kondisi_id' => $overallConditionId,
                 'deskripsi' => "Pemeriksaan: " . implode(", ", $damageDetails) . ". Notes: " . $notes,
                 'foto' => $photoName ? 'uploads/inspections/' . $photoName : null,
-                'is_restocked' => ($overallConditionId == 1) ? 1 : 0 // Auto restock if good
+                'is_restocked' => ($overallConditionId == 1 || $overallConditionId == 2) ? 1 : 0 // Auto restock if good or lightly damaged
             ]);
 
             // Update Peminjaman Status to Kembali (4)
@@ -190,13 +190,15 @@ class Inspections extends BaseController
             $peminjaman = $this->peminjamanModel->find($peminjamanId);
             if ($peminjaman) {
                 $sarprasStatus = 'tersedia';
-                if ($overallConditionId != 1) {
+                if ($overallConditionId == 3) { // Only Rusak Berat
                     $sarprasStatus = 'rusak';
+                } elseif ($overallConditionId == 4) {
+                    $sarprasStatus = 'hilang';
                 }
 
                 $this->sarprasModel->skipValidation(true)->update($peminjaman['sarpras_id'], [
                     'kondisi_id' => $overallConditionId,
-                    'stok' => ($overallConditionId == 1 ? 1 : 0),
+                    'stok' => ($overallConditionId == 1 || $overallConditionId == 2 ? 1 : 0),
                     'status' => $sarprasStatus
                 ]);
             }

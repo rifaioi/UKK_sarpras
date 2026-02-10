@@ -73,64 +73,92 @@
 
 <div class="row">
     <!-- Chart -->
-    <div class="col-md-7 mb-4">
-        <div class="card h-100 border-0">
-            <div class="card-header bg-transparent fw-bold py-3">
-                <i class="bi bi-graph-up text-accent-primary me-2"></i> Grafik Peminjaman Tahunan
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0"><i class="bi bi-graph-up text-accent-primary me-2"></i> Grafik Peminjaman Tahunan</h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-icon btn-action" type="button"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
             </div>
             <div class="card-body">
-                <canvas id="peminjamanChart" style="max-height: 400px;"></canvas>
+                <div style="height: 350px;">
+                    <canvas id="peminjamanChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Recent Activity -->
-    <div class="col-md-5 mb-4">
-        <div class="card h-100 border-0 mb-4">
-            <div class="card-header bg-transparent fw-bold py-3">
-                <i class="bi bi-calendar-event text-info me-2"></i> Jadwal Maintenance Terdekat
+    <!-- Maintenance (Side) -->
+    <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent fw-bold py-3 text-info">
+                <i class="bi bi-calendar-event me-2"></i> Maintenance Terdekat
             </div>
             <div class="card-body p-0">
                 <div class="list-group list-group-flush">
                     <?php if (empty($upcoming_maintenance)): ?>
-                        <div class="p-4 text-center text-muted small">Tidak ada jadwal maintenance.</div>
+                        <div class="p-4 text-center text-muted small">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-2 opacity-25"></i>
+                            Tidak ada jadwal maintenance.
+                        </div>
                     <?php endif; ?>
                     <?php foreach ($upcoming_maintenance as $m): ?>
                         <div class="list-group-item py-3">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1 fw-bold"><?= esc($m['asset_name']) ?></h6>
-                                <small class="text-info"><?= date('d/m', strtotime($m['scheduled_date'])) ?></small>
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0 fw-bold small text-white"><?= esc($m['asset_name']) ?></h6>
+                                <span class="badge bg-info text-dark" style="font-size: 0.65rem;"><?= date('d M', strtotime($m['scheduled_date'])) ?></span>
                             </div>
-                            <small class="text-muted d-block small"><?= esc($m['maintenance_type']) ?> - <?= esc($m['technician']) ?></small>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;"><?= esc($m['maintenance_type']) ?> &bull; <?= esc($m['technician']) ?></small>
                         </div>
                     <?php endforeach; ?>
                 </div>
+                <div class="card-footer bg-transparent border-0 text-center p-3">
+                    <a href="<?= base_url('admin/maintenance/schedules') ?>" class="btn btn-sm btn-action w-100">Kelola Jadwal</a>
+                </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="card h-100 border-0">
-            <div class="card-header bg-transparent d-flex justify-content-between align-items-center fw-bold py-3">
-                <span><i class="bi bi-clock-history text-primary me-2"></i> Aktivitas Terkini</span>
-                <a href="<?= base_url('admin/log') ?>" class="btn btn-sm btn-link text-decoration-none p-0">Lihat Semua</a>
+<!-- Recent Activity (Landscape) -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+                <h6 class="fw-bold mb-0 text-white"><i class="bi bi-clock-history text-primary me-2"></i> Aktivitas Terkini (Log Sistem)</h6>
+                <a href="<?= base_url('admin/log') ?>" class="btn btn-sm btn-outline-primary px-3 rounded-pill">Lihat Semua</a>
             </div>
             <div class="card-body p-0">
-                <div class="list-group list-group-flush">
-                    <?php if (empty($recent_activities)): ?>
-                        <div class="p-5 text-center text-muted">Belum ada aktivitas.</div>
-                    <?php endif; ?>
-                    <?php foreach ($recent_activities as $activity): ?>
-                        <div class="list-group-item py-3 px-4">
-                            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                                <h6 class="mb-0 fw-bold"><?= esc($activity['aksi']) ?></h6>
-                                <small class="text-muted small"><?= date('H:i', strtotime($activity['created_at'])) ?></small>
-                            </div>
-                            <p class="mb-2 small text-muted"><?= esc($activity['deskripsi']) ?></p>
-                            <div class="d-flex align-items-center">
-                                <img src="https://ui-avatars.com/api/?name=<?= urlencode($activity['nama_lengkap']) ?>&size=20&background=random" class="rounded-circle me-2" width="20" height="20">
-                                <small class="text-primary fw-medium"><?= esc($activity['nama_lengkap']) ?></small>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light bg-opacity-10">
+                            <tr>
+                                <th class="ps-4" style="width: 15%;">Waktu</th>
+                                <th style="width: 20%;">User</th>
+                                <th style="width: 15%;">Aksi</th>
+                                <th>Deskripsi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($recent_activities)): ?>
+                                <tr><td colspan="4" class="text-center py-5 text-muted">Belum ada aktivitas tercatat.</td></tr>
+                            <?php endif; ?>
+                            <?php foreach ($recent_activities as $activity): ?>
+                                <tr>
+                                    <td class="ps-4 text-muted small"><?= date('d M Y, H:i', strtotime($activity['created_at'])) ?></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($activity['nama_lengkap']) ?>&size=24&background=random" class="rounded-circle me-2" width="24" height="24">
+                                            <span class="small fw-medium"><?= esc($activity['nama_lengkap']) ?></span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-secondary bg-opacity-25 text-light border border-secondary"><?= esc($activity['aksi']) ?></span></td>
+                                    <td class="small text-secondary"><?= esc($activity['deskripsi']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

@@ -41,22 +41,25 @@
                     
                     <h5 class="fw-bold text-white mb-2"><?= esc($item['nama']) ?></h5>
                     
-                    <?php if ($item['jumlah_rusak_ringan'] > 0): ?>
-                        <div class="mb-2">
-                            <span class="badge bg-warning text-dark border-0 shadow-sm" style="font-size: 0.65rem;">
-                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Termasuk unit Rusak Ringan
-                            </span>
-                        </div>
-                    <?php endif; ?>
-                    
                     <div class="mb-4">
                         <div class="d-flex align-items-center text-secondary small mb-2">
                             <i class="bi bi-geo-alt me-2"></i>
                             <?= esc($item['nama_lokasi']) ?>
                         </div>
-                        <div class="d-flex align-items-center text-secondary small">
+                        <div class="d-flex align-items-center text-secondary small mb-3">
                             <i class="bi bi-box-seam me-2"></i>
-                             Unit Tersedia: <strong class="ms-1 text-info"><?= esc($item['tersedia']) ?> / <?= esc($item['total_unit']) ?></strong>
+                             Total Stok: <strong class="ms-1 text-info"><?= esc($item['tersedia']) ?> / <?= esc($item['total_unit']) ?></strong>
+                        </div>
+                        
+                        <div class="p-2 rounded bg-white bg-opacity-5 border border-white border-opacity-10">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-secondary">Kondisi Baik:</span>
+                                <span class="text-success fw-bold"><?= esc($item['jumlah_baik']) ?> Unit</span>
+                            </div>
+                            <div class="d-flex justify-content-between small">
+                                <span class="text-secondary">Rusak Ringan:</span>
+                                <span class="<?= $item['jumlah_rusak_ringan'] > 0 ? 'text-warning' : 'text-secondary' ?> fw-bold"><?= esc($item['jumlah_rusak_ringan']) ?> Unit</span>
+                            </div>
                         </div>
                     </div>
                     

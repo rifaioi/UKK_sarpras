@@ -18,7 +18,9 @@
                         <label class="form-label">Username</label>
                         <input type="text" name="username" class="form-control" value="<?= session()->get('username'); ?>" required>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Update Profil</button>
+                    <button type="submit" class="btn btn-primary px-4 mt-3">
+                        <i class="bi bi-save me-2"></i>Update Profil
+                    </button>
                 </form>
             </div>
         </div>
@@ -53,7 +55,9 @@
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Simpan Password Baru</button>
+                    <button type="submit" class="btn btn-primary px-4 mt-3">
+                        <i class="bi bi-key me-2"></i>Simpan Password Baru
+                    </button>
                 </form>
             </div>
         </div>

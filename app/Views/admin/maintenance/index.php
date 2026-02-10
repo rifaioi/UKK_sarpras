@@ -13,15 +13,15 @@
 
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
-        <form action="<?= base_url('admin/maintenance/schedules') ?>" method="get" class="row g-3">
-            <div class="col-md-5">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" class="form-control border-start-0 shadow-none" placeholder="Cari aset, teknisi..." value="<?= esc($filter_q) ?>">
+        <form action="<?= base_url('admin/maintenance/schedules') ?>" method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white bg-opacity-10 border-secondary border-end-0 text-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control bg-white bg-opacity-10 border-secondary border-start-0 shadow-none text-white ps-0" placeholder="Cari aset, teknisi..." value="<?= esc($filter_q) ?>">
                 </div>
             </div>
-            <div class="col-md-3">
-                <select name="status" class="form-select form-select-sm shadow-none">
+            <div class="col-6 col-md-3">
+                <select name="status" class="form-select shadow-none">
                     <option value="">Semua Status</option>
                     <option value="Scheduled" <?= $filter_status == 'Scheduled' ? 'selected' : '' ?>>Scheduled</option>
                     <option value="Delayed" <?= $filter_status == 'Delayed' ? 'selected' : '' ?>>Delayed</option>
@@ -29,9 +29,9 @@
                     <option value="Completed" <?= $filter_status == 'Completed' ? 'selected' : '' ?>>Completed</option>
                 </select>
             </div>
-            <div class="col-md-4 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-outline-secondary px-3 shadow-none">Filter</button>
-                <a href="<?= base_url('admin/maintenance/schedules') ?>" class="btn btn-sm btn-link text-decoration-none text-muted">Reset</a>
+            <div class="col-6 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-secondary px-3 shadow-none flex-fill">Filter</button>
+                <a href="<?= base_url('admin/maintenance/schedules') ?>" class="btn btn-link text-decoration-none text-muted">Reset</a>
             </div>
         </form>
     </div>

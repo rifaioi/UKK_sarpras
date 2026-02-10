@@ -11,9 +11,60 @@
     </nav>
     <h1 class="h2">Daftar Unit: <?= esc($nama_barang) ?></h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="<?= base_url('admin/sarpras') ?>" class="btn btn-sm btn-outline-secondary me-2">
+        <button type="button" class="btn btn-sm btn-primary me-2" data-bs-toggle="collapse" data-bs-target="#collapseAddUnit">
+            <i class="bi bi-plus-lg"></i> Tambah Unit
+        </button>
+        <a href="<?= base_url('admin/sarpras') ?>" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
+    </div>
+</div>
+
+<!-- Form Tambah Unit (Collapse) -->
+<div class="collapse mb-4" id="collapseAddUnit">
+    <div class="card border-0 shadow-sm bg-dark bg-opacity-50">
+        <div class="card-body p-4">
+            <h5 class="text-white mb-3">Tambah Unit Baru untuk <?= esc($nama_barang) ?></h5>
+            <form action="<?= base_url('admin/sarpras/store') ?>" method="post" class="form-confirm">
+                <input type="hidden" name="nama" value="<?= esc($nama_barang) ?>">
+                <input type="hidden" name="kategori_id" value="<?= esc($kategori_id) ?>">
+                <input type="hidden" name="redirect_to" value="units"> <!-- Signal to redirect back to units list -->
+                
+                <div class="row align-items-end">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label small text-white-50">Lokasi Penempatan</label>
+                        <select class="form-select" name="location_id" required>
+                            <option value="">-- Pilih Lokasi --</option>
+                            <?php foreach($locations as $loc): ?>
+                                <option value="<?= $loc['id'] ?>"><?= esc($loc['nama_lokasi']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label small text-white-50">Kondisi Awal</label>
+                        <select class="form-select" name="kondisi_id" required>
+                            <?php foreach($conditions as $cond): ?>
+                                <option value="<?= $cond['id'] ?>"><?= esc($cond['nama_kondisi']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label small text-white-50">Jumlah Unit</label>
+                        <input type="number" name="stok" class="form-control" value="1" min="1" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-save me-2"></i>Simpan Unit
+                            </button>
+                            <button type="button" class="btn btn-action px-4" data-bs-toggle="collapse" data-bs-target="#collapseAddUnit">
+                                Batal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

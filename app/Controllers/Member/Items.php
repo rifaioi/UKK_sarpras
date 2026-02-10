@@ -22,6 +22,7 @@ class Items extends BaseController
         $query = $this->sarprasModel->select("sarpras.nama, sarpras.kategori_id, MAX(sarpras.id) as id, kategori_sarpras.nama as nama_kategori, locations.nama_lokasi, 
                                              COUNT(*) as total_unit, 
                                              SUM(CASE WHEN sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as tersedia,
+                                             SUM(CASE WHEN sarpras.kondisi_id = 1 AND sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as jumlah_baik,
                                              SUM(CASE WHEN sarpras.kondisi_id = 2 AND sarpras.status = 'tersedia' THEN 1 ELSE 0 END) as jumlah_rusak_ringan")
                                      ->join('locations', 'locations.id = sarpras.location_id')
                                      ->join('kategori_sarpras', 'kategori_sarpras.id = sarpras.kategori_id')

@@ -43,8 +43,14 @@
                             <input type="date" name="tgl_kembali_rencana" class="form-control" required min="<?= date('Y-m-d') ?>">
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-success w-100">Ajukan Peminjaman</button>
-                    <a href="<?= base_url('member/dashboard') ?>" class="btn btn-secondary w-100 mt-2">Batal</a>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4 flex-grow-1">
+                            <i class="bi bi-send me-2"></i>Ajukan Peminjaman
+                        </button>
+                        <a href="<?= base_url('member/dashboard') ?>" class="btn btn-action px-4 d-flex align-items-center">
+                            <i class="bi bi-x-circle me-2"></i>Batal
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>

@@ -88,10 +88,10 @@ class Peminjaman extends BaseController
 
         if ($item['stok'] < $peminjaman['jumlah']) {
             // T1-PINJAM-FIX: Try to find another unit of the same type that is available
-            $alternative = $this->sarprasModel->where('nama', $item['nama'])
+                $alternative = $this->sarprasModel->where('nama', $item['nama'])
                                               ->where('kategori_id', $item['kategori_id'])
                                               ->where('location_id', $item['location_id'])
-                                              ->where('kondisi_id', 1)
+                                              ->whereIn('kondisi_id', [1, 2]) // Baik or Rusak Ringan
                                               ->where('status', 'tersedia')
                                               ->where('stok >', 0)
                                               ->first();

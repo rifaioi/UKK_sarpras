@@ -19,27 +19,9 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                     <strong>Barang:</strong> <?= esc($peminjaman['barang']) ?> (<?= esc($peminjaman['kode_barang']) ?>)
                 </div>
 
-                <?php if ($type == 'kembali' && isset($preInspection) && !empty($preInspection['photo_evidence'])) : ?>
-                    <div class="card mb-4 border-warning">
-                        <div class="card-header bg-warning text-dark">
-                            <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Kondisi Awal (Saat Keluar)</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <img src="<?= base_url($preInspection['photo_evidence']) ?>" class="img-fluid rounded shadow-sm" alt="Kondisi Awal">
-                                    <div class="small text-muted mt-1 text-center">Foto diambil: <?= $preInspection['inspection_date'] ?></div>
-                                </div>
-                                <div class="col-md-8">
-                                    <p class="mb-1"><strong>Catatan Awal:</strong></p>
-                                    <p class="fst-italic bg-light p-2 rounded text-dark"><?= esc($preInspection['notes'] ?? '-') ?></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
+                <!-- Photo Comparison moved to bottom -->
 
-                <form action="<?= base_url($role . '/inspections/store') ?>" method="post" enctype="multipart/form-data">
+                <form action="<?= base_url($role . '/inspections/store') ?>" method="post" enctype="multipart/form-data" class="form-confirm">
                     <?= csrf_field() ?>
                     <input type="hidden" name="peminjaman_id" value="<?= $peminjaman['id'] ?>">
                     <input type="hidden" name="type" value="<?= $type ?>">
@@ -108,10 +90,56 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                         </div>
                     <?php endif; ?>
 
-                    <div class="mb-3">
-                        <label for="photo" class="form-label fw-bold">Bukti Foto (Wajib)</label>
-                        <input type="file" class="form-control" name="photo" id="photo" accept="image/*" required>
-                        <div class="form-text">Upload foto kondisi barang saat ini.</div>
+                    <!-- Bukti Foto Section -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Bukti Foto (Wajib)</label>
+                        
+                        <?php if ($type == 'kembali') : ?>
+                            <!-- Comparison Layout for Returns -->
+                            <div class="card bg-dark bg-opacity-25 border-secondary">
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <!-- Before Photo -->
+                                        <div class="col-md-6 border-end border-secondary">
+                                            <h6 class="text-muted mb-3 small text-uppercase">Kondisi Awal (Saat Keluar)</h6>
+                                            <?php if (isset($preInspection) && !empty($preInspection['photo_evidence'])) : ?>
+                                                <img src="<?= base_url($preInspection['photo_evidence']) ?>" class="img-fluid rounded shadow-sm mb-2" style="max-height: 250px; object-fit: cover;">
+                                                <div class="small text-muted fst-italic">
+                                                    Catatan: "<?= esc($preInspection['notes'] ?? '-') ?>"
+                                                </div>
+                                            <?php else : ?>
+                                                <div class="d-flex align-items-center justify-content-center bg-secondary bg-opacity-10 rounded" style="height: 200px;">
+                                                    <span class="text-muted small fst-italic">Foto awal tidak tersedia</span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- After Photo (Upload) -->
+                                        <div class="col-md-6">
+                                            <h6 class="text-primary mb-3 small text-uppercase">Kondisi Sekarang (Baru)</h6>
+                                            
+                                            <div class="mb-3">
+                                                <input type="file" class="form-control form-control-sm" name="photo" id="photo" accept="image/*" required onchange="previewImage(this)">
+                                            </div>
+
+                                            <!-- Preview Container -->
+                                            <div class="d-flex align-items-center justify-content-center bg-dark bg-opacity-50 rounded border border-secondary border-dashed" style="height: 200px; min-height: 200px;">
+                                                <img id="photoPreview" src="#" alt="Preview" class="img-fluid rounded d-none" style="max-height: 100%; max-width: 100%;">
+                                                <div id="previewPlaceholder" class="text-muted small">
+                                                    <i class="bi bi-camera fs-2 d-block mb-1"></i>
+                                                    Preview foto akan muncul di sini
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <?php else : ?>
+                            <!-- Standard Upload for Check-out -->
+                            <input type="file" class="form-control" name="photo" id="photo" accept="image/*" required>
+                            <div class="form-text">Upload foto kondisi barang saat ini sebagai bukti serah terima.</div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="mb-3">
@@ -119,11 +147,13 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                         <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg py-3">
-                            <i class="bi bi-save me-2"></i> Simpan Inspeksi <?= $type == 'keluar' ? 'Keluar' : 'Kembali' ?>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4 flex-grow-1">
+                            <i class="bi bi-save me-2"></i>Simpan Inspeksi <?= $type == 'keluar' ? 'Keluar' : 'Kembali' ?>
                         </button>
-                        <a href="<?= base_url($role . '/peminjaman') ?>" class="btn btn-action py-2">Batal</a>
+                        <a href="<?= base_url($role . '/peminjaman') ?>" class="btn btn-action px-4 d-flex align-items-center">
+                            <i class="bi bi-x-circle me-2"></i>Batal
+                        </a>
                     </div>
                 </form>
             </div>
@@ -173,5 +203,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function previewImage(input) {
+    const preview = document.getElementById('photoPreview');
+    const placeholder = document.getElementById('previewPlaceholder');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+            placeholder.classList.add('d-none');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.src = '#';
+        preview.classList.add('d-none');
+        placeholder.classList.remove('d-none');
+    }
+}
 </script>
 <?= $this->endSection() ?>

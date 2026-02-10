@@ -104,7 +104,7 @@ class Sarpras extends BaseController
             $status = 'tersedia';
             if ($kondisiId == 4) {
                 $status = 'hilang';
-            } elseif ($kondisiId == 2 || $kondisiId == 3) {
+            } elseif ($kondisiId == 3) { // Only Rusak Berat (3) sets status to rusak
                 $status = 'rusak';
             }
 
@@ -135,6 +135,11 @@ class Sarpras extends BaseController
         }
 
         log_activity('Tambah Sarpras', "Menambahkan $jumlah unit item: $nama");
+        
+        if ($this->request->getVar('redirect_to') === 'units') {
+            return redirect()->to(base_url("admin/sarpras/units?nama=" . urlencode($nama) . "&kategori_id=" . $kategoriId))
+                             ->with('success', "$jumlah unit $nama berhasil ditambahkan");
+        }
 
         return redirect()->to('/admin/sarpras')->with('success', "$jumlah unit $nama berhasil ditambahkan");
     }
@@ -215,7 +220,7 @@ class Sarpras extends BaseController
             $status = 'tersedia';
             if ($kondisiId == 4) {
                 $status = 'hilang';
-            } elseif ($kondisiId == 2 || $kondisiId == 3) {
+            } elseif ($kondisiId == 3) { // Only Rusak Berat (3) sets status to rusak
                 $status = 'rusak';
             }
             $updateData['status'] = $status;
@@ -346,7 +351,10 @@ class Sarpras extends BaseController
 
         $data = [
             'items' => $items,
-            'nama_barang' => $nama
+            'nama_barang' => $nama,
+            'kategori_id' => $kategoriId,
+            'locations' => (new LocationModel())->findAll(),
+            'conditions' => (new KondisiAlatModel())->findAll()
         ];
         return view('admin/sarpras/units', $data);
     }

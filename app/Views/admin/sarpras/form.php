@@ -83,11 +83,12 @@
                     </div>
 
 
-                        <button type="submit" class="btn btn-primary px-5">
-                            <i class="bi bi-save me-2"></i> Simpan
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-save me-2"></i>Simpan
                         </button>
                         <a href="<?= base_url('admin/sarpras') ?>" class="btn btn-action px-4 d-flex align-items-center">
-                            Batal
+                            <i class="bi bi-x-circle me-2"></i>Batal
                         </a>
                     </div>
                 </form>
