@@ -30,14 +30,19 @@ class ActivityLog extends BaseController
             $query->like('activity_log.aksi', $action);
         }
 
-        $logs = $query->orderBy('activity_log.created_at', 'DESC')->findAll();
+        // $logs = $query->orderBy('activity_log.created_at', 'DESC')->findAll();
+        $logs = $query->orderBy('activity_log.created_at', 'DESC')->paginate(10);
+        $pager = $this->logModel->pager;
 
         $userModel = new \App\Models\UserModel();
         $data = [
             'logs' => $logs,
+            'pager' => $pager,
             'users' => $userModel->findAll(),
             'filter_user' => $userId,
-            'filter_action' => $action
+            'filter_action' => $action,
+            'currentPage' => $this->request->getVar('page') ? $this->request->getVar('page') : 1,
+            'perPage' => 10
         ];
         return view('admin/activity_log/index', $data);
     }
@@ -56,7 +61,7 @@ class ActivityLog extends BaseController
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['ID', 'Waktu', 'User', 'Role', 'Aksi', 'Deskripsi', 'IP Address', 'Metadata']);
+        fputcsv($output, ['ID', 'Waktu', 'User', 'Role', 'Modul', 'Aksi', 'Deskripsi', 'User Agent', 'IP Address', 'Metadata']);
 
         foreach ($logs as $log) {
             fputcsv($output, [
@@ -64,8 +69,10 @@ class ActivityLog extends BaseController
                 $log['created_at'],
                 $log['nama_lengkap'] ?? 'System',
                 $log['nama_role'] ?? 'N/A',
+                $log['module'],
                 $log['aksi'],
                 $log['deskripsi'],
+                $log['user_agent'],
                 $log['ip_address'],
                 $log['metadata']
             ]);

@@ -120,7 +120,7 @@ class Peminjaman extends BaseController
             return redirect()->back()->with('error', 'Gagal memproses peminjaman.');
         }
 
-        log_activity('Setujui Peminjaman', "Menyetujui peminjaman id: $id");
+        log_activity('Peminjaman', 'Setujui Peminjaman', "Menyetujui peminjaman id: $id");
 
         // Redirect to Inspeksi Keluar
         return redirect()->to('/petugas/inspections/create/' . $id . '?type=keluar')->with('success', 'Silakan lakukan inspeksi kondisi barang sebelum diserahkan.');
@@ -151,7 +151,7 @@ class Peminjaman extends BaseController
             'rejection_reason' => $rejectionReason
         ]);
 
-        log_activity('Reject Peminjaman', "Menolak peminjaman id: $id. Alasan: $rejectionReason");
+        log_activity('Peminjaman', 'Reject Peminjaman', "Menolak peminjaman id: $id. Alasan: $rejectionReason");
         return redirect()->to('/petugas/peminjaman')->with('success', 'Peminjaman ditolak dan stok dikembalikan');
     }
 
@@ -172,7 +172,7 @@ class Peminjaman extends BaseController
 
         $this->peminjamanModel->delete($id);
         $roleName = session()->get('role_id') == 1 ? 'Admin' : 'Petugas';
-        log_activity('Hapus Peminjaman', "Menghapus data peminjaman id: $id ($roleName)");
+        log_activity('Peminjaman', 'Hapus Peminjaman', "Menghapus data peminjaman id: $id ($roleName)");
         $roleUrl = session()->get('role_id') == 1 ? 'admin' : 'petugas';
         return redirect()->to('/' . $roleUrl . '/peminjaman')->with('success', 'Data peminjaman dihapus');
     }

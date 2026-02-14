@@ -114,25 +114,110 @@
         document.getElementById('btnSubmit').disabled = !this.checked;
     });
 
-    // T1-KEMBALI-MANDATORY-JS
+    // Enhanced validation for damaged/lost items
     const kondisiSelect = document.querySelector('select[name="kondisi_id"]');
     const descTextarea = document.getElementById('deskripsi');
     const descLabel = document.getElementById('desc-label');
+    const fotoInput = document.querySelector('input[name="foto"]');
+    const fotoLabel = document.querySelector('label.form-label.fw-bold:nth-of-type(3)') || document.querySelectorAll('label.form-label')[2];
 
     kondisiSelect.addEventListener('change', function() {
         const val = this.value;
-        // ID 1 is 'Baik'. If anything else (2: Rusak Ringan, 3: Rusak Berat, 4: Hilang), make it required.
+        // ID 1 is 'Baik'. If anything else (2: Rusak Ringan, 3: Rusak Berat, 4: Hilang), make fields required.
         if (val != "" && val != "1") {
+            // Make deskripsi required with minimum 20 characters
             descTextarea.required = true;
-            descLabel.innerHTML = 'Laporan / Catatan Tambahan <span class="text-danger">* (Wajib diisi jika rusak/hilang)</span>';
+            descTextarea.minLength = 20;
+            descLabel.innerHTML = 'Laporan / Catatan Tambahan <span class="text-danger">* (Wajib min 20 karakter)</span>';
             descTextarea.classList.add('border-danger');
-            descTextarea.placeholder = "WAJIB: Jelaskan detail kerusakan atau alasan kehilangan barang di sini...";
+            descTextarea.placeholder = "WAJIB: Jelaskan detail kerusakan atau alasan kehilangan barang minimal 20 karakter...";
+            
+            // Make foto required
+            fotoInput.required = true;
+            if (fotoLabel) {
+                fotoLabel.innerHTML = 'Foto Bukti <span class="text-danger">* (Wajib untuk kondisi rusak/hilang, max 2MB)</span>';
+            }
         } else {
             descTextarea.required = false;
+            descTextarea.minLength = 0;
             descLabel.innerHTML = 'Laporan / Catatan Tambahan';
             descTextarea.classList.remove('border-danger');
             descTextarea.placeholder = "Sebutkan jika ada kerusakan kecil, lecet, atau kelengkapan yang hilang...";
+            
+            fotoInput.required = false;
+            if (fotoLabel) {
+                fotoLabel.innerHTML = 'Foto Bukti (Jika Rusak/Masalah) <span class="text-muted small">(max 2MB)</span>';
+            }
         }
     });
+
+    // Validate file size
+    fotoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        
+        if (file) {
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            
+            if (file.size > maxSize) {
+                this.classList.add('is-invalid');
+                alert('Ukuran file terlalu besar! Maksimal 2MB. File Anda: ' + (file.size / 1024 / 1024).toFixed(2) + 'MB');
+                this.value = '';
+                return;
+            }
+            
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    // Validate deskripsi length when required
+    descTextarea.addEventListener('input', function() {
+        if (this.required && this.value.trim().length > 0 && this.value.trim().length < 20) {
+            this.classList.add('is-invalid');
+            this.setCustomValidity('Deskripsi minimal 20 karakter untuk kondisi rusak/hilang');
+        } else {
+            this.classList.remove('is-invalid');
+            this.setCustomValidity('');
+        }
+    });
+
+    // Form validation before submit
+    const returnForm = document.getElementById('returnForm');
+    returnForm.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Check if kondisi is damaged/lost
+        const kondisiVal = kondisiSelect.value;
+        if (kondisiVal != "" && kondisiVal != "1") {
+            // Validate deskripsi
+            if (descTextarea.value.trim().length < 20) {
+                descTextarea.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate foto is uploaded
+            if (fotoInput.files.length === 0) {
+                fotoInput.classList.add('is-invalid');
+                alert('Foto bukti wajib diupload untuk kondisi rusak/hilang!');
+                isValid = false;
+            }
+        }
+        
+        // Validate file size if file is selected
+        if (fotoInput.files.length > 0) {
+            const file = fotoInput.files[0];
+            const maxSize = 2 * 1024 * 1024;
+            
+            if (file.size > maxSize) {
+                fotoInput.classList.add('is-invalid');
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }, true);
 </script>
 <?= $this->endSection() ?>

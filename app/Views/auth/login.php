@@ -150,6 +150,13 @@
         </div>
     <?php endif; ?>
 
+    <?php if (session()->getFlashdata('success')) : ?>
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert" style="background: rgba(40,167,69,.12); border: 1px solid rgba(40,167,69,.25); color: #72f58e;">
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
     <form action="<?= base_url('auth/login') ?>" method="post">
         <div class="mb-3">
             <label class="form-label">Username</label>

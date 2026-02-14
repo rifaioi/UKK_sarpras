@@ -44,8 +44,13 @@
                 </li>
 
                 <li>
-                    <a href="<?= base_url('petugas/pengembalian') ?>" class="nav-link <?= (strpos(uri_string(), 'petugas/pengembalian') !== false && strpos(uri_string(), 'petugas/pengembalian/rusak') === false) ? 'active' : '' ?>">
+                    <a href="<?= base_url('petugas/pengembalian') ?>" class="nav-link <?= (strpos(uri_string(), 'petugas/pengembalian') !== false && strpos(uri_string(), 'petugas/pengembalian/rusak') === false && strpos(uri_string(), 'petugas/pengembalian/riwayat') === false) ? 'active' : '' ?>">
                         <i class="bi bi-arrow-return-left me-2"></i> Proses Kembali
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= base_url('petugas/pengembalian/rusak') ?>" class="nav-link <?= strpos(uri_string(), 'petugas/pengembalian/rusak') !== false ? 'active' : '' ?>">
+                        <i class="bi bi-wrench me-2"></i> Barang Rusak
                     </a>
                 </li>
                 <li>
@@ -235,5 +240,6 @@
             });
         });
     </script>
+    <?= $this->renderSection('scripts') ?>
 </body>
 </html>

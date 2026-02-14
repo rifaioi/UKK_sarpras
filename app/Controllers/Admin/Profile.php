@@ -16,7 +16,14 @@ class Profile extends BaseController
 
     public function index()
     {
-        return view('admin/profile');
+        $id = session()->get('id');
+        $user = $this->userModel->find($id);
+        
+        // Sync session just in case it was updated elsewhere in DB
+        session()->set('nama', $user['nama_lengkap']);
+        session()->set('username', $user['username']);
+
+        return view('admin/profile', ['user' => $user]);
     }
 
     public function update()
@@ -41,7 +48,7 @@ class Profile extends BaseController
             session()->set('nama', $data['nama_lengkap']);
             session()->set('username', $data['username']);
             
-            log_activity('Ubah Profil', 'Admin memperbarui informasi profil');
+            log_activity('Admin Profile', 'UPDATE', 'Admin memperbarui informasi profil');
             return redirect()->to('/admin/profile')->with('success', 'Profil berhasil diperbarui.');
         }
 
@@ -71,7 +78,7 @@ class Profile extends BaseController
             'password_hash' => password_hash($this->request->getVar('password_baru'), PASSWORD_BCRYPT)
         ]);
         
-        log_activity('Ubah Password', 'Admin mengubah password sendiri');
+        log_activity('Admin Profile', 'Ubah Password', 'Admin mengubah password sendiri');
 
         return redirect()->to('/admin/profile')->with('success', 'Password berhasil diubah.');
     }

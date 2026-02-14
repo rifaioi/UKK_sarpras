@@ -96,14 +96,14 @@ class MaintenanceSchedules extends BaseController
             ]);
         }
 
-        log_activity('Tambah Jadwal Maintenance', "Menambahkan jadwal maintenance baru");
+        log_activity('Maintenance', 'Tambah Jadwal Maintenance', "Menambahkan jadwal maintenance baru");
         return redirect()->to('/admin/maintenance/schedules')->with('success', 'Jadwal maintenance berhasil disimpan');
     }
 
     public function delete($id)
     {
         $this->scheduleModel->update($id, ['status' => 'Canceled']);
-        log_activity('Batalkan Jadwal Maintenance', "Membatalkan jadwal maintenance id: $id");
+        log_activity('Maintenance', 'Batalkan Jadwal Maintenance', "Membatalkan jadwal maintenance id: $id");
         return redirect()->to('/admin/maintenance/schedules')->with('success', 'Jadwal maintenance dibatalkan');
     }
 }

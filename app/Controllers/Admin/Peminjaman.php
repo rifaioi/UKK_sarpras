@@ -68,7 +68,7 @@ class Peminjaman extends PetugasPeminjaman
             'rejection_reason' => $rejectionReason
         ]);
 
-        log_activity('Tolak Peminjaman', "Menolak peminjaman id: $id dengan alasan: $rejectionReason");
+        log_activity('Peminjaman', 'Tolak Peminjaman', "Menolak peminjaman id: $id dengan alasan: $rejectionReason");
         
         return redirect()->to('/admin/peminjaman')->with('success', 'Peminjaman ditolak dan stok dikembalikan');
     }
@@ -115,7 +115,7 @@ class Peminjaman extends PetugasPeminjaman
         }
 
         $this->peminjamanModel->delete($id);
-        log_activity('Hapus Peminjaman', "Menghapus data peminjaman id: $id");
+        log_activity('Peminjaman', 'Hapus Peminjaman', "Menghapus data peminjaman id: $id");
         return redirect()->to('/admin/peminjaman')->with('success', 'Data peminjaman dihapus');
     }
 
@@ -148,7 +148,7 @@ class Peminjaman extends PetugasPeminjaman
         // Restore
         $this->peminjamanModel->update($id, ['deleted_at' => null]);
         
-        log_activity('Restore Peminjaman', "Mengembalikan data peminjaman id: $id dari arsip");
+        log_activity('Peminjaman', 'Restore Peminjaman', "Mengembalikan data peminjaman id: $id dari arsip");
         return redirect()->to('/admin/peminjaman/archived')->with('success', 'Data peminjaman berhasil dipulihkan.');
     }
 }

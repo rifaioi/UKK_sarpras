@@ -59,7 +59,7 @@ class Pengaduan extends BaseController
             'catatan' => $catatan
         ]);
         
-        log_activity('Update Pengaduan', 'Status pengaduan id '.$id.' diubah');
+        log_activity('Pengaduan', 'Update Pengaduan', 'Status pengaduan id '.$id.' diubah');
         
         return redirect()->back()->with('success', 'Pengaduan berhasil diupdate');
     }

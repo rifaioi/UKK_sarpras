@@ -74,8 +74,13 @@
                 </li>
 
                 <li>
-                    <a href="<?= base_url('admin/pengembalian') ?>" class="nav-link <?= (strpos(uri_string(), 'admin/pengembalian') !== false && strpos(uri_string(), 'admin/pengembalian/rusak') === false) ? 'active' : '' ?>">
+                    <a href="<?= base_url('admin/pengembalian') ?>" class="nav-link <?= (strpos(uri_string(), 'admin/pengembalian') !== false && strpos(uri_string(), 'admin/pengembalian/rusak') === false && strpos(uri_string(), 'admin/pengembalian/riwayat') === false) ? 'active' : '' ?>">
                         <i class="bi bi-arrow-return-left me-2"></i> Pengembalian
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= base_url('admin/pengembalian/rusak') ?>" class="nav-link <?= strpos(uri_string(), 'admin/pengembalian/rusak') !== false ? 'active' : '' ?>">
+                        <i class="bi bi-wrench me-2"></i> Barang Rusak
                     </a>
                 </li>
                 <li>

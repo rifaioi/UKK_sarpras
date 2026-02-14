@@ -75,6 +75,9 @@ class Pengembalian extends BaseController
         // T1-PINJAM-010, T1-KEMBALI-006, 007
         $peminjaman = $this->peminjamanModel->find($peminjamanId);
         if ($peminjaman) {
+            $db = \Config\Database::connect();
+            $db->transStart();
+            
             $status = 'tersedia';
             if ($kondisiId == 4) {
                 $status = 'hilang';
@@ -87,7 +90,16 @@ class Pengembalian extends BaseController
                 'stok' => ($kondisiId == 1 ? 1 : 0),
                 'status' => $status
             ];
+            
             $this->sarprasModel->skipValidation(true)->update($peminjaman['sarpras_id'], $updateData);
+            
+            $db->transComplete();
+            
+            if ($db->transStatus() === false) {
+                log_activity('Pengembalian', 'Error Update Status', "Gagal update status sarpras id: {$peminjaman['sarpras_id']} setelah pengembalian");
+            } else {
+                log_activity('Pengembalian', 'Update Status Sarpras', "Update status sarpras id: {$peminjaman['sarpras_id']} menjadi $status setelah pengembalian");
+            }
         }
 
         $rolePath = session()->get('role_id') == 1 ? 'admin' : 'petugas';
@@ -107,7 +119,7 @@ class Pengembalian extends BaseController
         $role = session()->get('role_id') == 1 ? 'admin' : 'petugas';
         // Show all completed returns with condition and equipment info
         $data = [
-            'riwayat_pengembalian' => $this->pengembalianModel->select('pengembalian.*, peminjaman.jumlah, peminjaman.tgl_pinjam, users.nama_lengkap, sarpras.nama as nama_barang, kondisi_alat.nama_kondisi')
+            'riwayat_pengembalian' => $this->pengembalianModel->select('pengembalian.*, peminjaman.jumlah, peminjaman.tgl_pinjam, users.nama_lengkap, sarpras.nama as nama_barang, sarpras.kode, kondisi_alat.nama_kondisi')
                                                                ->join('peminjaman', 'peminjaman.id = pengembalian.peminjaman_id')
                                                                ->join('users', 'users.id = peminjaman.user_id')
                                                                ->join('sarpras', 'sarpras.id = peminjaman.sarpras_id')
@@ -232,7 +244,7 @@ class Pengembalian extends BaseController
                     SET p.is_restocked = 1 
                     WHERE pj.sarpras_id = ? AND p.is_restocked = 0", [$id]);
 
-        log_activity('Restock Barang', "Unit {$unit['kode']} telah diperbaiki dan masuk stok kembali.");
+        log_activity('Pengembalian', 'Restock Barang', "Unit {$unit['kode']} telah diperbaiki dan masuk stok kembali.");
 
         return redirect()->to("/$role/pengembalian/rusak")->with('success', "Unit {$unit['kode']} berhasil direstock ke kondisi Baik.");
     }
@@ -270,7 +282,7 @@ class Pengembalian extends BaseController
                     SET p.is_restocked = 2 
                     WHERE pj.sarpras_id = ? AND p.is_restocked = 0", [$id]);
 
-        log_activity('Musnahkan Barang', "Unit {$unit['kode']} ditandai hilang/dimusnahkan dari daftar perbaikan.");
+        log_activity('Pengembalian', 'Musnahkan Barang', "Unit {$unit['kode']} ditandai hilang/dimusnahkan dari daftar perbaikan.");
 
         return redirect()->to("/$role/pengembalian/rusak")->with('success', "Unit {$unit['kode']} telah dihapus dari daftar perbaikan.");
     }

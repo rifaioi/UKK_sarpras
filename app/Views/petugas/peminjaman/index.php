@@ -93,12 +93,6 @@
                                 <i class="bi bi-printer"></i>
                             </a>
                         <?php endif; ?>
-
-
-
-                        <a href="<?= base_url('petugas/peminjaman/delete/'.$p['id']) ?>" class="btn btn-action text-muted btn-delete" title="Hapus">
-                            <i class="bi bi-trash"></i>
-                        </a>
                     </div>
                 </td>
             </tr>

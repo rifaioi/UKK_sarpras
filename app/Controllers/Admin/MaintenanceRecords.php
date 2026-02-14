@@ -50,6 +50,23 @@ class MaintenanceRecords extends BaseController
     }
 
     /**
+     * Redirect to maintenance schedules with pre-selected item
+     */
+    public function create($sarpras_id = null)
+    {
+        if ($sarpras_id) {
+            $sarpras = $this->sarprasModel->find($sarpras_id);
+            if ($sarpras) {
+                // Store selection in session to pre-fill form
+                session()->setFlashdata('preselect_sarpras', $sarpras_id);
+                session()->setFlashdata('preselect_sarpras_name', $sarpras['nama'] . ' (' . $sarpras['kode'] . ')');
+            }
+        }
+        
+        return redirect()->to('/admin/maintenance/schedules')->with('info', 'Silakan buat jadwal perbaikan untuk item terpilih');
+    }
+
+    /**
      * Store maintenance result and update asset
      */
     public function store()
@@ -108,7 +125,7 @@ class MaintenanceRecords extends BaseController
              return redirect()->back()->with('error', 'Gagal menyimpan data maintenance');
         }
 
-        log_activity('Selesaikan Maintenance', "Menyelesaikan maintenance asset id: " . $schedule['sarpras_id']);
+        log_activity('Maintenance', 'Selesaikan Maintenance', "Menyelesaikan maintenance asset id: " . $schedule['sarpras_id']);
         return redirect()->back()->with('success', 'Maintenance berhasil dicatat');
     }
 }

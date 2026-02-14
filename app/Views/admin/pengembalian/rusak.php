@@ -41,14 +41,20 @@
                             <?php endif; ?>
                         </td>
                         <td>
-                            <a href="<?= base_url('admin/pengembalian/restock/' . $item['id']) ?>" 
-                               class="btn btn-sm btn-success mb-1">
-                                <i class="bi bi-tools me-1"></i> Selesai
-                            </a>
-                            <a href="<?= base_url('admin/pengembalian/scrap/' . $item['id']) ?>" 
-                               class="btn btn-sm btn-danger mb-1">
-                                <i class="bi bi-trash me-1"></i> Delete
-                            </a>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <a href="<?= base_url('admin/maintenance/records/create/' . $item['id']) ?>" 
+                                   class="btn btn-sm btn-info mb-1" title="Buat Jadwal Perbaikan">
+                                    <i class="bi bi-calendar-plus me-1"></i> Perbaikan
+                                </a>
+                                <a href="<?= base_url('admin/pengembalian/restock/' . $item['id']) ?>" 
+                                   class="btn btn-sm btn-success mb-1" title="Tandai Selesai Diperbaiki">
+                                    <i class="bi bi-check-circle me-1"></i> Selesai
+                                </a>
+                                <a href="<?= base_url('admin/pengembalian/scrap/' . $item['id']) ?>" 
+                                   class="btn btn-sm btn-danger mb-1" title="Tandai Tidak Bisa Diperbaiki">
+                                    <i class="bi bi-trash me-1"></i> Scrap
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>

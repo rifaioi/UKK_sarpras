@@ -29,4 +29,20 @@ class MaintenanceRecords extends AdminRecords
 
         return view('petugas/maintenance/records', $data);
     }
+
+    /**
+     * Redirect to maintenance schedules with pre-selected item
+     */
+    public function create($sarpras_id = null)
+    {
+        if ($sarpras_id) {
+            $sarpras = $this->sarprasModel->find($sarpras_id);
+            if ($sarpras) {
+                session()->setFlashdata('preselect_sarpras', $sarpras_id);
+                session()->setFlashdata('preselect_sarpras_name', $sarpras['nama'] . ' (' . $sarpras['kode'] . ')');
+            }
+        }
+        
+        return redirect()->to('/petugas/maintenance/records')->with('info', 'Silakan buat jadwal perbaikan untuk item terpilih');
+    }
 }

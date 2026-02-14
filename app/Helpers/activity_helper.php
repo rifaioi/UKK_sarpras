@@ -3,7 +3,7 @@
 use App\Models\ActivityLogModel;
 
 if (!function_exists('log_activity')) {
-    function log_activity($aksi, $deskripsi = null, $metadata = null)
+    function log_activity($module, $aksi, $deskripsi = null, $metadata = null)
     {
         try {
             $logModel = new \App\Models\ActivityLogModel();
@@ -11,12 +11,16 @@ if (!function_exists('log_activity')) {
             
             $user_id = session()->get('id');
             $ip_address = $request->getIPAddress();
+            $agent = $request->getUserAgent();
+            $user_agent = $agent->getAgentString();
 
             $logModel->save([
                 'user_id' => $user_id, // Can be null for guest activities like failed login
+                'module' => $module,
                 'aksi' => $aksi,
                 'deskripsi' => $deskripsi,
                 'ip_address' => $ip_address,
+                'user_agent' => $user_agent,
                 'metadata' => $metadata
             ]);
         } catch (\Exception $e) {

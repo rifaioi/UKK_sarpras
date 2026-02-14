@@ -73,10 +73,10 @@ Pemeriksaan Barang: <?= esc($peminjaman['barang']) ?>
                                                         class="form-select form-select-sm status-select" 
                                                         data-pre-status="<?= strtolower($preStatus) ?>"
                                                         required>
-                                                    <option value="ok" <?= ($preStatus == 'ok') ? 'selected' : '' ?>>OK / Baik</option>
-                                                    <option value="damaged">Rusak / Cacat</option>
+                                                    <option value="ok" <?= ($preStatus == 'ok') ? 'selected' : '' ?>>Baik</option>
+                                                    <option value="damaged_light">Rusak Ringan</option>
+                                                    <option value="damaged_heavy">Rusak Berat</option>
                                                     <option value="missing">Hilang</option>
-                                                    <option value="n/a">Tidak Ada / N/A</option>
                                                 </select>
                                             </td>
                                             <td>

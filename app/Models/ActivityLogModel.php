@@ -10,7 +10,7 @@ class ActivityLogModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $allowedFields    = ['user_id', 'aksi', 'deskripsi', 'ip_address', 'metadata'];
+    protected $allowedFields    = ['user_id', 'aksi', 'deskripsi', 'ip_address', 'metadata', 'module', 'user_agent'];
 
     // Dates
     protected $useTimestamps = true;

@@ -28,8 +28,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label><strong>Tujuan Peminjaman</strong></label>
-                        <textarea name="tujuan" class="form-control" rows="3" required placeholder="Jelaskan untuk apa barang ini akan digunakan..."></textarea>
+                        <label><strong>Tujuan Peminjaman</strong> <span class="text-muted small">(minimal 20 karakter)</span></label>
+                        <textarea name="tujuan" class="form-control" rows="3" required minlength="20" placeholder="Jelaskan untuk apa barang ini akan digunakan..."></textarea>
                         <small class="text-muted">Contoh: Untuk kegiatan praktikum, acara sekolah, dll.</small>
                     </div>
 
@@ -70,6 +70,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const warningDiv = document.getElementById('date-warning');
     const warningText = document.getElementById('warning-text');
     const submitBtn = document.querySelector('button[type="submit"]');
+    const jumlahInput = document.querySelector('input[name="jumlah"]');
+    const tujuanInput = document.querySelector('textarea[name="tujuan"]');
+    const maxStok = parseInt(jumlahInput.getAttribute('max'));
+
+    // Validate stock quantity
+    jumlahInput.addEventListener('input', function() {
+        const value = parseInt(this.value);
+        
+        if (value > maxStok) {
+            this.classList.add('is-invalid');
+            this.value = maxStok;
+            alert('Jumlah pinjam tidak boleh melebihi stok tersedia (' + maxStok + ' unit)');
+        } else if (value < 1) {
+            this.classList.add('is-invalid');
+            this.value = 1;
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    // Validate tujuan minimum 20 characters
+    tujuanInput.addEventListener('input', function() {
+        const length = this.value.trim().length;
+        
+        if (length > 0 && length < 20) {
+            this.classList.add('is-invalid');
+            this.setCustomValidity('Tujuan peminjaman minimal 20 karakter');
+        } else {
+            this.classList.remove('is-invalid');
+            this.setCustomValidity('');
+        }
+    });
 
     function validateDates() {
         submitBtn.disabled = false;
@@ -80,17 +112,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!pinjamVal) return;
 
-        // Check weekend
-        const date = new Date(pinjamVal);
-        const day = date.getUTCDay(); // 0 is Sunday, 6 is Saturday
-        if (day === 0 || day === 6) {
-            warningText.innerText = 'Peminjaman tidak diperbolehkan pada hari Sabtu atau Minggu.';
+        // Check if pinjam date is weekend
+        const datePinjam = new Date(pinjamVal);
+        const dayPinjam = datePinjam.getUTCDay();
+        if (dayPinjam === 0 || dayPinjam === 6) {
+            warningText.innerText = 'Tanggal pinjam tidak diperbolehkan pada hari Sabtu atau Minggu.';
             warningDiv.classList.remove('d-none');
             submitBtn.disabled = true;
             return;
         }
 
         if (!kembaliVal) return;
+
+        // Check if kembali date is weekend
+        const dateKembali = new Date(kembaliVal);
+        const dayKembali = dateKembali.getUTCDay();
+        if (dayKembali === 0 || dayKembali === 6) {
+            warningText.innerText = 'Tanggal kembali tidak diperbolehkan pada hari Sabtu atau Minggu.';
+            warningDiv.classList.remove('d-none');
+            submitBtn.disabled = true;
+            return;
+        }
 
         // Check duration
         const start = new Date(pinjamVal);

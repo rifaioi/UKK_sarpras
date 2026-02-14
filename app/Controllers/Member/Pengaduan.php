@@ -60,7 +60,7 @@ class Pengaduan extends BaseController
             'status_id' => 1
         ]);
 
-        log_activity('Buat Pengaduan', 'Membuat laporan: ' . $this->request->getVar('judul'));
+        log_activity('Pengaduan', 'Buat Pengaduan', 'Membuat laporan: ' . $this->request->getVar('judul'));
 
         return redirect()->to('/member/pengaduan')->with('success', 'Laporan berhasil dikirim');
     }

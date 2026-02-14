@@ -58,6 +58,7 @@ class Dashboard extends BaseController
                 'upcoming_maintenance' => $upcomingMaintenance,
                 'good_sarpras' => $goodSarpras,
                 'asset_health' => $assetHealth,
+                'lost_sarpras' => $sarprasModel->where('kondisi_id', 4)->where('is_deleted', 0)->countAllResults(), // Hilang
                 'top_defects' => $topDefects
             ];
 

@@ -16,7 +16,14 @@ class Profile extends BaseController
 
     public function index()
     {
-        return view('petugas/profile');
+        $id = session()->get('id');
+        $user = $this->userModel->find($id);
+        
+        // Sync session just in case it was updated elsewhere in DB
+        session()->set('nama', $user['nama_lengkap']);
+        session()->set('username', $user['username']);
+
+        return view('petugas/profile', ['user' => $user]);
     }
 
     public function update()
@@ -40,7 +47,7 @@ class Profile extends BaseController
             session()->set('nama', $data['nama_lengkap']);
             session()->set('username', $data['username']);
             
-            log_activity('Ubah Profil', 'Petugas memperbarui informasi profil');
+            log_activity('Petugas Profile', 'Ubah Profil', 'Petugas memperbarui informasi profil');
             return redirect()->to('/petugas/profile')->with('success', 'Profil berhasil diperbarui.');
         }
 
@@ -70,8 +77,8 @@ class Profile extends BaseController
             'password_hash' => password_hash($this->request->getVar('password_baru'), PASSWORD_BCRYPT)
         ]);
         
-        log_activity('Ubah Password', 'Petugas mengubah password sendiri');
-
+        log_activity('Petugas Profile', 'Ubah Password', 'Petugas mengubah password sendiri');
+        
         return redirect()->to('/petugas/profile')->with('success', 'Password berhasil diubah.');
     }
 }

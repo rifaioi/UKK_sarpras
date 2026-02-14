@@ -83,14 +83,24 @@
                     <input type="hidden" name="kategori_id" id="kategori_id">
                     
                     <div class="mb-3">
-                        <label class="form-label">Nama Barang (Lama)</label>
-                        <input type="text" class="form-control bg-secondary border-0 text-white" id="display_old_name" readonly>
+                        <label class="form-label">Nama Barang</label>
+                        <input type="text" name="new_name" id="new_name" class="form-control" required placeholder="Masukkan nama barang...">
                     </div>
-                    
+
                     <div class="mb-3">
-                        <label class="form-label">Nama Barang Baru</label>
-                        <input type="text" name="new_name" id="new_name" class="form-control" required placeholder="Masukkan nama baru...">
-                        <div class="form-text text-white-50">Menamai ulang grup akan mengubah nama pada SEMUA unit barang ini.</div>
+                        <label class="form-label">Kategori</label>
+                        <select name="new_kategori_id" id="new_kategori_id" class="form-select" required>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>"><?= esc($cat['nama']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="alert alert-warning d-flex align-items-center mb-0 p-2">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+                        <div class="small">
+                            Perubahan ini akan diterapkan pada <strong>SEMUA unit</strong> barang dalam grup ini.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-secondary">
@@ -112,9 +122,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const kategori = this.getAttribute('data-kategori');
             
             document.getElementById('old_name').value = nama;
-            document.getElementById('display_old_name').value = nama;
             document.getElementById('new_name').value = nama;
             document.getElementById('kategori_id').value = kategori;
+            document.getElementById('new_kategori_id').value = kategori;
             
             editGroupModal.show();
         });

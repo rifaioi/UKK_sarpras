@@ -15,6 +15,7 @@
                 <th>No</th>
                 <th>Peminjam</th>
                 <th>Barang</th>
+                <th>Kode Unit</th>
                 <th>Jumlah</th>
                 <th>Tgl Pinjam</th>
                 <th>Tgl Kembali</th>
@@ -28,6 +29,7 @@
                 <td><?= count($riwayat_pengembalian) - $i ?></td>
                 <td><?= esc($r['nama_lengkap']) ?></td>
                 <td><?= esc($r['nama_barang']) ?></td>
+                <td><code class="text-info"><?= esc($r['kode']) ?></code></td>
                 <td><?= esc($r['jumlah']) ?></td>
                 <td><?= date('d/m/Y', strtotime($r['tgl_pinjam'])) ?></td>
                 <td><?= date('d/m/Y', strtotime($r['tgl_pengembalian'])) ?></td>

@@ -59,7 +59,9 @@ class Users extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            $errors = $this->validator->getErrors();
+            log_activity('Manajemen User', 'Gagal CREATE', 'Validasi gagal saat menambahkan user baru', json_encode($errors));
+            return redirect()->back()->withInput()->with('errors', $errors);
         }
 
         $saveData = [
@@ -71,10 +73,12 @@ class Users extends BaseController
 
         if ($this->userModel->save($saveData)) {
             $newId = $this->userModel->getInsertID();
-            log_activity('Tambah User', "Menambah user baru: " . $saveData['username'] . " (ID: $newId)");
+            log_activity('Manajemen User', 'CREATE', "Menambah user baru: " . $saveData['username'] . " (ID: $newId)");
             return redirect()->to('/admin/users')->with('success', 'User berhasil ditambahkan');
         } else {
-            return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+            $errors = $this->userModel->errors();
+            log_activity('Manajemen User', 'Gagal CREATE', 'Gagal menyimpan data user ke database', json_encode($errors));
+            return redirect()->back()->withInput()->with('errors', $errors);
         }
     }
 
@@ -96,7 +100,9 @@ class Users extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            $errors = $this->validator->getErrors();
+            log_activity('Manajemen User', 'Gagal UPDATE', "Validasi gagal saat update user ID: $id", json_encode($errors));
+            return redirect()->back()->withInput()->with('errors', $errors);
         }
 
         $data = [
@@ -116,23 +122,25 @@ class Users extends BaseController
                 session()->set('nama', $data['nama_lengkap']);
                 session()->set('username', $data['username']);
             }
-            log_activity('Update User', "Memperbarui profil user ID: $id (" . $data['username'] . ")");
+            log_activity('Manajemen User', 'UPDATE', "Memperbarui profil user ID: $id (" . $data['username'] . ")");
             return redirect()->to('/admin/users')->with('success', 'User berhasil diperbarui');
         } else {
-            return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+            $errors = $this->userModel->errors();
+            log_activity('Manajemen User', 'Gagal UPDATE', "Gagal update data user ID: $id", json_encode($errors));
+            return redirect()->back()->withInput()->with('errors', $errors);
         }
     }
 
     public function delete($id)
     {
         $currentUserId = session()->get('id');
-        
+
         $this->userModel->update($id, ['is_deleted' => 1]);
-        log_activity('Hapus User', "Menghapus user id: $id");
+        log_activity('Manajemen User', 'DELETE', "Menghapus user id: $id");
 
         if ($id == $currentUserId) {
-            session()->destroy();
-            return redirect()->to('/')->with('success', 'Akun Anda telah dihapus. Anda telah dikeluarkan dari sistem.');
+            session()->remove(['id', 'username', 'role_id', 'nama', 'isLoggedIn']);
+            return redirect()->to('/')->with('success', 'Akun Anda telah dihapus secara permanen dari sistem.');
         }
 
         return redirect()->to('/admin/users')->with('success', 'User berhasil dihapus');
@@ -141,7 +149,7 @@ class Users extends BaseController
     public function restore($id)
     {
         $this->userModel->update($id, ['is_deleted' => 0]);
-        log_activity('Restore User', "Mengembalikan user id: $id");
+        log_activity('Manajemen User', 'RESTORE', "Mengembalikan user id: $id");
         return redirect()->to('/admin/users?show_deleted=1')->with('success', 'User berhasil dikembalikan');
     }
 }

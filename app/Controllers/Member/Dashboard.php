@@ -94,13 +94,25 @@ class Dashboard extends BaseController
             return redirect()->back()->withInput()->with('error', 'Tanggal kembali (rencana) tidak boleh lebih dahulu/kecil dari tanggal pinjam.');
         }
 
-        // 1. Weekend Constraint: No borrowing on Saturday (6) or Sunday (7)
+        // 1. Weekend Constraint: No borrowing start on Sat/Sun
         $dayOfWeek = date('N', strtotime($tglPinjam));
         if ($dayOfWeek >= 6) {
             return redirect()->back()->withInput()->with('error', 'Maaf, peminjaman tidak diperbolehkan dimulai pada hari Sabtu atau Minggu.');
         }
 
-        // 2. Maximum Duration Constraint: Max 7 days
+        // 1b. Weekend Constraint: No returning on Sat/Sun
+        $dayOfWeekKembali = date('N', strtotime($tglKembali));
+        if ($dayOfWeekKembali >= 6) {
+            return redirect()->back()->withInput()->with('error', 'Maaf, tanggal pengembalian tidak diperbolehkan pada hari Sabtu atau Minggu.');
+        }
+
+        // 2. Minimum Tujuan Length (20 chars)
+        $tujuan = trim($this->request->getVar('tujuan'));
+        if (strlen($tujuan) < 20) {
+            return redirect()->back()->withInput()->with('error', 'Tujuan peminjaman harus dijelaskan minimal 20 karakter.');
+        }
+
+        // 3. Maximum Duration Constraint: Max 7 days
         $diffInSeconds = strtotime($tglKembali) - strtotime($tglPinjam);
         $diffInDays = floor($diffInSeconds / (60 * 60 * 24));
         if ($diffInDays > 7) {
@@ -177,11 +189,12 @@ class Dashboard extends BaseController
                 'jumlah' => 1,
                 'tgl_pinjam' => $tglPinjam,
                 'tgl_kembali_rencana' => $tglKembali,
+                'tujuan' => $tujuan,
                 'status_id' => 1 
             ]);
         }
         
-        log_activity('Request Peminjaman', 'Meminta pinjam barang: ' . $item['nama'] . ' (' . $jumlah . ' unit)');
+        log_activity('Peminjaman', 'Request Peminjaman', 'Meminta pinjam barang: ' . $item['nama'] . ' (' . $jumlah . ' unit)');
 
         return redirect()->to('/member/dashboard')->with('success', 'Permintaan peminjaman (' . $jumlah . ' unit) berhasil dikirim. Menunggu persetujuan.');
     }
@@ -224,7 +237,7 @@ class Dashboard extends BaseController
 
         $this->peminjamanModel->delete($id);
 
-        log_activity('Batal Peminjaman', "Membatalkan permintaan peminjaman id: $id");
+        log_activity('Peminjaman', 'Batal Peminjaman', "Membatalkan permintaan peminjaman id: $id");
 
         return redirect()->to('/member/dashboard')->with('success', 'Permintaan peminjaman dibatalkan.');
     }

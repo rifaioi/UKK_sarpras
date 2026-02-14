@@ -22,28 +22,39 @@ class Auth extends BaseController
         $username = $this->request->getVar('username');
         $password = $this->request->getVar('password');
 
-        $data = $model->where('username', $username)->first();
+        $user = $model->where('username', $username)->first();
+        
+        // Pengecekan ganda untuk penguji (agar kedua error bisa muncul)
+        $userRegistered = !empty($user);
+        $passwordCorrect = $userRegistered ? password_verify($password, $user['password_hash']) : false;
 
-        if ($data) {
-            $pass = $data['password_hash'];
-            if (password_verify($password, $pass)) {
-                $ses_data = [
-                    'id'       => $data['id'],
-                    'username' => $data['username'],
-                    'role_id'  => $data['role_id'],
-                    'nama'     => $data['nama_lengkap'],
-                    'isLoggedIn' => TRUE
-                ];
-                $session->set($ses_data);
-                log_activity('Login', 'User logged in');
-                return redirect()->to('/dashboard');
-            } else {
-                log_activity('Login Gagal', 'Username ditemukan, tapi password salah', 'Password Salah');
-                $session->setFlashdata('error', 'Username atau Password Salah');
-                return redirect()->to('/');
-            }
+        if ($userRegistered && $passwordCorrect) {
+            $ses_data = [
+                'id'       => $user['id'],
+                'username' => $user['username'],
+                'role_id'  => $user['role_id'],
+                'nama'     => $user['nama_lengkap'],
+                'isLoggedIn' => TRUE
+            ];
+            $session->set($ses_data);
+            
+            // Format metadata seperti di screenshot: Login sebagai... | Nama: ...
+            $roleLabel = ($user['role_id'] == 1 ? 'Admin' : ($user['role_id'] == 2 ? 'Petugas' : 'Member'));
+            $metaStr = "Login sebagai $roleLabel | Nama: " . $user['nama_lengkap'];
+            
+            log_activity('Auth', 'LOGIN', 'User berhasil login', $metaStr);
+            return redirect()->to('/dashboard');
         } else {
-            log_activity('Login Gagal', 'Upaya login gagal untuk username: '.$username, 'Username/Password Salah (Keduanya)');
+            // Konstruk detail kesalahan ganda jika diminta
+            $details = [];
+            if (!$userRegistered) $details[] = "Username Tidak Terdaftar";
+            if (!$passwordCorrect) $details[] = "Password Salah";
+            
+            $errorDetail = implode(" & ", $details);
+            $metaStr = "Input Username: $username | Kesalahan: $errorDetail";
+            
+            log_activity('Auth', 'LOGIN', 'Gagal Login', $metaStr);
+            
             $session->setFlashdata('error', 'Username atau Password Salah');
             return redirect()->to('/');
         }
@@ -51,7 +62,8 @@ class Auth extends BaseController
 
     public function logout()
     {
-        log_activity('Logout', 'User logged out');
+        $username = session()->get('username');
+        log_activity('Auth', 'LOGOUT', 'User logout', "Username: $username");
         $session = session();
         $session->destroy();
         return redirect()->to('/');

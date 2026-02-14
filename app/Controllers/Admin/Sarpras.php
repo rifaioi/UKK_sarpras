@@ -61,6 +61,7 @@ class Sarpras extends BaseController
         
         $data = [
             'items' => $items,
+            'categories' => $this->categoryModel->where('is_deleted', 0)->findAll(),
             'q' => $q
         ];
         return view('admin/sarpras/index', $data);
@@ -124,7 +125,9 @@ class Sarpras extends BaseController
 
             if (!$this->sarprasModel->insert($saveData)) {
                 $db->transRollback();
-                return redirect()->back()->withInput()->with('errors', $this->sarprasModel->errors());
+                $errors = $this->sarprasModel->errors();
+                log_activity('Sarpras', 'Gagal CREATE', "Gagal menambahkan item: $nama", json_encode($errors));
+                return redirect()->back()->withInput()->with('errors', $errors);
             }
         }
 
@@ -134,7 +137,7 @@ class Sarpras extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data sarpras.');
         }
 
-        log_activity('Tambah Sarpras', "Menambahkan $jumlah unit item: $nama");
+        log_activity('Sarpras', 'CREATE', "Menambahkan $jumlah unit item: $nama");
         
         if ($this->request->getVar('redirect_to') === 'units') {
             return redirect()->to(base_url("admin/sarpras/units?nama=" . urlencode($nama) . "&kategori_id=" . $kategoriId))
@@ -228,10 +231,12 @@ class Sarpras extends BaseController
         }
 
         if (!$this->sarprasModel->save($updateData)) {
-            return redirect()->back()->withInput()->with('errors', $this->sarprasModel->errors());
+            $errors = $this->sarprasModel->errors();
+            log_activity('Sarpras', 'Gagal UPDATE', "Gagal update item id: $id", json_encode($errors));
+            return redirect()->back()->withInput()->with('errors', $errors);
         }
 
-        log_activity('Update Sarpras', "Update item id: $id");
+        log_activity('Sarpras', 'UPDATE', "Update item id: $id");
 
         return redirect()->to('/admin/sarpras')->with('success', 'Data Sarpras berhasil diupdate');
     }
@@ -248,14 +253,14 @@ class Sarpras extends BaseController
         }
 
         $this->sarprasModel->delete($id);
-        log_activity('Hapus Sarpras', "Hapus/Soft delete item id: $id");
+        log_activity('Sarpras', 'DELETE', "Hapus/Soft delete item id: $id");
         return redirect()->to('/admin/sarpras')->with('success', 'Data Sarpras berhasil dihapus');
     }
 
     public function restore($id)
     {
         $this->sarprasModel->update($id, ['deleted_at' => null]);
-        log_activity('Restore Sarpras', "Mengembalikan item id: $id");
+        log_activity('Sarpras', 'RESTORE', "Mengembalikan item id: $id");
         return redirect()->to('/admin/sarpras/trash')->with('success', 'Data Sarpras berhasil dikembalikan');
     }
 
@@ -276,7 +281,7 @@ class Sarpras extends BaseController
                            ->where('deleted_at IS NOT NULL')
                            ->update();
         
-        log_activity('Restore Sarpras', "Mengembalikan grup item: $nama");
+        log_activity('Sarpras', 'RESTORE', "Mengembalikan grup item: $nama");
         return redirect()->to('/admin/sarpras/trash')->with('success', "Semua unit $nama berhasil dikembalikan");
     }
 
@@ -321,7 +326,7 @@ class Sarpras extends BaseController
         }
 
         $this->sarprasModel->delete($id, true); // true = hard delete
-        log_activity('Hapus Permanen', "Menghapus permanen item id: $id");
+        log_activity('Sarpras', 'DELETE', "Menghapus permanen item id: $id");
         return redirect()->to('/admin/sarpras/trash')->with('success', 'Item berhasil dihapus permanen.');
     }
 
@@ -347,7 +352,7 @@ class Sarpras extends BaseController
                            ->where('kategori_id', $kategoriId)
                            ->delete();
         
-        log_activity('Hapus Sarpras', "Hapus grup item: $nama");
+        log_activity('Sarpras', 'DELETE', "Hapus grup item: $nama");
         return redirect()->to('/admin/sarpras')->with('success', "Semua unit $nama berhasil dihapus");
     }
 
@@ -408,31 +413,36 @@ class Sarpras extends BaseController
     {
         $oldName = $this->request->getPost('old_name');
         $newName = $this->request->getPost('new_name');
-        $kategoriId = $this->request->getPost('kategori_id');
+        $oldKategoriId = $this->request->getPost('kategori_id');
+        $newKategoriId = $this->request->getPost('new_kategori_id');
 
-        if (!$oldName || !$newName || !$kategoriId) {
+        if (!$oldName || !$newName || !$oldKategoriId || !$newKategoriId) {
             return redirect()->back()->with('error', 'Data tidak lengkap.');
         }
 
-        if ($oldName === $newName) {
-            return redirect()->back()->with('info', 'Nama baru sama dengan nama lama.');
+        // Check if no changes
+        if ($oldName === $newName && $oldKategoriId === $newKategoriId) {
+            return redirect()->back()->with('info', 'Tidak ada perubahan data.');
         }
 
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $this->sarprasModel->set(['nama' => $newName])
+        $this->sarprasModel->set([
+                                'nama' => $newName,
+                                'kategori_id' => $newKategoriId
+                           ])
                            ->where('nama', $oldName)
-                           ->where('kategori_id', $kategoriId)
+                           ->where('kategori_id', $oldKategoriId)
                            ->update();
 
         $db->transComplete();
 
         if ($db->transStatus() === false) {
-            return redirect()->back()->with('error', 'Gagal mengubah nama barang.');
+            return redirect()->back()->with('error', 'Gagal mengubah data barang.');
         }
 
-        log_activity('Rename Group Sarpras', "Mengubah nama grup '$oldName' menjadi '$newName'");
-        return redirect()->to('/admin/sarpras')->with('success', "Grup '$oldName' berhasil diubah menjadi '$newName'");
+        log_activity('Sarpras', 'UPDATE', "Update grup '$oldName' -> '$newName' (Kategori ID: $newKategoriId)");
+        return redirect()->to('/admin/sarpras')->with('success', "Data barang berhasil diperbarui.");
     }
 }

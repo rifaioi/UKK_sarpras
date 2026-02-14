@@ -161,7 +161,7 @@ class Inspections extends BaseController
                 ]);
             }
             
-            log_activity('Inspeksi Keluar', "Inspeksi barang keluar untuk peminjaman #$peminjamanId selesai.");
+            log_activity('Inspeksi', 'Inspeksi Keluar', "Inspeksi barang keluar untuk peminjaman #$peminjamanId selesai.");
             $redirectUrl = '/petugas/peminjaman';
             $msg = 'Inspeksi keluar selesai. Barang siap diserahkan.';
         } else {

@@ -136,14 +136,22 @@
                         <small class="text-muted" style="font-size: 0.65rem;">KONDISI PRIMA</small>
                     </div>
                 </div>
-                <div class="row text-center mt-2">
-                    <div class="col-6 border-end">
-                        <h5 class="mb-0 fw-bold text-dark"><?= $good_sarpras ?></h5>
-                        <small class="text-muted" style="font-size: 0.7rem;">Baik</small>
+                <div class="row text-center mt-4">
+                    <div class="col-3 border-end">
+                        <h5 class="mb-0 fw-bold text-success"><?= $good_sarpras ?></h5>
+                        <small class="text-muted" style="font-size: 0.65rem;">Baik</small>
                     </div>
-                    <div class="col-6">
+                    <div class="col-3 border-end">
+                        <h5 class="mb-0 fw-bold text-danger"><?= $damaged_sarpras ?></h5>
+                        <small class="text-muted" style="font-size: 0.65rem;">Rusak</small>
+                    </div>
+                    <div class="col-3 border-end">
+                        <h5 class="mb-0 fw-bold text-secondary"><?= $lost_sarpras ?></h5>
+                        <small class="text-muted" style="font-size: 0.65rem;">Hilang</small>
+                    </div>
+                    <div class="col-3">
                         <h5 class="mb-0 fw-bold text-dark"><?= $total_sarpras ?></h5>
-                        <small class="text-muted" style="font-size: 0.7rem;">Total Aset</small>
+                        <small class="text-muted" style="font-size: 0.65rem;">Total</small>
                     </div>
                 </div>
             </div>
